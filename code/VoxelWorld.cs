@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PuzzlemakerPlus;
 public class VoxelWorld<T>
@@ -61,6 +62,60 @@ public class VoxelWorld<T>
     {
         return Set(pos.X, pos.Y, pos.Z, value);
     }
+
+    /// <summary>
+    /// Iterate over all the positions in this world that might have a non-default voxel in them.
+    /// </summary>
+    /// <param name="forceOrdered">If set, positions will be iterated over negative-first</param>
+    /// <returns></returns>
+    public IEnumerable<(Vector3I, T)> IterateVoxels(bool forceOrdered = false)
+    {
+        IEnumerable<KeyValuePair<Vector3I, VoxelChunk<T>>> chunks;
+        if (forceOrdered)
+        {
+            var list = Chunks.ToList();
+            list.Sort((val1, val2) =>
+            {
+                if (val1.Key.Z != val2.Key.Z)
+                {
+                    return val1.Key.Z - val2.Key.Z;
+                }
+                else if (val1.Key.Y != val2.Key.Y)
+                {
+                    return val1.Key.Y - val2.Key.Y;
+                }
+                else
+                {
+                    return val1.Key.X - val2.Key.X;
+                }
+            });
+            chunks = list;
+        }
+        else
+        {
+            chunks = Chunks;
+        }
+
+        foreach (var (chunkPos, chunk) in chunks)
+        {
+            Vector3I chunkStart = chunkPos * 16;
+            for (int x = 0; x < 16; x++)
+            {
+                for (int y = 0; y < 16; y++)
+                {
+                    for (int z = 0; z < 16; z++)
+                    {
+                        Vector3I globalPos = chunkStart + new Vector3I(x, y, z);
+                        T val = chunk.Get(x, y, z);
+                        yield return (globalPos, val);
+                    }
+                }
+            }
+        }
+
+        yield break;
+    }
+
 }
 
 /// <summary>
@@ -103,5 +158,13 @@ public class VoxelChunk<T>
         T prev = data[index];
         data[index] = value;
         return prev;
+    }
+}
+
+internal static class Vector3IExtensions
+{
+    public static int SumComponents(this Vector3I vec)
+    {
+        return vec.X + vec.Y + vec.Z;
     }
 }

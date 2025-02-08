@@ -14,7 +14,7 @@ public class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
 
 /// <summary>
 /// A single voxel in the puzzlemaker voxel world.
-/// While this class has a lot of helper functions, the struct itself is only one byte.
+/// While this class has a lot of helper functions, the struct itself is only two bytes.
 /// </summary>
 public struct PuzzlemakerVoxel
 {
@@ -22,52 +22,35 @@ public struct PuzzlemakerVoxel
     public enum VoxelFlags
     {
         Open = 0,
-        XP = 1,
-        XN = 2,
-        YP = 4,
-        YN = 8,
-        ZP = 16,
-        ZN = 32
+        Up = 1,
+        Down = 2,
+        Left = 4,
+        Right = 8,
+        Front = 16,
+        Back = 32
     }
 
+    /// <summary>
+    /// The bit flags of this voxel. Contains data about whether it's open and its portalability.
+    /// </summary>
     public byte Flags;
 
+    /// <summary>
+    /// The subdivision level of the voxel. 0 = 128 hammer units; 1 = 64 hammer units; 2 = 32 hammer units.
+    /// </summary>
+    public byte Subdivision;
+
     public bool IsOpen => HasFlag(VoxelFlags.Open);
-    public bool XPositive => HasFlag(VoxelFlags.XP);
-    public bool XNegative => HasFlag(VoxelFlags.XN);
-    public bool YPositive => HasFlag(VoxelFlags.YP);
-    public bool YNegative => HasFlag(VoxelFlags.YN);
-    public bool ZPositive => HasFlag(VoxelFlags.ZP);
-    public bool ZNegative => HasFlag(VoxelFlags.ZN);
+    public bool UpPortalable => HasFlag(VoxelFlags.Up);
+    public bool DownPortalable => HasFlag(VoxelFlags.Down);
+    public bool LeftPortalable => HasFlag(VoxelFlags.Left);
+    public bool RightPortalable => HasFlag(VoxelFlags.Right);
+    public bool FrontPortalable => HasFlag(VoxelFlags.Front);
+    public bool BackPortalable => HasFlag(VoxelFlags.Back);
 
-    public PuzzlemakerVoxel SetXPositive(bool portalable)
+    public PuzzlemakerVoxel WithOpen(bool open)
     {
-        return portalable ? SetFlag(VoxelFlags.XP) : ClearFlag(VoxelFlags.XP);
-    }
-
-    public PuzzlemakerVoxel SetXNegative(bool portalable)
-    {
-        return portalable ? SetFlag(VoxelFlags.XN) : ClearFlag(VoxelFlags.XN);
-    }
-
-    public PuzzlemakerVoxel SetYPositive(bool portalable)
-    {
-        return portalable ? SetFlag(VoxelFlags.YP) : ClearFlag(VoxelFlags.YP);
-    }
-
-    public PuzzlemakerVoxel SetYNegative(bool portalable)
-    {
-        return portalable ? SetFlag(VoxelFlags.YN) : ClearFlag(VoxelFlags.YN);
-    }
-
-    public PuzzlemakerVoxel SetZPositive(bool portalable)
-    {
-        return portalable ? SetFlag(VoxelFlags.ZP) : ClearFlag(VoxelFlags.ZP);
-    }
-
-    public PuzzlemakerVoxel SetZNegative(bool portalable)
-    {
-        return portalable ? SetFlag(VoxelFlags.ZN) : ClearFlag(VoxelFlags.ZN);
+        return open ? this.SetFlag(VoxelFlags.Open) : this.ClearFlag(VoxelFlags.Open);
     }
 
     public bool HasFlag(VoxelFlags flag)
@@ -106,6 +89,13 @@ public struct PuzzlemakerVoxel
         {
             result.Flags &= (byte)~flag;
         }
+        return result;
+    }
+
+    public PuzzlemakerVoxel SetSubdivision(byte subdivision)
+    {
+        PuzzlemakerVoxel result = this;
+        result.Subdivision = subdivision;
         return result;
     }
 }
