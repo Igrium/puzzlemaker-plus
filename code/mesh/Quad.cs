@@ -1,4 +1,7 @@
-﻿using Godot;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using Godot;
 
 namespace PuzzlemakerPlus;
 
@@ -27,6 +30,10 @@ public struct Quad
 
     public Quad(Vector3 vert1, Vector3 vert2, Vector3 vert3, Vector3 vert4)
     {
+        if (AnyElementsEqual(vert1, vert2, vert3, vert4))
+        {
+            GD.PushWarning($"Creating a quad with duplicate verts: ({vert1}, {vert2}, {vert3}, {vert4})");
+        }
         Vert1 = vert1;
         Vert2 = vert2;
         Vert3 = vert3;
@@ -130,6 +137,27 @@ public struct Quad
         return normal.Normalized();
     }
 
+    public readonly Quad Flipped()
+    {
+        Quad result = this;
+        result.Vert1 = Vert4;
+        result.Vert2 = Vert3;
+        result.Vert3 = Vert2;
+        result.Vert4 = Vert1;
+
+        result.Normal1 = Normal4.Inverse();
+        result.Normal2 = Normal3.Inverse();
+        result.Normal3 = Normal2.Inverse();
+        result.Normal4 = Normal1.Inverse();
+
+        result.UV1 = UV4;
+        result.UV2 = UV3;
+        result.UV3 = UV2;
+        result.UV4 = UV1;
+
+        return result;
+    }
+
     public static Quad operator +(Quad quad, in Vector3 vec)
     {
         quad.Vert1 += vec;
@@ -148,13 +176,63 @@ public struct Quad
         return quad;
     }
 
-    public static Quad operator -(Quad quad, in Vector3 vec)
+    public static Quad operator -(Quad quad, in Vector3 vec) => quad + -vec;
+
+
+    public static Quad operator -(Quad quad, in Vector3I vec) => quad + -vec;
+
+    public static bool operator ==(Quad quad1, Quad quad2)
     {
-        return quad + -vec;
+        return quad1.Equals(quad2);
     }
 
-    public static Quad operator -(Quad quad, in Vector3I vec)
+    public static bool operator !=(Quad quad1, Quad quad2) => !(quad1 == quad2);
+
+    public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        return quad + -vec;
+        return obj is Quad other && Equals(other);
+    }
+    public readonly bool Equals(Quad other)
+    {
+        return this.Vert1 == other.Vert1
+            && this.Vert2 == other.Vert2
+            && this.Vert3 == other.Vert3
+            && this.Vert4 == other.Vert4
+            && this.Normal1 == other.Normal1
+            && this.Normal2 == other.Normal2
+            && this.Normal3 == other.Normal3
+            && this.Normal4 == other.Normal4
+            && this.UV1 == other.UV1
+            && this.UV2 == other.UV2
+            && this.UV3 == other.UV3
+            && this.UV4 == other.UV4;
+    }
+
+    public override int GetHashCode()
+    {
+        return (HashCode.Combine(Vert1, Vert2, Vert3, Vert4) * 31
+            + HashCode.Combine(Normal1, Normal2, Normal3, Normal4)) * 31
+            + HashCode.Combine(UV1, UV2, UV3, UV4);
+    }
+
+    public override string ToString()
+    {
+        return $"Quad[{Vert1}, {Vert2}, {Vert3}, {Vert4}]";
+    }
+
+
+
+    private static bool AnyElementsEqual<T>(params T[] elements)
+    {
+        if (elements.Length == 0 || elements.Length == 1) return false;
+        for (int i = 0; i < elements.Length - 1; i++)
+        {
+            for (int j = i + 1; j < elements.Length; j++)
+            {
+                if (!EqualityComparer<T>.Default.Equals(elements[i], elements[j]))
+                    return true;
+            }
+        }
+        return false;
     }
 }

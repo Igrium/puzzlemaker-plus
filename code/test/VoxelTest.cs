@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Godot;
 
 namespace PuzzlemakerPlus;
@@ -151,151 +152,162 @@ public partial class VoxelTest : MeshInstance3D
 
     public void GenerateGreedyMesh()
     {
+        GD.Print("Creating greedy mesh...");
         MeshBuilder builder = new MeshBuilder();
         PuzzlemakerWorld world = _initWorld();
-        
-        foreach (var direction in Enum.GetValues<Direction>())
-        {
-            builder.AddQuads(DoGreedyMesh(world, 32));
-        }
+
+        //foreach (var direction in Enum.GetValues<Direction>())
+        //{
+        //    builder.AddQuads(DoGreedyMesh(world, direction));
+        //}
+        builder.AddQuads(GreedyMesh(world, 32, 0, 0, 0));
 
         ArrayMesh aMesh = new ArrayMesh();
         builder.ToMesh(aMesh);
         this.Mesh = aMesh;
     }
 
-    private IEnumerable<Quad> DoGreedyMesh(PuzzlemakerWorld world, int chunkSize)
+    private IEnumerable<Quad> DoGreedyMesh(PuzzlemakerWorld world, Direction direction)
     {
-        // Sweep over each axis
-        for (var axis = 0; axis < 3; ++axis)
+        HashSet<Vector3I> visited = new();
+        bool canRenderFace(Vector3I face)
         {
-            int i, j, k, l, quadWidth, quadHeight;
-            int axisU = (axis + 1) % 3;
-            int axisV = (axis + 2) % 3;
+            return !visited.Contains(face) && world.Get(face).IsOpen && !world.Get(face + direction.GetNormal()).IsOpen;
+        }
 
-            var position = new Vector3I();
-            var direction = new Vector3I();
+        for (int x = 0; x < Size; x++)
+        {
+            for (int y = 0; y < Size; y++)
+            {
+                for (int z = 0; z < Size; z++)
+                {
+                    Vector3I pos = new Vector3I(x, y, z);
+                    if (!canRenderFace(pos)) continue;
+
+                    GreedyMeshHelper greedy = new GreedyMeshHelper(pos, direction);
+                    greedy.ExpandRight(canRenderFace);
+                    visited.UnionWith(greedy.GetVoxels());
+
+                    yield return greedy.GetQuad();
+                }
+            }
+        }
+    }
+
+    public IEnumerable<Quad> GreedyMesh(PuzzlemakerWorld world, int chunkSize, int chunkPosX, int chunkPosY, int chunkPosZ)
+    {
+        bool IsBlockAt(int x, int y, int z)
+        {
+            return world.Get(x, y, z).IsOpen;
+        }
+
+        // Sweep over each axis (X, Y and Z)
+        for (var d = 0; d < 3; ++d)
+        {
+            int i, j, k, l, w, h;
+            int u = (d + 1) % 3;
+            int v = (d + 2) % 3;
+            var x = new int[3];
+            var q = new int[3];
 
             var mask = new bool[chunkSize * chunkSize];
-            direction[axis] = 1;
+            q[d] = 1;
 
             // Check each slice of the chunk one at a time
-            for (position[axis] = -1; position[axis] < chunkSize;)
+            for (x[d] = -1; x[d] < chunkSize;)
             {
                 // Compute the mask
-                var maskIndex = 0;
-                for (position[axisV] = 0; position[axisV] < chunkSize; ++position[axisV])
+                var n = 0;
+                for (x[v] = 0; x[v] < chunkSize; ++x[v])
                 {
-                    for (position[axisU] = 0; position[axisU] < chunkSize; ++position[axisU])
+                    for (x[u] = 0; x[u] < chunkSize; ++x[u])
                     {
-                        // direction determines the direction (X, Y or Z) that we are searching
-                        // IsBlockAt(x,y,z) takes global map positions and returns true if a block exists there
+                        // q determines the direction (X, Y or Z) that we are searching
+                        // m.IsBlockAt(x,y,z) takes global map positions and returns true if a block exists there
 
-                        bool blockCurrent = 0 <= position[axis] ? world.Get(position).IsOpen : true;
-                        bool blockCompare = position[axis] < chunkSize - 1 ? world.Get(position + direction).IsOpen : true;
+                        bool blockCurrent = 0 <= x[d] ? IsBlockAt(x[0] + chunkPosX, x[1] + chunkPosY, x[2] + chunkPosZ) : true;
+                        bool blockCompare = x[d] < chunkSize - 1 ? IsBlockAt(x[0] + q[0] + chunkPosX, x[1] + q[1] + chunkPosY, x[2] + q[2] + chunkPosZ) : true;
 
-                        mask[maskIndex++] = blockCurrent != blockCompare;
+                        // The mask is set to true if there is a visible face between two blocks,
+                        //   i.e. both aren't empty and both aren't blocks
+                        mask[n++] = blockCurrent != blockCompare;
                     }
                 }
 
-                ++position[axis];
-                maskIndex = 0;
+                ++x[d];
+
+                n = 0;
 
                 // Generate a mesh from the mask using lexicographic ordering,      
-                // by looping over each block in this slice of the chunk
+                //   by looping over each block in this slice of the chunk
                 for (j = 0; j < chunkSize; ++j)
                 {
                     for (i = 0; i < chunkSize;)
                     {
-                        if (mask[maskIndex])
+                        if (mask[n])
                         {
-                            // Compute the width of this quad and store it in quadWidth                        
-                            // This is done by searching along the current axis until mask[maskIndex + quadWidth] is false
-                            for (quadWidth = 1; i + quadWidth < chunkSize && mask[maskIndex + quadWidth]; quadWidth++) { };
+                            // Compute the width of this quad and store it in w                        
+                            //   This is done by searching along the current axis until mask[n + w] is false
+                            for (w = 1; i + w < chunkSize && mask[n + w]; w++) { }
 
-                            // Compute the height of this quad and store it in quadHeight                        
-                            // This is done by checking if every block next to this row (range 0 to quadWidth) is also part of the mask.
-                            // For example, if quadWidth is 5 we currently have a quad of dimensions 1 x 5. To reduce triangle count,
-                            // greedy meshing will attempt to expand this quad out to CHUNK_SIZE x 5, but will stop if it reaches a hole in the mask
+                            // Compute the height of this quad and store it in h                        
+                            //   This is done by checking if every block next to this row (range 0 to w) is also part of the mask.
+                            //   For example, if w is 5 we currently have a quad of dimensions 1 x 5. To reduce triangle count,
+                            //   greedy meshing will attempt to expand this quad out to chunkSize x 5, but will stop if it reaches a hole in the mask
 
                             var done = false;
-                            for (quadHeight = 1; j + quadHeight < chunkSize; quadHeight++)
+                            for (h = 1; j + h < chunkSize; h++)
                             {
                                 // Check each block next to this quad
-                                for (k = 0; k < quadWidth; ++k)
+                                for (k = 0; k < w; ++k)
                                 {
                                     // If there's a hole in the mask, exit
-                                    if (!mask[maskIndex + k + quadHeight * chunkSize])
+                                    if (!mask[n + k + h * chunkSize])
                                     {
                                         done = true;
                                         break;
                                     }
                                 }
 
-                                if (done) break;
+                                if (done)
+                                    break;
                             }
 
-                            position[axisU] = i;
-                            position[axisV] = j;
+                            x[u] = i;
+                            x[v] = j;
 
                             // du and dv determine the size and orientation of this face
-                            var du = new Vector3I();
-                            du[axisU] = quadWidth;
+                            var du = new int[3];
+                            du[u] = w;
 
-                            var dv = new Vector3I();
-                            dv[axisV] = quadHeight;
+                            var dv = new int[3];
+                            dv[v] = h;
 
                             // Create a quad for this face. Colour, normal or textures are not stored in this block vertex format.
-                            yield return new Quad(new Vector3(position[0], position[1], position[2]),                 // Top-left vertice position
-                                                  new Vector3(position[0] + du[0], position[1] + du[1], position[2] + du[2]),         // Top right vertice position
-                                                  new Vector3(position[0] + dv[0], position[1] + dv[1], position[2] + dv[2]),         // Bottom left vertice position
-                                                  new Vector3(position[0] + du[0] + dv[0], position[1] + du[1] + dv[1], position[2] + du[2] + dv[2])  // Bottom right vertice position
-                                                  ).FilledUVs().WithResetNormals();
+                            yield return new Quad(new Vector3I(x[0], x[1], x[2]),                 // Top-left vertice position
+                                                   new Vector3I(x[0] + du[0], x[1] + du[1], x[2] + du[2]),         // Top right vertice position
+                                                   new Vector3I(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),  // Bottom right vertice position
+                                                   new Vector3I(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),         // Bottom left vertice position
+                                                   ).WithResetNormals();
 
-                            // Clear this part of the mask so we don't add duplicate faces.
-                            for (l = 0; l < quadHeight; ++l)
-                            {
-                                for (k = 0; k < quadWidth; ++k)
-                                {
-                                    mask[maskIndex + k + l * chunkSize] = false;
-                                }
-                            }
+                            // Clear this part of the mask, so we don't add duplicate faces
+                            for (l = 0; l < h; ++l)
+                                for (k = 0; k < w; ++k)
+                                    mask[n + k + l * chunkSize] = false;
 
-                            // Increment counters and continue.
-                            i += quadWidth;
-                            maskIndex = quadWidth;
+                            // Increment counters and continue
+                            i += w;
+                            n += w;
                         }
                         else
                         {
                             i++;
-                            maskIndex++;
+                            n++;
                         }
                     }
                 }
             }
         }
-        //HashSet<Vector3I> visited = new();
-        //bool canRenderFace(Vector3I face)
-        //{
-        //    return !visited.Contains(face) && world.Get(face).IsOpen && !world.Get(face + direction.GetNormal()).IsOpen;
-        //}
-
-        //for (int x = 0; x < Size; x++)
-        //{
-        //    for (int y = 0; y < Size; y++)
-        //    {
-        //        for (int z = 0; z < Size; z++)
-        //        {
-        //            Vector3I pos = new Vector3I(x, y, z);
-        //            if (!canRenderFace(pos)) continue;
-
-        //            GreedyMeshHelper greedy = new GreedyMeshHelper(pos, direction);
-        //            greedy.ExpandRight(canRenderFace);
-        //            visited.UnionWith(greedy.GetVoxels());
-
-        //            yield return greedy.GetQuad();
-        //        }
-        //    }
-        //}
+        yield break;
     }
 }
