@@ -130,11 +130,11 @@ public partial class GreedyMeshTest : MeshInstance3D
 				arrays[(int)Mesh.ArrayType.TexUV] = _uvs.ToArray();
 				ArrayMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
 			}
-			this.Mesh = ArrayMesh;
         }
-	}
+        this.Mesh = ArrayMesh;
+    }
 
-	private bool ShouldRenderFace(PuzzlemakerWorld world, Vector3I pos, Direction side)
+    private bool ShouldRenderFace(PuzzlemakerWorld world, Vector3I pos, Direction side)
 	{
 		return world.Get(pos).IsOpen && !world.Get(pos + side.GetNormal()).IsOpen;
 	}

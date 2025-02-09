@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace PuzzlemakerPlus;
 public class VoxelWorld<T>
@@ -22,7 +23,7 @@ public class VoxelWorld<T>
         int localY = y & 15;
         int localZ = z & 15;
 
-        var chunk = chunks.GetValueOrDefault(new Vector3I(localX, localY, localZ));
+        var chunk = chunks.GetValueOrDefault(new Vector3I(chunkX, chunkY, chunkZ));
         if (chunk == null) return default;
 
         return chunk.Get(localX, localY, localZ);
@@ -43,13 +44,13 @@ public class VoxelWorld<T>
         int localY = y & 15;
         int localZ = z & 15;
 
-        Vector3I chunkPos = new Vector3I(localX, localY, localZ);
+        Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
         var chunk = chunks.GetValueOrDefault(chunkPos);
 
         if (chunk == null)
         {
-            if (EqualityComparer<T>.Default.Equals(value, default))
-                return default;
+            //if (EqualityComparer<T>.Default.Equals(value, default))
+            //    return default;
 
             chunk = new VoxelChunk<T>();
             chunks[chunkPos] = chunk;
@@ -116,6 +117,47 @@ public class VoxelWorld<T>
         yield break;
     }
 
+    /// <summary>
+    /// The minimum position a voxel may have been placed, inclusive.
+    /// </summary>
+    public Vector3I GetMinPos()
+    {
+        if (!chunks.Any()) return Vector3I.Zero;
+
+        Vector3I minChunk = Vector3I.MaxValue;
+        foreach (var chunkPos in chunks.Keys)
+        {
+            if (chunkPos.X < minChunk.X)
+                minChunk.X = chunkPos.X;
+            if (chunkPos.Y < minChunk.Y)
+                minChunk.Y = chunkPos.Y;
+            if (chunkPos.Z < minChunk.Z)
+                minChunk.Z = chunkPos.Z;
+        }
+
+        return minChunk * 16;
+    }
+
+    /// <summary>
+    /// The maximum position a voxel may have been placed, exclusive.
+    /// </summary>
+    public Vector3I GetMaxPos()
+    {
+        if (!chunks.Any()) return Vector3I.Zero;
+
+        Vector3I maxChunk = Vector3I.MinValue;
+        foreach (var chunkPos in chunks.Keys)
+        {
+            if (chunkPos.X > maxChunk.X)
+                maxChunk.X = chunkPos.X;
+            if (chunkPos.Y > maxChunk.Y)
+                maxChunk.Y = chunkPos.Y;
+            if (chunkPos.Z > maxChunk.Z)
+                maxChunk.Z = chunkPos.Z;
+        }
+
+        return maxChunk * 16 + new Vector3I(16, 16, 16);
+    }
 }
 
 /// <summary>

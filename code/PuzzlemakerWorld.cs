@@ -21,13 +21,13 @@ public struct PuzzlemakerVoxel
     [Flags]
     public enum VoxelFlags
     {
-        Open = 0,
-        Up = 1,
-        Down = 2,
-        Left = 4,
-        Right = 8,
-        Front = 16,
-        Back = 32
+        Open = 1,
+        Up = 2,
+        Down = 4,
+        Left = 8,
+        Right = 16,
+        Front = 32,
+        Back = 64
     }
 
     /// <summary>
@@ -62,6 +62,7 @@ public struct PuzzlemakerVoxel
     {
         PuzzlemakerVoxel result = this;
         result.Flags |= (byte)flag;
+        //GD.Print((int)flag);
         return result;
     }
 
