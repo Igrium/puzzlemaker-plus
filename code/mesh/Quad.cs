@@ -8,6 +8,8 @@ namespace PuzzlemakerPlus;
 /// </summary>
 public struct Quad
 {
+
+    public static Quad Empty => new Quad(Vector3.Zero, Vector3.Zero, Vector3.Zero, Vector3.Zero);
     public Vector3 Vert1 { get; set; }
     public Vector3 Vert2 { get; set; }
     public Vector3 Vert3 { get; set; }
@@ -137,7 +139,21 @@ public struct Quad
         return quad;
     }
 
+    public static Quad operator +(Quad quad, in Vector3I vec)
+    {
+        quad.Vert1 += vec;
+        quad.Vert2 += vec;
+        quad.Vert3 += vec;
+        quad.Vert4 += vec;
+        return quad;
+    }
+
     public static Quad operator -(Quad quad, in Vector3 vec)
+    {
+        return quad + -vec;
+    }
+
+    public static Quad operator -(Quad quad, in Vector3I vec)
     {
         return quad + -vec;
     }

@@ -19,6 +19,7 @@ public enum Direction
 
 public static class DirectionMethods
 {
+
     public static Vector3I GetNormal(this Direction direction)
     {
         switch (direction)

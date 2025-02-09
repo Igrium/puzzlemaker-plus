@@ -47,6 +47,69 @@ public struct GreedyMeshHelper
     }
 
     /// <summary>
+    /// Get a quad as the result of this greedy mesh.
+    /// </summary>
+    /// <returns>The quad.</returns>
+    public Quad GetQuad()
+    {
+        Quad quad;
+        switch (direction)
+        {
+            case Direction.Up:
+                quad = new Quad(
+                    new Vector3(0, 1, 0),
+                    new Vector3(Width, 1, 0),
+                    new Vector3(Width, 1, Height),
+                    new Vector3(0, 1, Height));
+                break;
+            case Direction.Right:
+                quad = new Quad(
+                    new Vector3(1, Width, Height),
+                    new Vector3(1, Width, 0),
+                    new Vector3(1, 0, 0),
+                    new Vector3(1, 0, Height));
+                break;
+            case Direction.Back:
+                quad = new Quad(
+                    new Vector3(0, Height, 1),
+                    new Vector3(Width, Height, 1),
+                    new Vector3(Width, 0, 1),
+                    new Vector3(0, 0, 1));
+                break;
+            case Direction.Left:
+                quad = new Quad(
+                    new Vector3(0, Width, 0),
+                    new Vector3(0, Width, Height),
+                    new Vector3(0, 0, Height),
+                    new Vector3(0, 0, 0));
+                break;
+            case Direction.Forward:
+                quad = new Quad(
+                    new Vector3(Width, Height, 0),
+                    new Vector3(0, Height, 0),
+                    new Vector3(0, 0, 0),
+                    new Vector3(Width, 0, 0));
+                break;
+            case Direction.Down:
+                quad = new Quad(
+                    new Vector3(0, 0, Height),
+                    new Vector3(Width, 0, Height),
+                    new Vector3(Width, 0, 0),
+                    new Vector3(0, 0, 0));
+                break;
+            default:
+                quad = Quad.Empty;
+                break;
+
+        }
+
+        quad += facePos;
+        quad.ResetNormals();
+        quad.FillUVs();
+        return quad;
+    }
+
+    /// <summary>
     /// Enumerate all the voxels that this face will cover.
     /// </summary>
     /// <returns>All relevent voxel positions.</returns>
@@ -71,7 +134,7 @@ public struct GreedyMeshHelper
     {
         Vector3I testPos = this.facePos;
         // Move right 1
-        testPos += direction.GetPerpendicularDir1().GetNormal();
+        testPos += direction.GetPerpendicularDir1().GetNormal() * Width;
 
         for (int i = 0; i < height; i++)
         {
@@ -97,7 +160,7 @@ public struct GreedyMeshHelper
     {
         Vector3I testPos = this.facePos;
         // Move up 1
-        testPos += direction.GetPerpendicularDir2().GetNormal();
+        testPos += direction.GetPerpendicularDir2().GetNormal() * Height;
 
         for (int i = 0; i < width; i++)
         {
