@@ -30,10 +30,10 @@ public struct Quad
 
     public Quad(Vector3 vert1, Vector3 vert2, Vector3 vert3, Vector3 vert4)
     {
-        if (AnyElementsEqual(vert1, vert2, vert3, vert4))
-        {
-            GD.PushWarning($"Creating a quad with duplicate verts: ({vert1}, {vert2}, {vert3}, {vert4})");
-        }
+        // if (AnyElementsEqual(vert1, vert2, vert3, vert4))
+        // {
+        //     GD.PushWarning($"Creating a quad with duplicate verts: ({vert1}, {vert2}, {vert3}, {vert4})");
+        // }
         Vert1 = vert1;
         Vert2 = vert2;
         Vert3 = vert3;
@@ -145,10 +145,10 @@ public struct Quad
         result.Vert3 = Vert2;
         result.Vert4 = Vert1;
 
-        result.Normal1 = Normal4.Inverse();
-        result.Normal2 = Normal3.Inverse();
-        result.Normal3 = Normal2.Inverse();
-        result.Normal4 = Normal1.Inverse();
+        result.Normal1 = -Normal4;
+        result.Normal2 = -Normal3;
+        result.Normal3 = -Normal2;
+        result.Normal4 = -Normal1;
 
         result.UV1 = UV4;
         result.UV2 = UV3;

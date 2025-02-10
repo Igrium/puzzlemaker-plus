@@ -50,7 +50,7 @@ public class MeshBuilder
         }
     }
 
-    public void ToMesh(ArrayMesh mesh)
+    public void ToMesh(ArrayMesh mesh, Material? material = null)
     {
         using (var gArray = new Array())
         {
@@ -61,6 +61,12 @@ public class MeshBuilder
             gArray[(int)Mesh.ArrayType.Index] = _indices.ToArray();
 
             mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, gArray);
+
+            if (material != null)
+            {
+                int surfaceIndex = mesh.GetSurfaceCount() - 1;
+                mesh.SurfaceSetMaterial(surfaceIndex, material);
+            }
         }
     }
 }
