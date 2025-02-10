@@ -11,12 +11,17 @@ config_version=5
 [application]
 
 config/name="Puzzlemaker Plus"
+run/main_scene="res://test_scene.tscn"
 config/features=PackedStringArray("4.3", "C#", "Mobile")
 config/icon="res://icon.svg"
 
 [dotnet]
 
 project/assembly_name="Puzzlemaker Plus"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/orbit-controls/plugin.cfg", "res://addons/orbit_camera/plugin.cfg")
 
 [rendering]
 

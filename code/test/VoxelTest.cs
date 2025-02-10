@@ -21,6 +21,9 @@ public partial class VoxelTest : MeshInstance3D
     [Export]
     public Material? Material { get; set; }
 
+    [Export]
+    public bool Invert { get; set; }
+
     public override void _Process(double delta)
     {
         base._Process(delta);
@@ -161,7 +164,7 @@ public partial class VoxelTest : MeshInstance3D
         PuzzlemakerWorld world = _initWorld();
 
         var watch = Stopwatch.StartNew();
-        builder.AddQuads(GreedyMesh.DoGreedyMesh(world, 64, Vector3I.Zero, uvScale: .125f));
+        builder.AddQuads(GreedyMesh.DoGreedyMesh(world, 64, Vector3I.Zero, uvScale: .125f, invert: Invert));
         watch.Stop();
         GD.Print($"Generated greedy mesh in {watch.ElapsedMilliseconds}ms");
 
