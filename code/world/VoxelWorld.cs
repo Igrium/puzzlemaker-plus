@@ -1,11 +1,21 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace PuzzlemakerPlus;
 public partial class VoxelWorld<T> : RefCounted
 {
+    public static Vector3I GetChunk(Vector3I pos)
+    {
+        return new Vector3I(pos.X >> 4, pos.Y >> 4, pos.Z >> 4);
+    }
+
+    public static Vector3I GetPosInChunk(Vector3I pos)
+    {
+        return new Vector3I(pos.X & 15, pos.Y & 15, pos.Z & 15);
+    }
+
     private readonly Dictionary<Vector3I, VoxelChunk<T>> chunks = new();
 
     /// <summary>
@@ -15,18 +25,13 @@ public partial class VoxelWorld<T> : RefCounted
 
     public T? GetVoxel(int x, int y, int z)
     {
-        int chunkX = x >> 4;
-        int chunkY = y >> 4;
-        int chunkZ = z >> 4;
+        Vector3I chunkPos = GetChunk(new Vector3I(x, y, z));
+        Vector3I localPos = GetPosInChunk(new Vector3I(x, y, z));
 
-        int localX = x & 15;
-        int localY = y & 15;
-        int localZ = z & 15;
-
-        var chunk = chunks.GetValueOrDefault(new Vector3I(chunkX, chunkY, chunkZ));
+        var chunk = chunks.GetValueOrDefault(chunkPos);
         if (chunk == null) return default;
 
-        return chunk.Get(localX, localY, localZ);
+        return chunk.Get(localPos);
     }
 
     public T? GetVoxel(Vector3I pos)
@@ -45,18 +50,75 @@ public partial class VoxelWorld<T> : RefCounted
         int localZ = z & 15;
 
         Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
-        var chunk = chunks.GetValueOrDefault(chunkPos);
+        var chunk = GetOrCreateChunk(chunkPos);
+        return chunk.Set(localX, localY, localZ, value);
+    }
 
+    private VoxelChunk<T> GetOrCreateChunk(in Vector3I chunkPos) 
+    {
+        var chunk = chunks.GetValueOrDefault(chunkPos);
         if (chunk == null)
         {
-            //if (EqualityComparer<T>.Default.Equals(value, default))
-            //    return default;
-
             chunk = new VoxelChunk<T>();
             chunks[chunkPos] = chunk;
         }
+        return chunk;
+    }
 
-        return chunk.Set(localX, localY, localZ, value);
+    /// <summary>
+    /// Fill a section of the world with a value.
+    /// </summary>
+    /// <param name="pos1">Minimum world pos, inclusive.</param>
+    /// <param name="pos2">Maximum world pos, inclusive.</param>
+    /// <param name="value">The value.</param>
+    public void Fill(Vector3I pos1, Vector3I pos2, T value)
+    {
+        Vector3I min = pos1.Min(pos2);
+        Vector3I max = pos1.Max(pos2);
+
+        Vector3I minChunk = GetChunk(min);
+        Vector3I maxChunk = GetChunk(max);
+
+        Vector3I localMin = GetPosInChunk(min);
+        Vector3I localMax = GetPosInChunk(max);
+
+        for (int chunkX = minChunk.X; chunkX <= maxChunk.X; chunkX++)
+        {
+            for (int chunkY = minChunk.Y; chunkY <= maxChunk.Y; chunkY++)
+            {
+                for (int chunkZ = minChunk.Z; chunkZ <= maxChunk.Z; chunkZ++)
+                {
+                    VoxelChunk<T> chunk = GetOrCreateChunk(new Vector3I(chunkX, chunkY, chunkZ));
+                    // Shortcut if the entire chunk will be filled.
+                    if (chunkX > minChunk.X && chunkX < maxChunk.X
+                        && chunkY > minChunk.Y && chunkY < maxChunk.Y
+                        && chunkZ > minChunk.Z && chunkZ < maxChunk.Z)
+                    {
+                        chunk.Fill(value);
+                        continue;
+                    }
+
+                    int minX = chunkX > minChunk.X ? 0 : localMin.X;
+                    int minY = chunkY > minChunk.Y ? 0 : localMin.Y;
+                    int minZ = chunkZ > minChunk.Z ? 0 : localMin.Z;
+
+                    int maxX = chunkX < maxChunk.X ? 15 : localMax.X;
+                    int maxY = chunkY < maxChunk.Y ? 15 : localMax.Y;
+                    int maxZ = chunkZ < maxChunk.Z ? 15 : localMax.Z;
+
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        for (int y = minY; y <= maxY; y++)
+                        {
+                            for (int z = minZ; z <= maxZ; z++)
+                            {
+                                chunk.Set(x, y, z, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public T? SetVoxel(Vector3I pos, T value)
@@ -174,7 +236,7 @@ public class VoxelChunk<T>
     public T[] Data { get => data; }
 
     /// <summary>
-    /// Get the value at a specific locaiton.
+    /// Get the value at a specific location.
     /// </summary>
     /// <param name="x">Local X coordinate.</param>
     /// <param name="y">Local Y coordinate.</param>
@@ -184,6 +246,16 @@ public class VoxelChunk<T>
     {
         int index = x + (y * 16) + (z * 16 * 16);
         return data[index];
+    }
+    
+    /// <summary>
+    /// Get the value at a specific location.
+    /// </summary>
+    /// <param name="pos">Local position.</param>
+    /// <returns>The value.</returns>
+    public T Get(Vector3I pos)
+    {
+        return Get(pos.X, pos.Y, pos.Z);
     }
 
     /// <summary>
@@ -200,6 +272,11 @@ public class VoxelChunk<T>
         T prev = data[index];
         data[index] = value;
         return prev;
+    }
+
+    public void Fill(T value)
+    {
+        Array.Fill(data, value);
     }
 }
 

@@ -34,5 +34,12 @@ public static class MathUtils
         else
             return (int)MathF.Ceiling(num / (float)factor) * factor;
     }
-
+    
+    /// <summary>
+    /// Round a vector to the nearest integer.
+    /// </summary>
+    public static Vector3I RoundInt(this in Vector3 vector)
+    {
+        return new Vector3I((int)MathF.Round(vector.X), (int)MathF.Round(vector.Y), (int)MathF.Round(vector.Z));
+    }
 }

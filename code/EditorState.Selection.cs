@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
@@ -16,7 +18,7 @@ public partial class EditorState
     [Signal]
     public delegate void OnUpdatedSelectionEventHandler(Aabb selection);
 
-    private int _gridScale = 2;
+    private int _gridScale = 1;
 
 
     /// <summary>
@@ -57,9 +59,9 @@ public partial class EditorState
     private Aabb _selection;
 
     /// <summary>
-    /// The current selection of the editor. Selections work based on vertices:
-    /// a face is considered selected if all 4 of its verts are selected, and a voxel is considered selected if all 6 of its verts are.
-    /// Alternatively, if the selection is based on voxels, it's start-inclusive, end-exclusive.
+    /// <p>The current selection of the editor.Selections work based on vertices: 
+    /// a face is considered selected if all 4 of its verts are selected, and a voxel is considered selected if all 6 of its verts are.</p>
+    /// <p>Alternatively, one could assert selection is based on voxels, being start-inclusive and end-exclusive.</p>
     /// </summary>
     public Aabb Selection => _selection;
 
@@ -167,7 +169,62 @@ public partial class EditorState
     public bool IsVoxelSelected(Vector3 voxel)
     {
         var selection = Selection;
-        return selection.HasPoint(voxel) && selection.HasPoint(voxel + new Vector3(1, 1, 1));
+        Vector3I min = selection.Position.RoundInt();
+        Vector3I max = (selection.Position + selection.Size).RoundInt();
+        Vector3I v = voxel.RoundInt();
+
+        return (min.X <= v.X && v.X < max.X
+            && min.Y <= v.Y && v.Y < max.Y
+            && min.Z <= v.Z && v.Z < max.Z);
+
+        //return selection.HasPoint(voxel) && selection.HasPoint(voxel + new Vector3(1, 1, 1));
+    }
+
+    public Vector3I[] GetSelectedVoxels()
+    {
+        var selection = Selection;
+        Vector3I min = (selection.Position).RoundInt();
+        Vector3I max = (selection.Position + selection.Size).RoundInt();
+
+        Vector3I[] array = new Vector3I[(max.X - min.X) * (max.Y - min.Y) * (max.Z - min.Z)];
+
+        int index = 0;
+        for (int z = min.Z; z < max.Z; z++)
+        {
+            for (int y = min.Y; y < max.Y; y++)
+            {
+                for (int x = min.X; y < max.X; x++)
+                {
+                    array[index++] = new Vector3I(x, y, z);
+                }
+            }
+        }
+        return array;
+    }
+
+    /// <summary>
+    /// The fact that GDScript doesn't have a PackedVector3IArray is dumb.
+    /// </summary>
+    public Vector3[] GetSelectedVoxelsFloat()
+    {
+        var selection = Selection;
+        Vector3I min = (selection.Position).RoundInt();
+        Vector3I max = (selection.Position + selection.Size).RoundInt();
+
+        Vector3[] array = new Vector3[(max.X - min.X) * (max.Y - min.Y) * (max.Z - min.Z)];
+
+        int index = 0;
+        for (int z = min.Z; z < max.Z; z++)
+        {
+            for (int y = min.Y; y < max.Y; y++)
+            {
+                for (int x = min.X; y < max.X; x++)
+                {
+                    array[index++] = new Vector3(x, y, z);
+                }
+            }
+        }
+        return array;
     }
 
     private static Aabb SnapSelectionToGrid(in Aabb selection, int gridScale)
