@@ -33,6 +33,7 @@ public sealed partial class EditorState : Node
     [Signal]
     public delegate void OnChunksUpdatedEventHandler(Vector3[] chunks);
 
+
     /// <summary>
     /// The current project loaded into the editor.
     /// An empty project by default.
@@ -78,4 +79,7 @@ public sealed partial class EditorState : Node
         World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
         EmitSignal(SignalName.OnChunksUpdated, new Vector3[] {new Vector3(0, 0, 0)});
     }
+
+
+  
 }

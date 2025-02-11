@@ -118,7 +118,7 @@ public partial class VoxelWorld<T> : RefCounted
     }
 
     /// <summary>
-    /// The minimum position a voxel may have been placed, inclusive.
+    /// The minimum Position a voxel may have been placed, inclusive.
     /// </summary>
     public Vector3I GetMinPos()
     {
@@ -139,7 +139,7 @@ public partial class VoxelWorld<T> : RefCounted
     }
 
     /// <summary>
-    /// The maximum position a voxel may have been placed, exclusive.
+    /// The maximum Position a voxel may have been placed, exclusive.
     /// </summary>
     public Vector3I GetMaxPos()
     {

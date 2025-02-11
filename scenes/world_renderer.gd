@@ -37,6 +37,7 @@ func _create_chunk(pos: Vector3i) -> WorldChunk:
 	var chunk: WorldChunk = chunk_scene.instantiate()
 	chunk.pos = pos
 	chunk.position = pos * 16
+	chunk.connect("on_input_event", _on_input_event)
 	add_child(chunk)
 	return chunk
 
@@ -44,3 +45,8 @@ func clear():
 	for chunk in chunks.values():
 		chunk.queue_free()
 	chunks.clear()
+
+func _on_input_event(_camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, _shape_idx: int) -> void:
+	if event is InputEventMouseButton:
+		if event.pressed:
+			Editor.SelectRaycast(event_position, normal, event.shift_pressed)

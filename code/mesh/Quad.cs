@@ -105,7 +105,7 @@ public struct Quad
     }
 
     /// <summary>
-    /// Reset this quad's normals so that they point in the direction of the face.
+    /// Reset this quad's normals so that they point in the Direction of the face.
     /// </summary>
     public void ResetNormals()
     {

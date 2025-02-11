@@ -11,7 +11,7 @@ public struct GreedyMeshHelper
     /// <summary>
     /// Gets called to determine whether a given voxel can be part of this face.
     /// </summary>
-    /// <param name="pos">The voxel's world position.</param>
+    /// <param name="pos">The voxel's world Position.</param>
     /// <returns>If it can be part of this face.</returns>
     public delegate bool CanDrawFace(Vector3I pos);
 
@@ -26,7 +26,7 @@ public struct GreedyMeshHelper
     /// <summary>
     /// Create a greedy mesh helper.
     /// </summary>
-    /// <param name="facePos">Voxel position of the face to start at. Should be the most-negative face in the plane in global space.</param>
+    /// <param name="facePos">Voxel Position of the face to start at. Should be the most-negative face in the plane in global space.</param>
     /// <param name="direction">Which side of the cube the face is on.</param>
     public GreedyMeshHelper(Vector3I facePos, Direction direction)
     {

@@ -7,6 +7,9 @@ extends MeshInstance3D
 @export
 var pos := Vector3i(0, 0, 0)
 
+## Called when the user clicks on the geometry in this chunk.
+signal on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int)
+
 @onready
 var _collision_shape: CollisionShape3D = $Area3D/CollisionShape3D
 
@@ -30,6 +33,5 @@ func render() -> void:
 	else:
 		push_warning("No world found")
 
-## Called when the user clicks on the geometry in this chunk.
-func _on_input_event(_camera: Node, _event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
-	pass # Replace with function body.
+func _on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
+	on_input_event.emit(camera, event, event_position, normal, shape_idx)

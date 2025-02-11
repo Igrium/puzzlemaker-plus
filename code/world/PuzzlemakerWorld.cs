@@ -14,7 +14,7 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
     /// Draw a set of blocks from this world into a mesh.
     /// </summary>
     /// <param name="mesh">Mesh to add to.</param>
-    /// <param name="chunk">Negative-most position of the chunk.</param>
+    /// <param name="chunk">Negative-most Position of the chunk.</param>
     /// <param name="chunkSize">Size of the chunk.</param>
     /// <param name="invert">If set, render the inside of the blocks instead of the outside.</param>
     public void RenderChunk(ArrayMesh mesh, Vector3I chunk, int chunkSize = 16, bool invert = true) 
@@ -27,7 +27,7 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
     /// </summary>
     /// <param name="mesh">Mesh to add render geometry to.</param>
     /// <param name="collision">Shape to add collision geometry to.</param>
-    /// <param name="chunk">Most-negative position of the chunk in world-space.</param>
+    /// <param name="chunk">Most-negative Position of the chunk in world-space.</param>
     /// <param name="chunkSize">Size of the chunk in voxels.</param>
     /// <param name="invert">If set, render the inside of the blocks instead of the outside.</param>
     public void RenderChunkAndCollision(ArrayMesh? mesh, ConcavePolygonShape3D? collision, Vector3I chunk, int chunkSize = 16, bool invert = true)

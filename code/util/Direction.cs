@@ -17,8 +17,32 @@ public enum Direction
     Back
 }
 
-public static class DirectionMethods
-{
+public static class Directions
+{   
+    /// <summary>
+    /// Get the cardinal direction that a given normal vector is closest to.
+    /// </summary>
+    /// <param name="vector">The direction.</param>
+    /// <returns>The closest direction.</returns>
+    public static Direction GetClosestDirection(Vector3 vector)
+    {
+        float absX = MathF.Abs(vector.X);
+        float absY = MathF.Abs(vector.Y);
+        float absZ = MathF.Abs(vector.Z);
+
+        if (absX > absY && absX > absZ)
+        {
+            return vector.X >= 0 ? Direction.Right : Direction.Left;
+        }
+        else if (absY > absX && absY > absZ)
+        {
+            return vector.Y >= 0 ? Direction.Up : Direction.Down;
+        }
+        else
+        {
+            return vector.Z >= 0 ? Direction.Forward : Direction.Back;
+        }
+    }
 
     public static Vector3I GetNormal(this Direction direction)
     {
@@ -31,6 +55,23 @@ public static class DirectionMethods
             case Direction.Forward: return Vector3I.Forward;
             case Direction.Back: return Vector3I.Back;
             default: return Vector3I.Zero;
+        }
+    }
+
+    public static int GetAxis(this Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.Up:
+            case Direction.Down:
+                return 1;
+            case Direction.Left:
+            case Direction.Right:
+                return 0;
+            case Direction.Forward:
+            case Direction.Back:
+                return 2;
+            default: return 0;
         }
     }
 
@@ -49,10 +90,10 @@ public static class DirectionMethods
     }
 
     /// <summary>
-    /// Given a plane facing this direction, 
-    /// get a vector determining the primary check direction when performing a greedy mesh.
+    /// Given a plane facing this Direction, 
+    /// get a vector determining the primary check Direction when performing a greedy mesh.
     /// </summary>
-    /// <returns>Unit vector in the primary check direction.</returns>
+    /// <returns>Unit vector in the primary check Direction.</returns>
     public static Direction GetPerpendicularDir1(this Direction direction)
     {
         switch(direction)

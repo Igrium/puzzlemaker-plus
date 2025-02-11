@@ -5,8 +5,6 @@
 
 [node name="Node3D" type="Node3D"]
 
-[node name="Clickable" type="Node" parent="."]
-
 [node name="MainCamera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.5971)
 

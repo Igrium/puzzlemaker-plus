@@ -52,7 +52,7 @@ public partial class VoxelTest : MeshInstance3D
                             world.SetVoxel(x, y, z, new PuzzlemakerVoxel().WithOpen(true));
                         //if (z % 2 == 0)
                         //{
-                        //    world.Set(position, y, z, new PuzzlemakerVoxel().WithOpen(true));
+                        //    world.Set(Position, y, z, new PuzzlemakerVoxel().WithOpen(true));
                         //}
 
                     }

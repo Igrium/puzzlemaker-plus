@@ -41,8 +41,8 @@ public static class GreedyMesh
                     {
                         for (position[axisU] = 0; position[axisU] < chunkSize; ++position[axisU])
                         {
-                            // direction determines the direction (X, Y or Z) that we are searching
-                            // m.IsBlockAt(position,y,z) takes global map positions and returns true if a block exists there
+                            // Direction determines the Direction (X, Y or Z) that we are searching
+                            // m.IsBlockAt(Position,y,z) takes global map positions and returns true if a block exists there
 
                             bool blockCurrent = IsBlockAt(position[0] + chunkPosX, position[1] + chunkPosY, position[2] + chunkPosZ);
                             bool blockCompare = IsBlockAt(position[0] + direction[0] + chunkPosX, position[1] + direction[1] + chunkPosY, position[2] + direction[2] + chunkPosZ);
@@ -80,8 +80,8 @@ public static class GreedyMesh
 
                                 // Compute the height of this quad and store it in quadHeight                        
                                 //   This is done by checking if every block next to this row (range 0 to quadWidth) is also part of the mask.
-                                //   For example, if quadWidth is 5 we currently have a quad of dimensions 1 position 5. To reduce triangle count,
-                                //   greedy meshing will attempt to expand this quad out to chunkSize position 5, but will stop if it reaches a hole in the mask
+                                //   For example, if quadWidth is 5 we currently have a quad of dimensions 1 Position 5. To reduce triangle count,
+                                //   greedy meshing will attempt to expand this quad out to chunkSize Position 5, but will stop if it reaches a hole in the mask
 
                                 var done = false;
                                 for (quadHeight = 1; j + quadHeight < chunkSize; quadHeight++)
@@ -112,10 +112,10 @@ public static class GreedyMesh
                                 dv[axisV] = quadHeight;
 
                                 // Create a quad for this face. Colour, normal or textures are not stored in this block vertex format.
-                                Quad quad = new Quad(new Vector3I(position[0], position[1], position[2]),                 // Top-left vertice position
-                                                       new Vector3I(position[0] + du[0], position[1] + du[1], position[2] + du[2]),         // Top right vertice position
-                                                       new Vector3I(position[0] + du[0] + dv[0], position[1] + du[1] + dv[1], position[2] + du[2] + dv[2]),  // Bottom right vertice position
-                                                       new Vector3I(position[0] + dv[0], position[1] + dv[1], position[2] + dv[2])         // Bottom left vertice position
+                                Quad quad = new Quad(new Vector3I(position[0], position[1], position[2]),                 // Top-left vertice Position
+                                                       new Vector3I(position[0] + du[0], position[1] + du[1], position[2] + du[2]),         // Top right vertice Position
+                                                       new Vector3I(position[0] + du[0] + dv[0], position[1] + du[1] + dv[1], position[2] + du[2] + dv[2]),  // Bottom right vertice Position
+                                                       new Vector3I(position[0] + dv[0], position[1] + dv[1], position[2] + dv[2])         // Bottom left vertice Position
                                                        ).WithResetNormals();
 
                                 // Compute UVs
