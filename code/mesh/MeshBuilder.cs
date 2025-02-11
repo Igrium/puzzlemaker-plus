@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Godot.Collections;
 
@@ -52,6 +53,8 @@ public class MeshBuilder
 
     public void ToMesh(ArrayMesh mesh, Material? material = null)
     {
+        if (!_indices.Any())
+            return;
         using (var gArray = new Array())
         {
             gArray.Resize((int)Mesh.ArrayType.Max);

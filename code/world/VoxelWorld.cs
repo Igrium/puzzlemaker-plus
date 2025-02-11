@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace PuzzlemakerPlus;
-public class VoxelWorld<T>
+public partial class VoxelWorld<T> : RefCounted
 {
     private readonly Dictionary<Vector3I, VoxelChunk<T>> chunks = new();
 
@@ -13,7 +13,7 @@ public class VoxelWorld<T>
     /// </summary>
     public IDictionary<Vector3I, VoxelChunk<T>> Chunks => chunks;
 
-    public T? Get(int x, int y, int z)
+    public T? GetVoxel(int x, int y, int z)
     {
         int chunkX = x >> 4;
         int chunkY = y >> 4;
@@ -29,12 +29,12 @@ public class VoxelWorld<T>
         return chunk.Get(localX, localY, localZ);
     }
 
-    public T? Get(Vector3I pos)
+    public T? GetVoxel(Vector3I pos)
     {
-        return Get(pos.X, pos.Y, pos.Z);
+        return GetVoxel(pos.X, pos.Y, pos.Z);
     }
 
-    public T? Set(int x, int y, int z, T value)
+    public T? SetVoxel(int x, int y, int z, T value)
     {
         int chunkX = x >> 4;
         int chunkY = y >> 4;
@@ -59,9 +59,9 @@ public class VoxelWorld<T>
         return chunk.Set(localX, localY, localZ, value);
     }
 
-    public T? Set(Vector3I pos, T value)
+    public T? SetVoxel(Vector3I pos, T value)
     {
-        return Set(pos.X, pos.Y, pos.Z, value);
+        return SetVoxel(pos.X, pos.Y, pos.Z, value);
     }
 
     /// <summary>

@@ -14,7 +14,7 @@ public static class GreedyMesh
 
         bool IsBlockAt(int x, int y, int z)
         {
-            return world.Get(x, y, z).IsOpen;
+            return world.GetVoxel(x, y, z).IsOpen;
         }
 
         // Sweep over each axis (X, Y and Z)

@@ -49,7 +49,7 @@ public partial class VoxelTest : MeshInstance3D
                     for (int z = 0; z < Size; z++)
                     {
                         if (noise.GetNoise3D(x, y, z) < Threshold)
-                            world.Set(x, y, z, new PuzzlemakerVoxel().WithOpen(true));
+                            world.SetVoxel(x, y, z, new PuzzlemakerVoxel().WithOpen(true));
                         //if (z % 2 == 0)
                         //{
                         //    world.Set(position, y, z, new PuzzlemakerVoxel().WithOpen(true));
@@ -64,11 +64,11 @@ public partial class VoxelTest : MeshInstance3D
 
     private IEnumerable<Quad> CreateCubeMesh(PuzzlemakerWorld world, Vector3I pos)
     {
-        if (!world.Get(pos).IsOpen)
+        if (!world.GetVoxel(pos).IsOpen)
             yield break;
 
         // Top
-        if (!world.Get(pos + Vector3I.Up).IsOpen)
+        if (!world.GetVoxel(pos + Vector3I.Up).IsOpen)
         {
             yield return new Quad(
                 new Vector3(0, 1, 0),
@@ -79,7 +79,7 @@ public partial class VoxelTest : MeshInstance3D
         }
 
         // Right
-        if (!world.Get(pos + Vector3I.Right).IsOpen)
+        if (!world.GetVoxel(pos + Vector3I.Right).IsOpen)
         {
             yield return new Quad(
                 new Vector3(1, 1, 1),
@@ -91,7 +91,7 @@ public partial class VoxelTest : MeshInstance3D
 
 
         // Back
-        if (!world.Get(pos + Vector3I.Back).IsOpen)
+        if (!world.GetVoxel(pos + Vector3I.Back).IsOpen)
         {
             yield return new Quad(
                 new Vector3(0, 1, 1),
@@ -102,7 +102,7 @@ public partial class VoxelTest : MeshInstance3D
         }
 
         // Left
-        if (!world.Get(pos + Vector3I.Left).IsOpen)
+        if (!world.GetVoxel(pos + Vector3I.Left).IsOpen)
         {
             yield return new Quad(
                 new Vector3(0, 1, 0),
@@ -113,7 +113,7 @@ public partial class VoxelTest : MeshInstance3D
         }
 
         // Forward
-        if (!world.Get(pos + Vector3I.Forward).IsOpen)
+        if (!world.GetVoxel(pos + Vector3I.Forward).IsOpen)
         {
             yield return new Quad(
                 new Vector3(1, 1, 0),
@@ -124,7 +124,7 @@ public partial class VoxelTest : MeshInstance3D
         }
 
         // Bottom
-        if (!world.Get(pos + Vector3I.Down).IsOpen)
+        if (!world.GetVoxel(pos + Vector3I.Down).IsOpen)
         {
             yield return new Quad(
                 new Vector3(0, 0, 1),

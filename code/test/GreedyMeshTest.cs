@@ -58,7 +58,7 @@ public partial class GreedyMeshTest : MeshInstance3D
 					float val = noise.GetNoise3D(x, y, z);
 					if (val > Threshold)
 					{
-						world.Set(x, y, z, new PuzzlemakerVoxel().WithOpen(true));
+						world.SetVoxel(x, y, z, new PuzzlemakerVoxel().WithOpen(true));
 					}
 				}
 			}
@@ -136,6 +136,6 @@ public partial class GreedyMeshTest : MeshInstance3D
 
     private bool ShouldRenderFace(PuzzlemakerWorld world, Vector3I pos, Direction side)
 	{
-		return world.Get(pos).IsOpen && !world.Get(pos + side.GetNormal()).IsOpen;
+		return world.GetVoxel(pos).IsOpen && !world.GetVoxel(pos + side.GetNormal()).IsOpen;
 	}
 }

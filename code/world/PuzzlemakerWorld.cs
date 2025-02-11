@@ -7,9 +7,53 @@ using Godot;
 
 namespace PuzzlemakerPlus;
 
-public class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
-{
-    
+[GlobalClass]
+public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
+{   
+    /// <summary>
+    /// Draw a set of blocks from this world into a mesh.
+    /// </summary>
+    /// <param name="mesh">Mesh to add to.</param>
+    /// <param name="chunk">Negative-most position of the chunk.</param>
+    /// <param name="chunkSize">Size of the chunk.</param>
+    /// <param name="invert">If set, render the inside of the blocks instead of the outside.</param>
+    public void RenderChunk(ArrayMesh mesh, Vector3I chunk, int chunkSize = 16, bool invert = true) 
+    {
+        RenderChunkAndCollision(mesh, null, chunk, chunkSize, invert);
+    }
+
+    /// <summary>
+    /// Create render and collision geometry from a set of blocks from this world.
+    /// </summary>
+    /// <param name="mesh">Mesh to add render geometry to.</param>
+    /// <param name="collision">Shape to add collision geometry to.</param>
+    /// <param name="chunk">Most-negative position of the chunk in world-space.</param>
+    /// <param name="chunkSize">Size of the chunk in voxels.</param>
+    /// <param name="invert">If set, render the inside of the blocks instead of the outside.</param>
+    public void RenderChunkAndCollision(ArrayMesh? mesh, ConcavePolygonShape3D? collision, Vector3I chunk, int chunkSize = 16, bool invert = true)
+    {
+        Quad[] quads = GreedyMesh.DoGreedyMesh(this, chunkSize, chunk, invert: invert).ToArray();
+        
+        if (mesh != null)
+        {
+            MeshBuilder builder = new MeshBuilder();
+            for (int i = 0; i < quads.Length; i++)
+            {
+                builder.AddQuad(in quads[i]);
+            }
+            builder.ToMesh(mesh);
+        }
+
+        if (collision != null)
+        {
+            PolygonShapeBuilder builder = new PolygonShapeBuilder();
+            for (int i = 0; i < quads.Length; i++)
+            {
+                builder.AddQuad(in quads[i]);
+            }
+            builder.ToShape(collision);
+        }
+    }
 }
 
 /// <summary>

@@ -52,7 +52,7 @@ public partial class Chunk : MeshInstance3D
                         //if (noise.GetNoise3D(x, y, z) < Threshold)
                             if (x % 2 == 0)
                             {
-                                world.Set(x, y, z, new PuzzlemakerVoxel().WithOpen(true));
+                                world.SetVoxel(x, y, z, new PuzzlemakerVoxel().WithOpen(true));
                             }
                     }
                 }
@@ -67,7 +67,7 @@ public partial class Chunk : MeshInstance3D
                 StringBuilder builder = new StringBuilder();
                 for (int x = 0; x < ChunkSize; x++)
                 {
-                    builder.Append(world.Get(x, y, z).IsOpen ? 'X' : '0');
+                    builder.Append(world.GetVoxel(x, y, z).IsOpen ? 'X' : '0');
                 }
                 GD.Print(builder.ToString());
             }
@@ -221,7 +221,7 @@ public partial class Chunk : MeshInstance3D
 
     private bool BlockIsAir(Vector3I pos)
     {
-        return !world.Get(pos).IsOpen;
+        return !world.GetVoxel(pos).IsOpen;
   //      if (pos.X < 0 || pos.Y < 0 || pos.Z < 0 ||
   //          pos.X >= ChunkSize || pos.Y >= ChunkSize || pos.Z >= ChunkSize)
   //      {
