@@ -75,11 +75,10 @@ public sealed partial class EditorState : Node
     
     public void AddTestVoxels() 
     {
-        World.SetVoxel(0, 0, 0, new PuzzlemakerVoxel().WithOpen(true));
-        World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
+        // World.SetVoxel(0, 0, 0, new PuzzlemakerVoxel().WithOpen(true));
+        // World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
+        World.Fill(new Vector3I(0, 0, 0), new Vector3I(7, 7, 7), new PuzzlemakerVoxel().WithOpen(true));
         EmitSignal(SignalName.OnChunksUpdated, new Vector3[] {new Vector3(0, 0, 0)});
     }
 
-
-  
 }
