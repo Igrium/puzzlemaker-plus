@@ -33,7 +33,7 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
     /// <param name="invert">If set, render the inside of the blocks instead of the outside.</param>
     public void RenderChunkAndCollision(ArrayMesh? mesh, ConcavePolygonShape3D? collision, Vector3I chunk, int chunkSize = 16, bool invert = true)
     {
-        Quad[] quads = GreedyMesh.DoGreedyMesh(this, chunkSize, chunk, uvScale: .25f, invert: invert).ToArray();
+        Quad[] quads = new GreedyMesh().DoGreedyMesh(this, chunkSize, chunk, uvScale: .25f, invert: invert).ToArray();
         
         if (mesh != null)
         {

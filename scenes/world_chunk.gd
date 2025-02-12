@@ -32,7 +32,8 @@ func render() -> void:
 	if (world):
 		world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
 		var surface_index = a_mesh.get_surface_count() - 1
-		a_mesh.surface_set_material(surface_index, material)
+		if (surface_index >= 0):
+			a_mesh.surface_set_material(surface_index, material)
 		
 		self.mesh = a_mesh
 		_collision_shape.shape = shape
