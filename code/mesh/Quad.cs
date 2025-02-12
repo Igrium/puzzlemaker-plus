@@ -9,7 +9,7 @@ namespace PuzzlemakerPlus;
 /// A simple mesh quad.
 /// Godot uses a clockwise winding-order, and this quad implementation uses the same.
 /// </summary>
-public struct Quad
+public record struct Quad
 {
 
     public static Quad Empty => new Quad(Vector3.Zero, Vector3.Zero, Vector3.Zero, Vector3.Zero);
@@ -28,7 +28,9 @@ public struct Quad
     public Vector2 UV3 { get; set; }
     public Vector2 UV4 { get; set; }
 
-    public Quad(Vector3 vert1, Vector3 vert2, Vector3 vert3, Vector3 vert4)
+    public int MaterialIndex { get; set; }
+
+    public Quad(Vector3 vert1, Vector3 vert2, Vector3 vert3, Vector3 vert4, int materialIndex = 0)
     {
         // if (AnyElementsEqual(vert1, vert2, vert3, vert4))
         // {
@@ -48,10 +50,12 @@ public struct Quad
         UV2 = Vector2.Zero;
         UV3 = Vector2.Zero;
         UV4 = Vector2.Zero;
+
+        this.MaterialIndex = materialIndex;
     }
 
     public Quad(Vector3 vert1, Vector3 vert2, Vector3 vert3, Vector3 vert4,
-        Vector3 normal1, Vector3 normal2, Vector3 normal3, Vector3 normal4)
+        Vector3 normal1, Vector3 normal2, Vector3 normal3, Vector3 normal4, int materialIndex = 0)
     {
         Vert1 = vert1;
         Vert2 = vert2;
@@ -67,11 +71,13 @@ public struct Quad
         UV2 = Vector2.Zero;
         UV3 = Vector2.Zero;
         UV4 = Vector2.Zero;
+
+        this.MaterialIndex = materialIndex;
     }
 
     public Quad(Vector3 vert1, Vector3 vert2, Vector3 vert3, Vector3 vert4,
         Vector3 normal1, Vector3 normal2, Vector3 normal3, Vector3 normal4,
-        Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4)
+        Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4, int materialIndex)
     {
         Vert1 = vert1;
         Vert2 = vert2;
@@ -87,6 +93,15 @@ public struct Quad
         UV2 = uv2;
         UV3 = uv3;
         UV4 = uv4;
+
+        this.MaterialIndex = materialIndex;
+    }
+
+    public readonly Quad WithMaterialIndex(int materialIndex)
+    {
+        Quad result = this;
+        result.MaterialIndex = materialIndex;
+        return result;
     }
 
     public void FillUVs()
@@ -181,46 +196,10 @@ public struct Quad
 
     public static Quad operator -(Quad quad, in Vector3I vec) => quad + -vec;
 
-    public static bool operator ==(Quad quad1, Quad quad2)
-    {
-        return quad1.Equals(quad2);
-    }
-
-    public static bool operator !=(Quad quad1, Quad quad2) => !(quad1 == quad2);
-
-    public override bool Equals([NotNullWhen(true)] object? obj)
-    {
-        return obj is Quad other && Equals(other);
-    }
-    public readonly bool Equals(Quad other)
-    {
-        return this.Vert1 == other.Vert1
-            && this.Vert2 == other.Vert2
-            && this.Vert3 == other.Vert3
-            && this.Vert4 == other.Vert4
-            && this.Normal1 == other.Normal1
-            && this.Normal2 == other.Normal2
-            && this.Normal3 == other.Normal3
-            && this.Normal4 == other.Normal4
-            && this.UV1 == other.UV1
-            && this.UV2 == other.UV2
-            && this.UV3 == other.UV3
-            && this.UV4 == other.UV4;
-    }
-
-    public override int GetHashCode()
-    {
-        return (HashCode.Combine(Vert1, Vert2, Vert3, Vert4) * 31
-            + HashCode.Combine(Normal1, Normal2, Normal3, Normal4)) * 31
-            + HashCode.Combine(UV1, UV2, UV3, UV4);
-    }
-
     public override string ToString()
     {
-        return $"Quad[{Vert1}, {Vert2}, {Vert3}, {Vert4}]";
+        return $"Quad[{Vert1}, {Vert2}, {Vert3}, {Vert4} ({MaterialIndex})]";
     }
-
-
 
     private static bool AnyElementsEqual<T>(params T[] elements)
     {

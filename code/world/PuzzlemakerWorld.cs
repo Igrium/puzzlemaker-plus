@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
@@ -84,63 +85,167 @@ public struct PuzzlemakerVoxel
     /// </summary>
     public byte Subdivision;
 
-    public bool IsOpen => HasFlag(VoxelFlags.Open);
-    public bool UpPortalable => HasFlag(VoxelFlags.Up);
-    public bool DownPortalable => HasFlag(VoxelFlags.Down);
-    public bool LeftPortalable => HasFlag(VoxelFlags.Left);
-    public bool RightPortalable => HasFlag(VoxelFlags.Right);
-    public bool FrontPortalable => HasFlag(VoxelFlags.Front);
-    public bool BackPortalable => HasFlag(VoxelFlags.Back);
-
-    public PuzzlemakerVoxel WithOpen(bool open)
+    public bool IsOpen 
     {
-        return open ? this.SetFlag(VoxelFlags.Open) : this.ClearFlag(VoxelFlags.Open);
+        readonly get => HasFlag(VoxelFlags.Open);
+        set => SetFlag(VoxelFlags.Open, value);
+    }
+    public bool UpPortalable
+    {
+        readonly get => HasFlag(VoxelFlags.Up);
+        set => SetFlag(VoxelFlags.Up, value);
+    }
+    public bool DownPortalable
+    {
+        readonly get => HasFlag(VoxelFlags.Down);
+        set => SetFlag(VoxelFlags.Down, value);
+    }
+    public bool LeftPortalable
+    {
+        readonly get => HasFlag(VoxelFlags.Left);
+        set => SetFlag(VoxelFlags.Left, value);
+    }
+    public bool RightPortalable
+    {
+        readonly get => HasFlag(VoxelFlags.Right);
+        set => SetFlag(VoxelFlags.Right, value);
+    }
+    public bool FrontPortalable
+    {
+        readonly get => HasFlag(VoxelFlags.Front);
+        set => SetFlag(VoxelFlags.Front, value);
+    }
+    public bool BackPortalable
+    {
+        readonly get => HasFlag(VoxelFlags.Back);
+        set => SetFlag(VoxelFlags.Back, value);
     }
 
-    public bool HasFlag(VoxelFlags flag)
+    public readonly PuzzlemakerVoxel WithOpen(bool open)
+    {
+        PuzzlemakerVoxel result = this;
+        result.IsOpen = open;
+        return result;
+    }
+
+    public readonly bool HasFlag(VoxelFlags flag)
     {
         return ((Flags & (byte)flag) == (byte)flag);
     }
 
-    public PuzzlemakerVoxel SetFlag(VoxelFlags flag)
+
+    public void SetFlag(VoxelFlags flag)
+    {
+        this.Flags |= (byte)flag;
+    }
+
+    public void SetFlag(VoxelFlags flag, bool value)
+    {
+        if (value)
+            SetFlag(flag);
+        else
+            ClearFlag(flag);
+    }
+
+    public readonly PuzzlemakerVoxel WithFlag(VoxelFlags flag)
     {
         PuzzlemakerVoxel result = this;
-        result.Flags |= (byte)flag;
-        //GD.Print((int)flag);
+        result.SetFlag(flag);
         return result;
     }
 
-    public PuzzlemakerVoxel SetFlags(params VoxelFlags[] flags)
+    public void SetFlags(params VoxelFlags[] flags)
     {
-        PuzzlemakerVoxel result = this;
         foreach (VoxelFlags flag in flags)
         {
-            result.Flags |= (byte)flag;
+            Flags |= (byte)flag;
         }
+    }
+
+    public readonly PuzzlemakerVoxel WithFlags(params VoxelFlags[] flags)
+    {
+        PuzzlemakerVoxel result = this;
+        result.SetFlags(flags);
         return result;
     }
 
-    public PuzzlemakerVoxel ClearFlag(VoxelFlags flag)
+    public void ClearFlag(VoxelFlags flag)
     {
-        PuzzlemakerVoxel result = this;
         Flags &= (byte)~flag;
-        return result;
     }
 
-    public PuzzlemakerVoxel ClearFlags(params VoxelFlags[] flags)
+    public readonly PuzzlemakerVoxel WithoutFlag(VoxelFlags flag)
     {
         PuzzlemakerVoxel result = this;
-        foreach (VoxelFlags flag in flags)
-        {
-            result.Flags &= (byte)~flag;
-        }
+        result.ClearFlag(flag);
         return result;
     }
 
-    public PuzzlemakerVoxel SetSubdivision(byte subdivision)
+    public void ClearFlags(params VoxelFlags[] flags)
+    {
+        foreach (VoxelFlags flag in flags)
+        {
+            Flags &= (byte)~flag;
+        }
+    }
+
+    public readonly PuzzlemakerVoxel WithoutFlags(params VoxelFlags[] flags)
+    {
+        PuzzlemakerVoxel result = this;
+        result.ClearFlags(flags);
+        return result;
+    }
+
+    public PuzzlemakerVoxel WithSubdivision(byte subdivision)
     {
         PuzzlemakerVoxel result = this;
         result.Subdivision = subdivision;
         return result;
+    }
+
+    public readonly bool IsPortalable(Direction direction)
+    {
+        switch(direction)
+        {
+            case Direction.Up:
+                return UpPortalable;
+            case Direction.Down:
+                return DownPortalable;
+            case Direction.Left:
+                return LeftPortalable;
+            case Direction.Right: 
+                return RightPortalable;
+            case Direction.Forward:
+                return FrontPortalable;
+            case Direction.Back:
+                return BackPortalable;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(direction));
+        }
+    }
+
+    public void SetPortalable(Direction direction, bool value)
+    {
+        switch(direction)
+        {
+            case Direction.Up:
+                UpPortalable = value;
+                break;
+            case Direction.Down:
+                DownPortalable = value;
+                break;
+            case Direction.Left:
+                LeftPortalable = value;
+                break;
+            case Direction.Right:
+                RightPortalable = value;
+                break;
+            case Direction.Forward:
+                FrontPortalable = value;
+                break;
+            case Direction.Back:
+                BackPortalable = value;
+                break;
+        }
     }
 }
