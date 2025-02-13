@@ -14,11 +14,13 @@ func _ready() -> void:
 func update_selection(selection: AABB):
 	i_mesh.clear_surfaces()
 
+	var grid_scale: int = Editor.GridScale
+
 	var size := selection.size
 	var flatten := Vector3(1 if size.x != 0 else 0, 1 if size.y != 0 else 0, 1 if size.z != 0 else 0)
 
-	_draw_selection_highlight(i_mesh, _grow_box(selection, flatten * .02), material)
-	_draw_selection_highlight(i_mesh, _grow_box(selection, flatten * -.02), material)
+	_draw_selection_highlight(i_mesh, _grow_box(selection, flatten * (.01 * grid_scale)), material)
+	_draw_selection_highlight(i_mesh, _grow_box(selection, flatten * (-.01 * grid_scale)), material)
 	self.mesh = i_mesh
 
 @warning_ignore("shadowed_global_identifier", "shadowed_global_identifier")

@@ -79,7 +79,16 @@ public sealed partial class EditorState : Node
         // World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
         World.Fill(new Vector3I(0, 0, 0), new Vector3I(7, 7, 7), new PuzzlemakerVoxel().WithOpen(true));
         World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
-        EmitSignal(SignalName.OnChunksUpdated, new Vector3[] {new Vector3(0, 0, 0)});
+
+        Vector3I portalable = new Vector3I(4, 0, 3);
+        World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalable(Direction.Down, true));
+
+        EmitOnChunksUpdated(new Vector3(0, 0, 0));
+    }
+
+    public void EmitOnChunksUpdated(params Vector3[] chunks)
+    {
+        EmitSignal(SignalName.OnChunksUpdated, chunks);
     }
 
 }

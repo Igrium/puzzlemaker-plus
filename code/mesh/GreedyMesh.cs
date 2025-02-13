@@ -5,6 +5,38 @@ namespace PuzzlemakerPlus;
 
 public struct GreedyMesh
 {
+    private record struct FaceType
+    {
+        public FaceType(bool portalable, short subdivision)
+        {
+            this.Portalable = portalable;
+            this.Subdivision = subdivision;
+        }
+
+        bool Portalable;
+        short Subdivision;
+
+        public int GetMaterialIndex()
+        {
+            return Subdivision * 2 + (Portalable ? 1 : 0);
+        }
+
+        public static FaceType FromVoxel(PuzzlemakerVoxel voxel, Direction direction)
+        {
+            return new FaceType(voxel.IsPortalable(direction), voxel.Subdivision);
+        }
+    }
+
+    private static IEnumerable<FaceType> IterateFaceTypes()
+    {
+        for (short i = 0; i <= 2; i++)
+        {
+            yield return new FaceType(false, i);
+            yield return new FaceType(true, i);
+        }
+    }
+
+
     private PuzzlemakerWorld _world;
     private int _chunkSize;
     private Vector3I _chunkPos;
@@ -13,10 +45,13 @@ public struct GreedyMesh
     private bool[] _mask;
     private Vector3I _position;
     private Vector3I _direction;
+    private Direction _dirEnum;
     private int _currentAxis;
     private int _axisU;
     private int _axisV;
     private int _dir;
+    private FaceType _faceType;
+
 
     public IEnumerable<Quad> DoGreedyMesh(PuzzlemakerWorld world, int chunkSize, Vector3I chunkPos, float uvScale = 1, bool invert = false)
     {
@@ -32,19 +67,27 @@ public struct GreedyMesh
             // 0 = negative, 1 = positive.
             for (_dir = 0; _dir <= 1; _dir++)
             {
-                InitializeAxisVariables();
-                _direction[_currentAxis] = 1;
-
-                // Check each slice of the chunk one at a time
-                for (_position[_currentAxis] = -1; _position[_currentAxis] < _chunkSize;)
+                _dirEnum = Directions.FromAxis(_currentAxis, _dir == 0);
+                foreach (var facetype in IterateFaceTypes())
                 {
-                    ComputeMask();
-                    ++_position[_currentAxis];
-                    foreach (var quad in GenerateMeshFromMask())
+                    this._faceType = facetype;
+                    InitializeAxisVariables();
+                    _direction[_currentAxis] = 1;
+
+                    
+
+                    // Check each slice of the chunk one at a time
+                    for (_position[_currentAxis] = -1; _position[_currentAxis] < _chunkSize;)
                     {
-                        yield return quad;
+                        ComputeMask();
+                        ++_position[_currentAxis];
+                        foreach (var quad in GenerateMeshFromMask())
+                        {
+                            yield return quad;
+                        }
                     }
                 }
+                
             }
         }
     }
@@ -68,15 +111,29 @@ public struct GreedyMesh
                 bool blockCurrent = _world.GetVoxel(_position + _chunkPos).IsOpen;
                 bool blockCompare = _world.GetVoxel(_position + _direction + _chunkPos).IsOpen;
 
+                PuzzlemakerVoxel currentBlock = _world.GetVoxel(_position + _chunkPos);
+                PuzzlemakerVoxel compareBlock = _world.GetVoxel(_position + _direction + _chunkPos);
+
                 // If _dir is 1, we're in the compare block looking at this one. Otherwise, we're in this one looking at the compare.
                 if (_dir == 1)
                 {
-                    _mask[n++] = blockCurrent && !blockCompare;
+                    FaceType f = FaceType.FromVoxel(currentBlock, _dirEnum);
+                    _mask[n++] = currentBlock.IsOpen && !compareBlock.IsOpen && f == _faceType;
                 }
                 else
                 {
-                    _mask[n++] = blockCompare && !blockCurrent;
+                    FaceType f = FaceType.FromVoxel(compareBlock, _dirEnum);
+                    _mask[n++] = compareBlock.IsOpen && !currentBlock.IsOpen && f == _faceType;
                 }
+
+                //if (_dir == 1)
+                //{
+                //    _mask[n++] = blockCurrent && !blockCompare;
+                //}
+                //else
+                //{
+                //    _mask[n++] = blockCompare && !blockCurrent;
+                //}
 
                 // The mask is set to true if there is a visible face between two blocks,
                 // i.e. both aren't empty and both aren't blocks
@@ -185,6 +242,8 @@ public struct GreedyMesh
         {
             quad = quad.Flipped();
         }
+
+        quad.MaterialIndex = _faceType.GetMaterialIndex();
 
         return quad;
     }

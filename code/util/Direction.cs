@@ -75,16 +75,16 @@ public static class Directions
         }
     }
 
-    public static Direction FromAxis(int axis, bool reverse)
+    public static Direction FromAxis(int axis, bool negative)
     {
         switch(axis)
         {
             case 0:
-                return reverse ? Direction.Right : Direction.Left;
+                return negative ? Direction.Right : Direction.Left;
             case 1:
-                return reverse ? Direction.Up : Direction.Down;
+                return negative ? Direction.Up : Direction.Down;
             case 2:
-                return reverse ? Direction.Back : Direction.Forward;
+                return negative ? Direction.Back : Direction.Forward;
             default:
                 throw new ArgumentOutOfRangeException(nameof(axis), "Axis must be 0 (x), 1 (y) or 2 (z).");
         }

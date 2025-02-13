@@ -63,6 +63,7 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
 /// </summary>
 public struct PuzzlemakerVoxel
 {
+    // TODO: We need to find a way to store the subdivision on a per-face basis.
     [Flags]
     public enum VoxelFlags
     {
@@ -247,5 +248,12 @@ public struct PuzzlemakerVoxel
                 BackPortalable = value;
                 break;
         }
+    }
+
+    public readonly PuzzlemakerVoxel WithPortalable(Direction direction, bool value)
+    {
+        PuzzlemakerVoxel result = this;
+        result.SetPortalable(Direction.Up, value);
+        return result;
     }
 }

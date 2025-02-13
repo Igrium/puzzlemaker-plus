@@ -18,7 +18,7 @@ public partial class EditorState
     [Signal]
     public delegate void OnUpdatedSelectionEventHandler(Aabb selection);
 
-    private int _gridScale = 1;
+    private int _gridScale = 4;
 
 
     /// <summary>
@@ -73,7 +73,6 @@ public partial class EditorState
             _selection = selection;
             EmitSignal(SignalName.OnUpdatedSelection, selection);
         }
-        GD.Print("Selection is now " + selection);
     }
 
     public void ExpandSelection(Vector3 newPos)
