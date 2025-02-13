@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://b44qgtmjx6vrf"]
+
+[ext_resource type="Shader" path="res://assets/materials/editor_voxel.gdshader" id="1_vkt1j"]
+[ext_resource type="Texture2D" uid="uid://n8q8jn4a0btb" path="res://assets/materials/clean/grid0b.png" id="2_o8n15"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_vkt1j")
+shader_parameter/tint_color = Color(0.325796, 0.325796, 0, 1)
+shader_parameter/tex = ExtResource("2_o8n15")

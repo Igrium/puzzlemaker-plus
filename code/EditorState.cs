@@ -10,7 +10,7 @@ namespace PuzzlemakerPlus;
 public sealed partial class EditorState : Node
 {
     private static EditorState? _instance;
-    public static EditorState? Instance => _instance ?? throw new InvalidOperationException("Editor has not finished initializing!");
+    public static EditorState Instance => _instance ?? throw new InvalidOperationException("Editor has not finished initializing!");
 
     /// <summary>
     /// Called when a project has been opened.
@@ -46,11 +46,15 @@ public sealed partial class EditorState : Node
     /// </summary>
     public PuzzlemakerWorld World => Project.World;
 
+    [Export]
+    public LevelTheme Theme { get; set; } = new();
+
     public EditorState()
     {
         if (_instance != null)
             GD.PushWarning("Tried to initialize EditorState twice!");
         _instance = this;
+        Theme = GD.Load<LevelTheme>("res://assets/themes/clean.tres");
     }
 
     public override void _Ready()

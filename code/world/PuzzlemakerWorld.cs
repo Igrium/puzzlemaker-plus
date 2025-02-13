@@ -37,12 +37,12 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
         
         if (mesh != null)
         {
-            MeshBuilder builder = new MeshBuilder();
+            MultiMeshBuilder builder = new();
             for (int i = 0; i < quads.Length; i++)
             {
                 builder.AddQuad(in quads[i]);
             }
-            builder.ToMesh(mesh);
+            builder.ToMesh(mesh, EditorState.Instance.Theme.VoxelTextures);
         }
 
         if (collision != null)

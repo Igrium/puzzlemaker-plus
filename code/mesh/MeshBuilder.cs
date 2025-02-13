@@ -6,7 +6,7 @@ using Godot.Collections;
 
 namespace PuzzlemakerPlus;
 
-public class MeshBuilder
+public class MeshBuilder : IMeshBuilder
 {
     private readonly List<Vector3> _vertices = new();
     private readonly List<Vector3> _normals = new();
@@ -43,14 +43,6 @@ public class MeshBuilder
         _numVerts += 4;
     }
 
-    public void AddQuads(IEnumerable<Quad> quads)
-    {
-        foreach (var quad in quads)
-        {
-            AddQuad(in quad);
-        }
-    }
-
     public void ToMesh(ArrayMesh mesh, Material? material = null)
     {
         if (!_indices.Any())
@@ -68,7 +60,8 @@ public class MeshBuilder
             if (material != null)
             {
                 int surfaceIndex = mesh.GetSurfaceCount() - 1;
-                mesh.SurfaceSetMaterial(surfaceIndex, material);
+                if (surfaceIndex >= 0)
+                    mesh.SurfaceSetMaterial(surfaceIndex, material);
             }
         }
     }
