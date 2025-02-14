@@ -54,12 +54,17 @@ public sealed partial class EditorState : Node
         if (_instance != null)
             GD.PushWarning("Tried to initialize EditorState twice!");
         _instance = this;
-        Theme = GD.Load<LevelTheme>("res://assets/themes/clean.tres");
+        //Theme = GD.Load<LevelTheme>("res://assets/themes/clean.tres");
+        //Theme.LoadMaterials();
     }
 
     public override void _Ready()
     {
         base._Ready();
+        GD.Print("Editor state is ready!");
+        var theme = LevelTheme.LoadTheme("res://assets/themes/clean.json");
+        if (theme != null)
+            Theme = theme;
     }
 
     public PuzzlemakerProject NewProject()

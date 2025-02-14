@@ -1,6 +1,6 @@
 shader_type spatial;
 
-uniform sampler2D tex : source_color;
+uniform sampler2D albedo_texture : source_color;
 
 instance uniform vec3 selection_start;
 instance uniform vec3 selection_end;
@@ -14,7 +14,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec3 color = texture(tex, UV).rgb;
+	vec3 color = texture(albedo_texture, UV).rgb;
 	
 	bool selected = selection_start.x <= pos.x && pos.x <= selection_end.x
 				&& selection_start.y <= pos.y && pos.y <= selection_end.y
