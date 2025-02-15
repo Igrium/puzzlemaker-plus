@@ -1,6 +1,8 @@
 ﻿
+using System.IO;
 using Godot;
-using VMFParser;
+using VMFLib.Parsers;
+using VMFLib.VClass;
 
 namespace PuzzlemakerPlus;
 
@@ -9,10 +11,7 @@ public partial class VMFTest : Node
     public void TestLoadVMF(string path)
     {
         GD.Print("Loading test VMF data from " + path);
-        var contents = FileAccess.GetFileAsString(path);
-
-        VMF vmf = new VMF(new string[] { contents });
-
+        SimpleVMF vmf = SimpleVMF.ReadFile(path);
         GD.Print(vmf);
     }
 }

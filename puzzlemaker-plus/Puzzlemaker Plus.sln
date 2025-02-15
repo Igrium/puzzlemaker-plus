@@ -5,10 +5,10 @@ VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Puzzlemaker Plus", "Puzzlemaker Plus.csproj", "{72114C91-E59F-46E0-835E-B476180D26B6}"
 	ProjectSection(ProjectDependencies) = postProject
-		{74567D15-3C03-42FB-82DB-06EA61D64970} = {74567D15-3C03-42FB-82DB-06EA61D64970}
+		{EA921D76-C73B-4790-9B70-BB7BBC37DF57} = {EA921D76-C73B-4790-9B70-BB7BBC37DF57}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VMFParser", "..\lib\VMFParser\VMFParser.csproj", "{74567D15-3C03-42FB-82DB-06EA61D64970}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VMFLib", "..\lib\VMFLib\VMFLib.csproj", "{EA921D76-C73B-4790-9B70-BB7BBC37DF57}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +23,12 @@ Global
 		{72114C91-E59F-46E0-835E-B476180D26B6}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{72114C91-E59F-46E0-835E-B476180D26B6}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{72114C91-E59F-46E0-835E-B476180D26B6}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
-		{74567D15-3C03-42FB-82DB-06EA61D64970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74567D15-3C03-42FB-82DB-06EA61D64970}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74567D15-3C03-42FB-82DB-06EA61D64970}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74567D15-3C03-42FB-82DB-06EA61D64970}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
-		{74567D15-3C03-42FB-82DB-06EA61D64970}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{74567D15-3C03-42FB-82DB-06EA61D64970}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+		{EA921D76-C73B-4790-9B70-BB7BBC37DF57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA921D76-C73B-4790-9B70-BB7BBC37DF57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA921D76-C73B-4790-9B70-BB7BBC37DF57}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA921D76-C73B-4790-9B70-BB7BBC37DF57}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{EA921D76-C73B-4790-9B70-BB7BBC37DF57}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{EA921D76-C73B-4790-9B70-BB7BBC37DF57}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
