@@ -18,6 +18,11 @@ public class VClassWriter : IDisposable
         Writer = writer;
     }
 
+    public VClassWriter(Stream stream)
+    {
+        Writer = new StreamWriter(stream);
+    }
+
     public virtual void WriteClass(BaseVClass vClass)
     {
         switch (vClass.ClassHeader)
@@ -33,6 +38,10 @@ public class VClassWriter : IDisposable
             case "solid":
             {
                 WriteSolidClass((Solid)vClass);
+            } break;
+            case "world":
+            {
+                WriteWorldClass((World)vClass);
             } break;
             case "entity":
             {
@@ -120,6 +129,47 @@ public class VClassWriter : IDisposable
 
     #region World Info
 
+
+    private protected void WriteWorldClass(World world)
+    {
+        WriteIndentedLine(world.ClassHeader);
+        WriteIndentedLine("{"); // Need our brackets!
+        NextLevel(); //Heading into our properties
+
+        //Properties get written first
+        foreach (VProperty property in world.Properties.Values)
+        {
+            WriteProperty(property);
+        }
+
+        if (world.Solids.Count > 0)
+        {
+            foreach (Solid solid in world.Solids)
+            {
+                WriteClass(solid);
+            }
+
+        }
+
+        //if (world.Hidden != null)
+        //{
+        //    WriteClass(world.Hidden);
+        //}
+
+        //if (world.Editor != null)
+        //{
+        //    WriteClass(world.Editor);
+        //}
+
+        foreach (BaseVClass subClass in world.SubClasses)
+        {
+            WriteClass(subClass); //Pass this back to WriteClass() in case this is a special class
+        }
+
+        PreviousLevel();
+        WriteIndentedLine("}");
+    }
+
     #region Solids
 
     /// <summary>
@@ -199,7 +249,7 @@ public class VClassWriter : IDisposable
         WriteIndentedLine("{"); // Need our brackets!
         NextLevel(); //Heading into our properties
         
-        foreach (Vertex vertex in vPlus.Vertices)
+        foreach (Vec3 vertex in vPlus.Vertices)
         {
             WriteIndentedLine($"\"v\" \"{vertex}\"");
         }
@@ -234,7 +284,7 @@ public class VClassWriter : IDisposable
             {
                 var currentRow = displacement.Rows.RowNormals[i];
                 string write = "";
-                foreach (Vertex vertex in currentRow)
+                foreach (Vec3 vertex in currentRow)
                 {
                     write += $"{vertex} ";
                 }
@@ -266,7 +316,7 @@ public class VClassWriter : IDisposable
             {
                 var currentRow = displacement.Rows.RowOffsets[i];
                 string write = "";
-                foreach (Vertex vertex in currentRow)
+                foreach (Vec3 vertex in currentRow)
                 {
                     write += $"{vertex} ";
                 }
@@ -282,7 +332,7 @@ public class VClassWriter : IDisposable
             {
                 var currentRow = displacement.Rows.RowOffsetNormals[i];
                 string write = "";
-                foreach (Vertex vertex in currentRow)
+                foreach (Vec3 vertex in currentRow)
                 {
                     write += $"{vertex} ";
                 }

@@ -27,6 +27,19 @@ public abstract class BaseVClass
         Properties.Add(property.Name, property);
     }
 
+    /// <summary>
+    /// Set a property value in this class.
+    /// </summary>
+    /// <param name="name">Property name.</param>
+    /// <param name="value">Stringified property value.</param>
+    public void SetProperty(string name, string? value)
+    {
+        if (value == null)
+            Properties.Remove(name);
+        else
+            Properties[name] = new VProperty(name, value);
+    }
+
     public BaseVClass()
     {
         SubClasses = new List<BaseVClass>();

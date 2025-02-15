@@ -1,6 +1,6 @@
 ﻿namespace VMFLib.Objects;
 
-public class Vec2
+public record struct Vec2
 {
     public int X;
     public int Y;
@@ -20,5 +20,7 @@ public class Vec2
 
     public Vec2()
     {
+        X = 0;
+        Y = 0;
     }
 }

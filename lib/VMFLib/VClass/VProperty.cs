@@ -13,6 +13,12 @@ namespace VMFLib.VClass
             _property = value?.ToString();
         }
 
+        public VProperty(string? name, string? value)
+        {
+            Name = name;
+            _property = value;
+        }
+
         public VProperty(string property)
         {
             property = property.Trim();
@@ -100,12 +106,12 @@ namespace VMFLib.VClass
             return new RGB(_property);
         }
 
-        public Vertex Vertex()
+        public Vec3 Vertex()
         {
             if (_property == null)
-                return new Vertex();
+                return new Vec3();
             
-            return new Vertex(_property);
+            return new Vec3(_property);
         }
         
         public Vec2 Vec2()

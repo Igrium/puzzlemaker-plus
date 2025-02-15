@@ -19,12 +19,10 @@ grow_horizontal = 2
 
 [node name="File" type="PopupMenu" parent="MenuBar"]
 item_count = 1
-item_0/text = "Open Test VMF"
+item_0/text = "Save Test VMF"
 
 [node name="FD_VMFTest" type="FileDialog" parent="."]
-title = "Open a File"
-ok_button_text = "Open"
-file_mode = 0
+ok_button_text = "Save"
 access = 2
 use_native_dialog = true
 

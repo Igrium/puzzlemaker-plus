@@ -7,7 +7,7 @@ using Godot;
 
 namespace PuzzlemakerPlus;
 
-public static class MathUtils
+internal static class MathUtils
 {
     public static int Min(int int1, int int2, int int3, int int4)
     {

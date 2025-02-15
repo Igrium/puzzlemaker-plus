@@ -10,7 +10,7 @@ namespace PuzzlemakerPlus;
 /// 
 /// By Novaleaf on Reddit.
 /// </summary>
-public class FileAccessStream : Stream
+internal class FileAccessStream : Stream
 {
     private readonly FileAccess _fileAccess;
     private readonly long _fileLength;

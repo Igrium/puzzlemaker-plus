@@ -470,7 +470,7 @@ namespace VMFLib.Parsers
                     continue;
                 }
                 
-                verticesPlus.Vertices.Add(new Vertex(line.Split(new []{"\" \""}, StringSplitOptions.RemoveEmptyEntries)[1].Trim(new []{' ', '"'})));
+                verticesPlus.Vertices.Add(new Vec3(line.Split(new []{"\" \""}, StringSplitOptions.RemoveEmptyEntries)[1].Trim(new []{' ', '"'})));
                 line = Reader.ReadLine()!.Trim();
             }
 

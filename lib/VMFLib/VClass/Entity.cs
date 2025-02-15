@@ -14,7 +14,7 @@ public class Entity : BaseVClass
     public int Id => Properties["id"].Int();
     public string ClassName => Properties["classname"].Str();
     public int SpawnFlags => Properties["spawnflags"].Int();
-    public Vertex Origin => Properties["origin"].Vertex();
+    public Vec3 Origin => Properties["origin"].Vertex();
 
     /// <summary>
     /// 

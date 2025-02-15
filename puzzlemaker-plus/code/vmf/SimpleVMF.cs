@@ -8,7 +8,7 @@ using Godot;
 using VMFLib.Parsers;
 using VMFLib.VClass;
 
-namespace PuzzlemakerPlus;
+namespace PuzzlemakerPlus.VMF;
 
 public class SimpleVMF
 {
