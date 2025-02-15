@@ -54,8 +54,6 @@ public sealed partial class EditorState : Node
         if (_instance != null)
             GD.PushWarning("Tried to initialize EditorState twice!");
         _instance = this;
-        //Theme = GD.Load<LevelTheme>("res://assets/themes/clean.tres");
-        //Theme.LoadMaterials();
     }
 
     public override void _Ready()
@@ -89,8 +87,9 @@ public sealed partial class EditorState : Node
         World.Fill(new Vector3I(0, 0, 0), new Vector3I(7, 7, 7), new PuzzlemakerVoxel().WithOpen(true));
         World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
 
-        Vector3I portalable = new Vector3I(4, 0, 3);
-        World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalable(Direction.Down, true));
+        //Vector3I portalable = new Vector3I(4, 0, 3);
+        //World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalable(Direction.Down, true));
+        World.UpdateVoxel(4, 0, 3, (block) => block.WithPortalable(Direction.Down, true));
 
         EmitOnChunksUpdated(new Vector3(0, 0, 0));
     }

@@ -125,19 +125,6 @@ public struct GreedyMesh
                     FaceType f = FaceType.FromVoxel(compareBlock, _dirEnum);
                     _mask[n++] = compareBlock.IsOpen && !currentBlock.IsOpen && f == _faceType;
                 }
-
-                //if (_dir == 1)
-                //{
-                //    _mask[n++] = blockCurrent && !blockCompare;
-                //}
-                //else
-                //{
-                //    _mask[n++] = blockCompare && !blockCurrent;
-                //}
-
-                // The mask is set to true if there is a visible face between two blocks,
-                // i.e. both aren't empty and both aren't blocks
-                // mask[n++] = blockCurrent != blockCompare;
             }
         }
     }

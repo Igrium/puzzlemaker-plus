@@ -4,13 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace PuzzlemakerPlus;
+
+/// <summary>
+/// Called to update the value in a voxel without a bunch of indirection.
+/// This doesn't work right now and I can't figure out how to make it work.
+/// </summary>
+/// <typeparam name="T">Voxel type.</typeparam>
+/// <param name="value">A reference to the voxel's value. Update this to update the voxel.</param>
+public delegate void VoxelOperator<T>(ref T value);
+
 public partial class VoxelWorld<T> : RefCounted
 {
+
+    /// <summary>
+    /// Get the chunk position that a certian voxel belongs to.
+    /// </summary>
+    /// <param name="pos">World position to test.</param>
+    /// <returns>Chunk position.</returns>
     public static Vector3I GetChunk(Vector3I pos)
     {
         return new Vector3I(pos.X >> 4, pos.Y >> 4, pos.Z >> 4);
     }
 
+    /// <summary>
+    /// Get the local position within a voxel's chunk that a voxel resides at.
+    /// </summary>
+    /// <param name="pos">Voxel global position.</param>
+    /// <returns>Position relative to chunk.</returns>
     public static Vector3I GetPosInChunk(Vector3I pos)
     {
         return new Vector3I(pos.X & 15, pos.Y & 15, pos.Z & 15);
@@ -52,6 +72,51 @@ public partial class VoxelWorld<T> : RefCounted
         Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
         var chunk = GetOrCreateChunk(chunkPos);
         return chunk.Set(localX, localY, localZ, value);
+    }
+
+    public T? SetVoxel(Vector3I pos, T value)
+    {
+        return SetVoxel(pos.X, pos.Y, pos.Z, value);
+    }
+
+    public void UpdateVoxel(int x, int y, int z, VoxelOperator<T> function)
+    {
+        int chunkX = x >> 4;
+        int chunkY = y >> 4;
+        int chunkZ = z >> 4;
+
+        int localX = x & 15;
+        int localY = y & 15;
+        int localZ = z & 15;
+        Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
+        var chunk = GetOrCreateChunk(chunkPos);
+
+        chunk.Update(localX, localY, localZ, function);
+    }
+
+    public void UpdateVoxel(Vector3I pos, VoxelOperator<T> function)
+    {
+        UpdateVoxel(pos.X, pos.Y, pos.Z, function);
+    }
+
+    public void UpdateVoxel(int x, int y, int z, Func<T, T> function)
+    {
+        int chunkX = x >> 4;
+        int chunkY = y >> 4;
+        int chunkZ = z >> 4;
+
+        int localX = x & 15;
+        int localY = y & 15;
+        int localZ = z & 15;
+        Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
+        var chunk = GetOrCreateChunk(chunkPos);
+
+        chunk.Update(localX, localY, localZ, function);
+    }
+
+    public void UpdateVoxel(Vector3I pos, Func<T, T> function)
+    {
+        UpdateVoxel(pos.X, pos.Y, pos.Z, function);
     }
 
     private VoxelChunk<T> GetOrCreateChunk(in Vector3I chunkPos) 
@@ -121,9 +186,20 @@ public partial class VoxelWorld<T> : RefCounted
         }
     }
 
-    public T? SetVoxel(Vector3I pos, T value)
+    /// <summary>
+    /// Return a copy of this world with a mapping function applied to each of the voxels.
+    /// </summary>
+    /// <typeparam name="V">Target voxel type.</typeparam>
+    /// <param name="function">Mapping function.</param>
+    /// <returns>The copy.</returns>
+    public VoxelWorld<V> Transform<V>(Func<T, V> function)
     {
-        return SetVoxel(pos.X, pos.Y, pos.Z, value);
+        VoxelWorld<V> result = new();
+        foreach (var (pos, chunk) in chunks)
+        {
+            result.chunks.Add(pos, chunk.Transform(function));
+        }
+        return result;
     }
 
     /// <summary>
@@ -274,9 +350,31 @@ public class VoxelChunk<T>
         return prev;
     }
 
+    public void Update(int x, int y, int z, VoxelOperator<T> function)
+    {
+        int index = x + (y * 16) + (z * 16 * 16);
+        function.Invoke(ref data[index]);
+    }
+
+    public void Update(int x, int y, int z, Func<T, T> function)
+    {
+        int index = x + (y * 16) + (z * 16 * 16);
+        data[index] = function.Invoke(data[index]);
+    }
+
     public void Fill(T value)
     {
         Array.Fill(data, value);
+    }
+
+    public VoxelChunk<V> Transform<V>(Func<T, V> function)
+    {
+        VoxelChunk<V> result = new();
+        for (int i = 0; i < data.Length; i++)
+        {
+            result.data[i] = function.Invoke(data[i]);
+        }
+        return result;
     }
 }
 
