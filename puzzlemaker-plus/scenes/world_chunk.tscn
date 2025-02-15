@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://1hw75nbgk46w"]
+
+[ext_resource type="Script" path="res://scenes/world_chunk.gd" id="1_y567v"]
+[ext_resource type="Material" uid="uid://dyvgr7q35fcid" path="res://assets/materials/clean/grid_light.tres" id="2_fx1e0"]
+[ext_resource type="Script" path="res://scripts/debug_visualizer.gd" id="3_te8ta"]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ca28r"]
+
+[node name="WorldChunk" type="MeshInstance3D"]
+script = ExtResource("1_y567v")
+material = ExtResource("2_fx1e0")
+
+[node name="Area3D" type="Area3D" parent="."]
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("ConcavePolygonShape3D_ca28r")
+
+[node name="DebugVisualizer" type="Node" parent="."]
+script = ExtResource("3_te8ta")
+
+[connection signal="input_event" from="Area3D" to="." method="_on_input_event"]

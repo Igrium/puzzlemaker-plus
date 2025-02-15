@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://bd3mbm0pemh78"]
+
+[ext_resource type="Script" path="res://ui/main_ui.gd" id="1_ubv51"]
+
+[node name="MainUi" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ubv51")
+
+[node name="MenuBar" type="MenuBar" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+
+[node name="File" type="PopupMenu" parent="MenuBar"]
+item_count = 1
+item_0/text = "Open Test VMF"
+
+[node name="FD_VMFTest" type="FileDialog" parent="."]
+title = "Open a File"
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+use_native_dialog = true
+
+[connection signal="id_pressed" from="MenuBar/File" to="." method="_on_file_id_pressed"]
+[connection signal="file_selected" from="FD_VMFTest" to="." method="_on_fd_vmf_test_file_selected"]
