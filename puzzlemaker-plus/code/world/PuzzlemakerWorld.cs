@@ -65,7 +65,7 @@ public struct PuzzlemakerVoxel
 {
     // TODO: We need to find a way to store the subdivision on a per-face basis.
     [Flags]
-    public enum VoxelFlags
+    public enum VoxelFlags : byte
     {
         Open = 1,
         Up = 2,
@@ -225,7 +225,7 @@ public struct PuzzlemakerVoxel
         }
     }
 
-    public void SetPortalable(Direction direction, bool value)
+    public void SetPortalability(Direction direction, bool value)
     {
         switch(direction)
         {
@@ -250,10 +250,36 @@ public struct PuzzlemakerVoxel
         }
     }
 
-    public readonly PuzzlemakerVoxel WithPortalable(Direction direction, bool value)
+    public readonly PuzzlemakerVoxel WithPortalability(Direction direction, bool value)
     {
         PuzzlemakerVoxel result = this;
-        result.SetPortalable(Direction.Up, value);
+        result.SetPortalability(Direction.Up, value);
+        return result;
+    }
+
+    /// <summary>
+    /// Set the portalability for all sides.
+    /// </summary>
+    /// <param name="value">Portalability</param>
+    public void SetPortalability(bool value)
+    {
+        FrontPortalable = value;
+        BackPortalable = value;
+        UpPortalable = value;
+        DownPortalable = value;
+        LeftPortalable = value;
+        RightPortalable = value;
+    }
+
+    /// <summary>
+    /// Set the portalability for all sides.
+    /// </summary>
+    /// <param name="value">Portalability</param>
+    /// <returns>A copy of this voxel with the set portalability.</returns>
+    public readonly PuzzlemakerVoxel WithPortalability(bool value)
+    {
+        PuzzlemakerVoxel result = this;
+        result.SetPortalability(value);
         return result;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Godot;
 
 namespace PuzzlemakerPlus;
@@ -88,8 +89,8 @@ public sealed partial class EditorState : Node
         World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
 
         //Vector3I portalable = new Vector3I(4, 0, 3);
-        //World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalable(Direction.Down, true));
-        World.UpdateVoxel(4, 0, 3, (block) => block.WithPortalable(Direction.Down, true));
+        //World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalability(Direction.Down, true));
+        World.UpdateVoxel(4, 0, 3, (block) => block.WithPortalability(Direction.Down, true));
 
         EmitOnChunksUpdated(new Vector3(0, 0, 0));
     }
@@ -97,6 +98,33 @@ public sealed partial class EditorState : Node
     public void EmitOnChunksUpdated(params Vector3[] chunks)
     {
         EmitSignal(SignalName.OnChunksUpdated, chunks);
+    }
+
+    public void EmitOnChunksUpdated(Aabb bounds)
+    {
+        Vector3I minChunk = (bounds.Position / 16f).FloorInt();
+        Vector3I maxChunk = (bounds.End / 16f).FloorInt();
+
+        if (minChunk == maxChunk)
+        {
+            EmitOnChunksUpdated(minChunk);
+        }
+        else
+        {
+            List<Vector3> chunks = new List<Vector3>();
+            for (int x = minChunk.X; x <= maxChunk.X; x++)
+            {
+                for (int y = minChunk.Y; x <= maxChunk.Y; y++)
+                {
+                    for (int z = minChunk.Z; x <= maxChunk.Z; z++)
+                    {
+                        chunks.Add(new Vector3(x, y, z));
+                    }
+                }
+            }
+
+            EmitOnChunksUpdated(chunks.ToArray());
+        }
     }
 
 }
