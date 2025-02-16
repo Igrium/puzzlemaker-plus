@@ -40,9 +40,9 @@ public record struct Plane
 
     public Vec3 ComputeNormal()
     {
-        Vec3 edge1 = Vert2 - Vert1;
-        Vec3 edge2 = Vert3 - Vert1;
-        return edge1.Cross(edge2);
+        Vec3 edge2 = Vert2 - Vert1;
+        Vec3 edge1 = Vert3 - Vert1;
+        return edge1.Cross(edge2).Normalized();
     }
 
     public override string ToString()

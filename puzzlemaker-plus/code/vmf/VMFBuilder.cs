@@ -38,6 +38,10 @@ public class VMFBuilder
         }
     }
 
+    /// <summary>
+    /// Contains utility methods for constructing solid BSP.
+    /// Note: many of these methods aim to create a finished brush, so chaining them may result in invalid geometry.
+    /// </summary>
     public class SolidBuilder
     {
         private readonly VMFBuilder _vmfBuilder;
@@ -58,8 +62,10 @@ public class VMFBuilder
         /// <summary>
         /// Add a side defined by a plane. Auto-calculate UV, etc.
         /// </summary>
-        /// <param name="plane"></param>
-        public void AddSide(in Plane plane, string? material = null)
+        /// <param name="plane">Plane to add.</param>
+        /// <param name="material">Material to give it.</param>
+        /// <param name="lightmapScale">Lightmap scale to use. 8 by default because it's not 2004 anymore.</param>
+        public void AddSide(in Plane plane, string? material = null, int lightmapScale = 8)
         {
             Side side = new Side();
             side.Plane = plane;
@@ -81,31 +87,45 @@ public class VMFBuilder
                     side.VAxis = new UVAxis(new Vec3(0, -1, 0));
                     break;
             }
-            side.LightmapScale = 8;
+            side.LightmapScale = lightmapScale;
             if (material != null)
                 side.Material = material;
             AddSide(side);
         }
 
-        public void AddBox(Vec3 min, Vec3 size)
+        public void AddBox(Vec3 min, Vec3 size, string? mat = null, int lightmapScale = 8)
         {
             Vec3 max = min + size;
-            string mat = "DEV/DEV_MEASUREWALL01A";
 
-            AddSide(new Plane(min.X, max.Y, max.Z, max.X, max.Y, max.Z, max.X, min.Y, max.Z), mat);
-            AddSide(new Plane(min.X, min.Y, min.Z, max.X, min.Y, min.Z, max.X, max.Y, min.Z), mat);
-            AddSide(new Plane(min.X, max.Y, max.Z, min.X, min.Y, max.Z, min.X, min.Y, min.Z), mat);
-            AddSide(new Plane(max.X, max.Y, min.Z, max.X, min.Y, min.Z, max.X, min.Y, max.Z), mat);
-            AddSide(new Plane(max.X, max.Y, max.Z, min.X, max.Y, max.Z, min.X, max.Y, min.Z), mat);
-            AddSide(new Plane(max.X, min.Y, min.Z, min.X, min.Y, min.Z, min.X, min.Y, max.Z), mat);
+            AddSide(new Plane(min.X, max.Y, max.Z, max.X, max.Y, max.Z, max.X, min.Y, max.Z), mat, lightmapScale);
+            AddSide(new Plane(min.X, min.Y, min.Z, max.X, min.Y, min.Z, max.X, max.Y, min.Z), mat, lightmapScale);
+            AddSide(new Plane(min.X, max.Y, max.Z, min.X, min.Y, max.Z, min.X, min.Y, min.Z), mat, lightmapScale);
+            AddSide(new Plane(max.X, max.Y, min.Z, max.X, min.Y, min.Z, max.X, min.Y, max.Z), mat, lightmapScale);
+            AddSide(new Plane(max.X, max.Y, max.Z, min.X, max.Y, max.Z, min.X, max.Y, min.Z), mat, lightmapScale);
+            AddSide(new Plane(max.X, min.Y, min.Z, min.X, min.Y, min.Z, min.X, min.Y, max.Z), mat, lightmapScale);
+        }
 
-            // Create the 6 sides of the box using a single plane for each face
-            //AddSide(new Plane(new Vec3(pos.X, pos.Y, pos.Z), new Vec3(max.X, max.Y, pos.Z), new Vec3(max.X, pos.Y, pos.Z))); // Bottom
-            //AddSide(new Plane(new Vec3(pos.X, pos.Y, max.Z), new Vec3(max.X, max.Y, max.Z), new Vec3(max.X, pos.Y, max.Z))); // Top
-            //AddSide(new Plane(new Vec3(pos.X, pos.Y, pos.Z), new Vec3(pos.X, max.Y, max.Z), new Vec3(pos.X, pos.Y, max.Z))); // Left
-            //AddSide(new Plane(new Vec3(max.X, pos.Y, pos.Z), new Vec3(max.X, max.Y, max.Z), new Vec3(max.X, pos.Y, max.Z))); // Right
-            //AddSide(new Plane(new Vec3(pos.X, pos.Y, pos.Z), new Vec3(max.X, pos.Y, max.Z), new Vec3(max.X, pos.Y, pos.Z))); // Front
-            //AddSide(new Plane(new Vec3(pos.X, max.Y, pos.Z), new Vec3(max.X, max.Y, max.Z), new Vec3(max.X, max.Y, pos.Z))); // Back
+        public void AddThickenedQuad(Vec3 v1, Vec3 v2, Vec3 v3, Vec3 v4, double thickness, string? mat = null, int lightmapScale = 8)
+        {
+            // Compute the normal of the plane defined by the quad
+            Vec3 normal = (v2 - v1).Cross(v3 - v1).Normalized();
+
+            // Compute the offset for the thickness
+            Vec3 offset = normal * thickness;
+
+            // Define the vertices of the cuboid
+            Vec3 v1_thick = v1 + offset;
+            Vec3 v2_thick = v2 + offset;
+            Vec3 v3_thick = v3 + offset;
+            Vec3 v4_thick = v4 + offset;
+
+            // Add the six sides of the cuboid
+            AddSide(new Plane(v1, v2, v3), mat, lightmapScale); // Front face
+            AddSide(new Plane(v1_thick, v3_thick, v2_thick), mat, lightmapScale); // Back face
+            AddSide(new Plane(v1, v1_thick, v2_thick), mat, lightmapScale); // Side face 1
+            AddSide(new Plane(v2, v2_thick, v3_thick), mat, lightmapScale); // Side face 2
+            AddSide(new Plane(v3, v3_thick, v4_thick), mat, lightmapScale); // Side face 3
+            AddSide(new Plane(v4, v4_thick, v1_thick), mat, lightmapScale); // Side face 4
         }
 
         private static Axis GetFacingAxis(Vec3 vec)

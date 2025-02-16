@@ -91,9 +91,16 @@
             }
         }
 
+        public static Vec3 operator -(Vec3 a) => new Vec3(-a.X, -a.Y, -a.Z);
+
         public static Vec3 operator +(Vec3 a, Vec3 b) => new Vec3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         public static Vec3 operator -(Vec3 a, Vec3 b) => new Vec3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+
         public static Vec3 operator *(Vec3 a, double b) => new Vec3(a.X * b, a.Y * b, a.Z * b);
+        public static Vec3 operator *(double a, Vec3 b) => b * a;
+
+        public static Vec3 operator /(Vec3 a, double b) => new Vec3(a.X / b, a.Y / b, a.Z / b);
+        public static Vec3 operator /(double a, Vec3 b) => new Vec3(a / b.X, a / b.Y, a / b.Z);
 
         public readonly double Dot(Vec3 other)
         {
