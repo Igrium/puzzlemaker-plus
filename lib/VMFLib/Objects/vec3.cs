@@ -126,6 +126,16 @@
             return Math.Sqrt(LengthSquared());
         }
 
+        public readonly double SquaredDistanceTo(Vec3 other)
+        {
+            return (this - other).LengthSquared();
+        }
+
+        public readonly double DistanceTo(Vec3 other)
+        {
+            return (this - other).Length();
+        }
+
         public void Normalize()
         {
             double len = Length();

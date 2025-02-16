@@ -80,6 +80,32 @@ public partial class LevelTheme : RefCounted
     }
 
     /// <summary>
+    /// Source engine paths for textures to use in-game
+    /// </summary>
+    [Export]
+    public string[] VoxelTextures { get; set; } = new string[0];
+
+    public string? GetVoxelTexture(bool portalable, int subdiv)
+    {
+        if (subdiv < 0)
+            throw new ArgumentOutOfRangeException(nameof(subdiv));
+
+        int maxCount = VoxelTextures.Length;
+        int maxSubdiv = maxCount / 2;
+        if (subdiv > maxSubdiv)
+            subdiv = maxSubdiv;
+
+        int index = subdiv * 2 + (portalable ? 1 : 0);
+        if (index >= maxCount)
+        {
+            GD.PushError($"Unable to get voxel texture for portalability {portalable} with subdivision {subdiv}.");
+            return null;
+        }
+
+        return VoxelTextures[index];
+    }
+
+    /// <summary>
     /// Attempt to load a level theme from the given resource path.
     /// </summary>
     /// <param name="path">Path to load from.</param>

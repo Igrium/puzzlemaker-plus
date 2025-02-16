@@ -14,17 +14,8 @@ public partial class VMFTest : Node
     {
         
         VMFBuilder builder = new VMFBuilder();
-        VMFBuilder.SolidBuilder solid = new VMFBuilder.SolidBuilder(builder);
-
-        solid.Material = "dev/DEV_MEASUREWALL01A";
-        solid.Material2 = "tools/toolsnodraw";
-
-        solid.AddThickenedQuad(new Vec3(0, 0, 0), new Vec3(0, 0, 128), new Vec3(128, 64, 128), new Vec3(128, 64, 0), 32, inset: 16);
-
-        //solid.AddBox(new Vec3(0, 0, 0), new Vec3(128, 128, 256));
-        //solid.AddSide(new VMFLib.Objects.Plane(0, 0, 0, 128, 128, 0, 128, 128, 128));
-
-        builder.AddSolid(solid);
+        WorldExporter exporter = new WorldExporter(EditorState.Instance.Theme);
+        exporter.ExportWorld(builder, EditorState.Instance.World);
 
         GD.Print("Saving test VMF to " + path);
         builder.WriteVMF(path);

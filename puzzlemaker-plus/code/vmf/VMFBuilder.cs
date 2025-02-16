@@ -162,13 +162,23 @@ public class VMFBuilder
                 v4_thick += v4_inset * inset;
             }
 
+
             // Add the six sides of the cuboid
             AddSide(new Plane(v1, v2, v3), frontMat); // Front face
-            AddSide(new Plane(v1_thick, v3_thick, v2_thick), backMat); // Back face
+
+            // Only add back face if bevel didn't eliminate it.
+            if (!AreAnyVecsEqual(v1_thick, v2_thick, v3_thick, .5))
+                AddSide(new Plane(v1_thick, v3_thick, v2_thick), backMat); // Back face
+
             AddSide(new Plane(v1, v1_thick, v2_thick), backMat); // Side face 1
             AddSide(new Plane(v2, v2_thick, v3_thick), backMat); // Side face 2
             AddSide(new Plane(v3, v3_thick, v4_thick), backMat); // Side face 3
             AddSide(new Plane(v4, v4_thick, v1_thick), backMat); // Side face 4
+        }
+
+        public void AddThickenedQuad(in Quad quad, double thickness, double inset = 0)
+        {
+            AddThickenedQuad(quad.Vert1.ToVec3(), quad.Vert2.ToVec3(), quad.Vert3.ToVec3(), quad.Vert4.ToVec3(), thickness, inset);
         }
 
         private static Axis GetFacingAxis(Vec3 vec)
@@ -188,6 +198,14 @@ public class VMFBuilder
             solid.Id = _vmfBuilder._solidCount++;
             solid.Sides.AddRange(_sides);
             return solid;
+        }
+
+        private static bool AreAnyVecsEqual(Vec3 vec1, Vec3 vec2, Vec3 vec3, double epsilon)
+        {
+            double epsilonSquared = epsilon * epsilon;
+            return (vec1.SquaredDistanceTo(vec2) < epsilonSquared)
+                || (vec1.SquaredDistanceTo(vec3) < epsilonSquared)
+                || (vec2.SquaredDistanceTo(vec3) < epsilonSquared);
         }
     }
 }

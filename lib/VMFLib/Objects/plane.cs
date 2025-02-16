@@ -1,5 +1,9 @@
 ﻿namespace VMFLib.Objects;
 
+/// <summary>
+/// A plane to be used in a VMF.
+/// Note: the wiki LIED about the winding order; it's counterclockwise, and this plane uses as such. I think. The math's cofusing...
+/// </summary>
 public record struct Plane
 {
     //public Vec3[] Vertices;
@@ -14,7 +18,7 @@ public record struct Plane
         Vert1 = new Vec3(planeVerts[0]);
         Vert2 = new Vec3(planeVerts[1]);
         Vert3 = new Vec3(planeVerts[2]);
-
+            
     }
 
     public Plane(Vec3 vert1, Vec3 vert2, Vec3 vert3)

@@ -6,5 +6,9 @@
 		"assets/materials/clean/grid1b.png",
 		"assets/materials/clean/grid2.png",
 		"assets/materials/clean/grid2b.png"
+	],
+	"VoxelTextures": [
+		"metal/black_wall_metal_002c",
+		"tile/white_wall_tile003h"
 	]
 }

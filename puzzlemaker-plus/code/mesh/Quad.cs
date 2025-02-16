@@ -196,6 +196,17 @@ public record struct Quad
 
     public static Quad operator -(Quad quad, in Vector3I vec) => quad + -vec;
 
+    public static Quad operator *(Quad quad, float scalar)
+    {
+        quad.Vert1 *= scalar;
+        quad.Vert2 *= scalar;
+        quad.Vert3 *= scalar;
+        quad.Vert4 *= scalar;
+        return quad;
+    }
+
+    public static Quad operator *(float scalar, Quad quad) => quad * scalar;
+
     public override string ToString()
     {
         return $"Quad[{Vert1}, {Vert2}, {Vert3}, {Vert4} ({MaterialIndex})]";
