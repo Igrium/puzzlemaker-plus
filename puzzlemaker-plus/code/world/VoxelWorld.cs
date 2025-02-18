@@ -119,12 +119,12 @@ public partial class VoxelWorld<T> : RefCounted
         UpdateVoxel(pos.X, pos.Y, pos.Z, function);
     }
 
-    private VoxelChunk<T> GetOrCreateChunk(in Vector3I chunkPos) 
+    public VoxelChunk<T> GetOrCreateChunk(in Vector3I chunkPos) 
     {
-        var chunk = chunks.GetValueOrDefault(chunkPos);
-        if (chunk == null)
+        VoxelChunk<T>? chunk;
+        if (!chunks.TryGetValue(chunkPos, out chunk))
         {
-            chunk = new VoxelChunk<T>();
+            chunk = new();
             chunks[chunkPos] = chunk;
         }
         return chunk;
@@ -375,6 +375,18 @@ public class VoxelChunk<T>
             result.data[i] = function.Invoke(data[i]);
         }
         return result;
+    }
+
+    public VoxelChunk<T> Copy()
+    {
+        VoxelChunk<T> other = new();
+        other.CopyFrom(this);
+        return other;
+    }
+
+    public void CopyFrom(VoxelChunk<T> other)
+    {
+        Array.Copy(other.data, this.data, this.data.Length);
     }
 }
 

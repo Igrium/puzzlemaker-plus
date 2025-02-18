@@ -110,6 +110,28 @@ public static class SelectionUtils
         }
     }
 
+    /// <summary>
+    /// Enumerate over all the chunks that are covered in a selection.
+    /// </summary>
+    /// <param name="selection">The selection.</param>
+    /// <param name="expand">If set, also include chunks that any selected blocks are adjoining.</param>
+    /// <returns>All chunks in the selection.</returns>
+    public static IEnumerable<Vector3I> GetSelectedChunks(in Aabb selection, bool expand = false)
+    {
+        Vector3I minBlock = selection.Position.FloorInt();
+        Vector3I maxBlock = selection.End.CeilInt();
+
+        if (expand)
+        {
+            minBlock -= new Vector3I(1, 1, 1);
+            maxBlock += new Vector3I(1, 1, 1);
+        }
+
+        Vector3I minChunk = PuzzlemakerWorld.GetChunk(minBlock);
+        Vector3I maxChunk = PuzzlemakerWorld.GetChunk(maxBlock);
+        return EnumerateBox(minChunk, maxChunk, true);
+    }
+
     private static IEnumerable<Vector3I> EnumerateBox(Vector3I min, Vector3I max, bool inclusive = false)
     {
         if (inclusive)

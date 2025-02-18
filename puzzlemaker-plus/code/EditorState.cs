@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Godot;
+using PuzzlemakerPlus.Commands;
 
 namespace PuzzlemakerPlus;
 
@@ -47,6 +48,8 @@ public sealed partial class EditorState : Node
     /// </summary>
     public PuzzlemakerWorld World => Project.World;
 
+    public CommandStack CommandStack { get; private set; } = new();
+
     [Export]
     public LevelTheme Theme { get; set; } = new();
 
@@ -78,6 +81,7 @@ public sealed partial class EditorState : Node
     {
         if (project == Project) return;
         Project = project;
+        CommandStack = new(); // reset undo/redo
         EmitSignal(SignalName.OnOpenProject, project);
     }
     
@@ -98,6 +102,16 @@ public sealed partial class EditorState : Node
     public void EmitOnChunksUpdated(params Vector3[] chunks)
     {
         EmitSignal(SignalName.OnChunksUpdated, chunks);
+    }
+
+    public void EmitOnChunksUpdated(params Vector3I[] chunks)
+    {
+        Vector3[] array = new Vector3[chunks.Length];
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            array[i] = chunks[i];
+        }
+        EmitOnChunksUpdated(array);
     }
 
     public void EmitOnChunksUpdated(Aabb bounds)
@@ -127,4 +141,18 @@ public sealed partial class EditorState : Node
         }
     }
 
+    public void ExecuteCommand(ICommand command)
+    {
+        CommandStack.ExecuteCommand(command);
+    }
+
+    public void Undo()
+    {
+        CommandStack.Undo();
+    }
+
+    public void Redo()
+    {
+        CommandStack.Redo();
+    }
 }
