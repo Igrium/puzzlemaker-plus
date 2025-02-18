@@ -13,7 +13,7 @@ namespace PuzzlemakerPlus;
 /// <param name="value">A reference to the voxel's value. Update this to update the voxel.</param>
 public delegate void VoxelOperator<T>(ref T value);
 
-public partial class VoxelWorld<T> : RefCounted
+public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 {
 
     /// <summary>
@@ -138,6 +138,57 @@ public partial class VoxelWorld<T> : RefCounted
     /// <param name="value">The value.</param>
     public void Fill(Vector3I pos1, Vector3I pos2, T value)
     {
+        UpdateBox(pos1, pos2, (pos, val) => value);
+        //Vector3I min = pos1.Min(pos2);
+        //Vector3I max = pos1.Max(pos2);
+
+        //Vector3I minChunk = GetChunk(min);
+        //Vector3I maxChunk = GetChunk(max);
+
+        //Vector3I localMin = GetPosInChunk(min);
+        //Vector3I localMax = GetPosInChunk(max);
+
+        //for (int chunkX = minChunk.X; chunkX <= maxChunk.X; chunkX++)
+        //{
+        //    for (int chunkY = minChunk.Y; chunkY <= maxChunk.Y; chunkY++)
+        //    {
+        //        for (int chunkZ = minChunk.Z; chunkZ <= maxChunk.Z; chunkZ++)
+        //        {
+        //            VoxelChunk<T> chunk = GetOrCreateChunk(new Vector3I(chunkX, chunkY, chunkZ));
+        //            // Shortcut if the entire chunk will be filled.
+        //            if (chunkX > minChunk.X && chunkX < maxChunk.X
+        //                && chunkY > minChunk.Y && chunkY < maxChunk.Y
+        //                && chunkZ > minChunk.Z && chunkZ < maxChunk.Z)
+        //            {
+        //                chunk.Fill(value);
+        //                continue;
+        //            }
+
+        //            int minX = chunkX > minChunk.X ? 0 : localMin.X;
+        //            int minY = chunkY > minChunk.Y ? 0 : localMin.Y;
+        //            int minZ = chunkZ > minChunk.Z ? 0 : localMin.Z;
+
+        //            int maxX = chunkX < maxChunk.X ? 15 : localMax.X;
+        //            int maxY = chunkY < maxChunk.Y ? 15 : localMax.Y;
+        //            int maxZ = chunkZ < maxChunk.Z ? 15 : localMax.Z;
+
+        //            for (int x = minX; x <= maxX; x++)
+        //            {
+        //                for (int y = minY; y <= maxY; y++)
+        //                {
+        //                    for (int z = minZ; z <= maxZ; z++)
+        //                    {
+        //                        chunk.Set(x, y, z, value);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+    }
+
+    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function)
+    {
         Vector3I min = pos1.Min(pos2);
         Vector3I max = pos1.Max(pos2);
 
@@ -154,14 +205,6 @@ public partial class VoxelWorld<T> : RefCounted
                 for (int chunkZ = minChunk.Z; chunkZ <= maxChunk.Z; chunkZ++)
                 {
                     VoxelChunk<T> chunk = GetOrCreateChunk(new Vector3I(chunkX, chunkY, chunkZ));
-                    // Shortcut if the entire chunk will be filled.
-                    if (chunkX > minChunk.X && chunkX < maxChunk.X
-                        && chunkY > minChunk.Y && chunkY < maxChunk.Y
-                        && chunkZ > minChunk.Z && chunkZ < maxChunk.Z)
-                    {
-                        chunk.Fill(value);
-                        continue;
-                    }
 
                     int minX = chunkX > minChunk.X ? 0 : localMin.X;
                     int minY = chunkY > minChunk.Y ? 0 : localMin.Y;
@@ -177,7 +220,7 @@ public partial class VoxelWorld<T> : RefCounted
                         {
                             for (int z = minZ; z <= maxZ; z++)
                             {
-                                chunk.Set(x, y, z, value);
+                                chunk.Update(x, y, z, val => function(new Vector3I(x, y, z), val));
                             }
                         }
                     }
@@ -359,7 +402,7 @@ public class VoxelChunk<T>
     public void Update(int x, int y, int z, Func<T, T> function)
     {
         int index = x + (y * 16) + (z * 16 * 16);
-        data[index] = function.Invoke(data[index]);
+        data[index] = function(data[index]);
     }
 
     public void Fill(T value)
