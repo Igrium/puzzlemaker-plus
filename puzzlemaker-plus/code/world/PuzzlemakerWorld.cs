@@ -257,6 +257,16 @@ public struct PuzzlemakerVoxel
         return result;
     }
 
+    public readonly PuzzlemakerVoxel WithPortalability(Direction? direction, bool value)
+    {
+        PuzzlemakerVoxel result = this;
+        if (direction.HasValue)
+            result.SetPortalability(direction.Value, value);
+        else
+            result.SetPortalability(value);
+        return result;
+    }
+
     /// <summary>
     /// Set the portalability for all sides.
     /// </summary>

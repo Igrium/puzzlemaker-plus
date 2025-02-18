@@ -73,15 +73,30 @@ public static class SelectionUtils
         int nonPortalable = 0;
         int portalable = 0;
 
+        void markPortalability(bool isPortalable)
+        {
+            if (isPortalable)
+                portalable++;
+            else
+                nonPortalable++;
+        }
+
         foreach(var (pos, face) in EnumerateFaces(in selection))
         {
             PuzzlemakerVoxel voxel = world.GetVoxel(pos);
             if (voxel.IsOpen)
             {
-                if (voxel.IsPortalable(face))
-                    portalable++;
+                if (face.HasValue)
+                {
+                    markPortalability(voxel.IsPortalable(face.Value));
+                }
                 else
-                    nonPortalable++;
+                {
+                    foreach (Direction dir in Enum.GetValues<Direction>())
+                    {
+                        markPortalability(voxel.IsPortalable(dir));
+                    }
+                }
             }
         }
 
@@ -94,7 +109,7 @@ public static class SelectionUtils
     /// <param name="selection">Selection box.</param>
     /// <param name="exact">If true, each face must be entirely in the exact selection, othewise, selection is rounded to nearest int.</param>
     /// <returns>All faces in the selection.</returns>
-    public static IEnumerable<(Vector3I, Direction)> EnumerateFaces(in Aabb selection, bool exact = false)
+    public static IEnumerable<(Vector3I, Direction?)> EnumerateFaces(in Aabb selection, bool exact = false)
     {
         Vector3I min = exact ? selection.Position.CeilInt() : selection.Position.RoundInt();
         Vector3I max = exact ? selection.End.FloorInt() : selection.End.RoundInt();
@@ -106,8 +121,8 @@ public static class SelectionUtils
     /// </summary>
     /// <param name="min">Selection minimum pos, inclusive.</param>
     /// <param name="max">Selection maximum pos, exclusive.</param>
-    /// <returns>All faces in the selection.</returns>
-    public static IEnumerable<(Vector3I, Direction)> EnumerateFaces(Vector3I min, Vector3I max)
+    /// <returns>All faces in the selection. If direction is null, the entire block is selected.</returns>
+    public static IEnumerable<(Vector3I, Direction?)> EnumerateFaces(Vector3I min, Vector3I max)
     {
         if (min == max)
             yield break;
@@ -124,12 +139,7 @@ public static class SelectionUtils
         {
             foreach (var pos in EnumerateBox(min, max))
             {
-                yield return (pos, Direction.Up);
-                yield return (pos, Direction.Down);
-                yield return (pos, Direction.Left);
-                yield return (pos, Direction.Right);
-                yield return (pos, Direction.Forward);
-                yield return (pos, Direction.Back);
+                yield return (pos, null);
             }
             yield break;
         }
