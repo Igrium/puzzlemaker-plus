@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
+using PuzzlemakerPlus.Commands;
 
 namespace PuzzlemakerPlus;
 
@@ -14,4 +15,6 @@ namespace PuzzlemakerPlus;
 public partial class PuzzlemakerProject : RefCounted
 {
     public PuzzlemakerWorld World { get; } = new PuzzlemakerWorld();
+
+    public CommandStack CommandStack { get; } = new();
 }

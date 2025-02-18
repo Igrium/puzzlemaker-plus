@@ -119,7 +119,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
         UpdateVoxel(pos.X, pos.Y, pos.Z, function);
     }
 
-    private VoxelChunk<T> GetOrCreateChunk(in Vector3I chunkPos) 
+    public VoxelChunk<T> GetOrCreateChunk(in Vector3I chunkPos) 
     {
         var chunk = chunks.GetValueOrDefault(chunkPos);
         if (chunk == null)
@@ -139,55 +139,9 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     public void Fill(Vector3I pos1, Vector3I pos2, T value)
     {
         UpdateBox(pos1, pos2, (pos, val) => value);
-        //Vector3I min = pos1.Min(pos2);
-        //Vector3I max = pos1.Max(pos2);
-
-        //Vector3I minChunk = GetChunk(min);
-        //Vector3I maxChunk = GetChunk(max);
-
-        //Vector3I localMin = GetPosInChunk(min);
-        //Vector3I localMax = GetPosInChunk(max);
-
-        //for (int chunkX = minChunk.X; chunkX <= maxChunk.X; chunkX++)
-        //{
-        //    for (int chunkY = minChunk.Y; chunkY <= maxChunk.Y; chunkY++)
-        //    {
-        //        for (int chunkZ = minChunk.Z; chunkZ <= maxChunk.Z; chunkZ++)
-        //        {
-        //            VoxelChunk<T> chunk = GetOrCreateChunk(new Vector3I(chunkX, chunkY, chunkZ));
-        //            // Shortcut if the entire chunk will be filled.
-        //            if (chunkX > minChunk.X && chunkX < maxChunk.X
-        //                && chunkY > minChunk.Y && chunkY < maxChunk.Y
-        //                && chunkZ > minChunk.Z && chunkZ < maxChunk.Z)
-        //            {
-        //                chunk.Fill(value);
-        //                continue;
-        //            }
-
-        //            int minX = chunkX > minChunk.X ? 0 : localMin.X;
-        //            int minY = chunkY > minChunk.Y ? 0 : localMin.Y;
-        //            int minZ = chunkZ > minChunk.Z ? 0 : localMin.Z;
-
-        //            int maxX = chunkX < maxChunk.X ? 15 : localMax.X;
-        //            int maxY = chunkY < maxChunk.Y ? 15 : localMax.Y;
-        //            int maxZ = chunkZ < maxChunk.Z ? 15 : localMax.Z;
-
-        //            for (int x = minX; x <= maxX; x++)
-        //            {
-        //                for (int y = minY; y <= maxY; y++)
-        //                {
-        //                    for (int z = minZ; z <= maxZ; z++)
-        //                    {
-        //                        chunk.Set(x, y, z, value);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
     }
 
-    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function)
+    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function, bool _readOnly = false)
     {
         Vector3I min = pos1.Min(pos2);
         Vector3I max = pos1.Max(pos2);
@@ -347,12 +301,12 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 /// <typeparam name="T">Block type</typeparam>
 public class VoxelChunk<T>
 {
-    private readonly T[] data = new T[16 * 16 * 16];
+    private readonly T[] _data = new T[16 * 16 * 16];
 
     /// <summary>
-    /// The flat array containing the chunk's data.
+    /// The flat array containing the chunk's _data.
     /// </summary>
-    public T[] Data { get => data; }
+    public T[] Data { get => _data; }
 
     /// <summary>
     /// Get the value at a specific location.
@@ -364,7 +318,7 @@ public class VoxelChunk<T>
     public T Get(int x, int y, int z)
     {
         int index = x + (y * 16) + (z * 16 * 16);
-        return data[index];
+        return _data[index];
     }
     
     /// <summary>
@@ -388,36 +342,52 @@ public class VoxelChunk<T>
     public T Set(int x, int y, int z, T value)
     {
         int index = x + (y * 16) + (z * 16 * 16);
-        T prev = data[index];
-        data[index] = value;
+        T prev = _data[index];
+        _data[index] = value;
         return prev;
+    }
+
+    /// <summary>
+    /// Set the value at a specific location.
+    /// </summary>
+    /// <param name="pos">Local position.</param>
+    /// <param name="value">New value.</param>
+    /// <returns>The previous value.</returns>
+    public T Set(Vector3I pos, T value)
+    {
+        return Set(pos.X, pos.Y, pos.Z, value);
     }
 
     public void Update(int x, int y, int z, VoxelOperator<T> function)
     {
         int index = x + (y * 16) + (z * 16 * 16);
-        function.Invoke(ref data[index]);
+        function.Invoke(ref _data[index]);
     }
 
     public void Update(int x, int y, int z, Func<T, T> function)
     {
         int index = x + (y * 16) + (z * 16 * 16);
-        data[index] = function(data[index]);
+        _data[index] = function(_data[index]);
     }
 
     public void Fill(T value)
     {
-        Array.Fill(data, value);
+        Array.Fill(_data, value);
     }
 
     public VoxelChunk<V> Transform<V>(Func<T, V> function)
     {
         VoxelChunk<V> result = new();
-        for (int i = 0; i < data.Length; i++)
+        for (int i = 0; i < _data.Length; i++)
         {
-            result.data[i] = function.Invoke(data[i]);
+            result._data[i] = function.Invoke(_data[i]);
         }
         return result;
+    }
+
+    public void CopyTo(VoxelChunk<T> other)
+    {
+        Array.Copy(_data, other._data, _data.Length);
     }
 }
 

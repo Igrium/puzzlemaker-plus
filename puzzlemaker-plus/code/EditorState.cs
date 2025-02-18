@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
+using PuzzlemakerPlus.Commands;
 
 namespace PuzzlemakerPlus;
 
@@ -46,6 +48,8 @@ public sealed partial class EditorState : Node
     /// Shortcut for Project?.World
     /// </summary>
     public PuzzlemakerWorld World => Project.World;
+
+    public CommandStack CommandStack => Project.CommandStack;
 
     [Export]
     public LevelTheme Theme { get; set; } = new();
@@ -98,6 +102,16 @@ public sealed partial class EditorState : Node
     public void EmitOnChunksUpdated(params Vector3[] chunks)
     {
         EmitSignal(SignalName.OnChunksUpdated, chunks);
+    }
+
+    public void EmitOnChunksUpdated(IEnumerable<Vector3> chunks)
+    {
+        EmitOnChunksUpdated(chunks.ToArray());
+    }
+
+    public void EmitOnChunksUpdated(IEnumerable<Vector3I> chunks)
+    {
+        EmitOnChunksUpdated(chunks.Select(vec => (Vector3)vec).ToArray());
     }
 
     public void EmitOnChunksUpdated(Aabb bounds)

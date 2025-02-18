@@ -21,10 +21,17 @@ grow_horizontal = 2
 item_count = 1
 item_0/text = "Save Test VMF"
 
+[node name="Edit" type="PopupMenu" parent="MenuBar"]
+item_count = 2
+item_0/text = "Undo"
+item_1/text = "Redo"
+item_1/id = 1
+
 [node name="FD_VMFTest" type="FileDialog" parent="."]
 ok_button_text = "Save"
 access = 2
 use_native_dialog = true
 
 [connection signal="id_pressed" from="MenuBar/File" to="." method="_on_file_id_pressed"]
+[connection signal="index_pressed" from="MenuBar/Edit" to="." method="_on_edit_index_pressed"]
 [connection signal="file_selected" from="FD_VMFTest" to="." method="_on_fd_vmf_test_file_selected"]

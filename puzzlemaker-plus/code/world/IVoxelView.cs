@@ -44,5 +44,6 @@ public interface IVoxelView<T>
     /// <param name="pos1">Minimum world pos, inclusive.</param>
     /// <param name="pos2">Maximum world pos, inclusive</param>
     /// <param name="function">Update function.</param>
-    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function);
+    /// <param name="readOnly">If set, indicate that the update funciton only intends to read the voxel and apply some side effect.</param>
+    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function, bool readOnly = false);
 }

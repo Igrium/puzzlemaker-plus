@@ -77,7 +77,7 @@ public struct PuzzlemakerVoxel
     }
 
     /// <summary>
-    /// The bit flags of this voxel. Contains data about whether it's open and its portalability.
+    /// The bit flags of this voxel. Contains _data about whether it's open and its portalability.
     /// </summary>
     public byte Flags;
 
