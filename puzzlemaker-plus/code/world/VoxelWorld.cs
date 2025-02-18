@@ -317,6 +317,7 @@ public class VoxelChunk<T>
     /// <returns>The value.</returns>
     public T Get(int x, int y, int z)
     {
+        AssertValidIndex(x, y, z);
         int index = x + (y * 16) + (z * 16 * 16);
         return _data[index];
     }
@@ -341,6 +342,7 @@ public class VoxelChunk<T>
     /// <returns>The previous value.</returns>
     public T Set(int x, int y, int z, T value)
     {
+        AssertValidIndex(x, y, z);
         int index = x + (y * 16) + (z * 16 * 16);
         T prev = _data[index];
         _data[index] = value;
@@ -360,14 +362,28 @@ public class VoxelChunk<T>
 
     public void Update(int x, int y, int z, VoxelOperator<T> function)
     {
+        AssertValidIndex(x, y, z);
+
         int index = x + (y * 16) + (z * 16 * 16);
         function.Invoke(ref _data[index]);
     }
 
     public void Update(int x, int y, int z, Func<T, T> function)
     {
+        AssertValidIndex(x, y, z);
+
         int index = x + (y * 16) + (z * 16 * 16);
         _data[index] = function(_data[index]);
+    }
+
+    private void AssertValidIndex(int x, int y, int z)
+    {
+        if (x < 0 || x >= 16)
+            throw new ArgumentOutOfRangeException(nameof(x), x, "X param out of range");
+        if (y < 0 || y >= 16)
+            throw new ArgumentOutOfRangeException(nameof(x), y, "Y param out of range");
+        else if (z < 0 || y >= 16)
+            throw new ArgumentOutOfRangeException(nameof(z), z, "Z param out of range");
     }
 
     public void Fill(T value)

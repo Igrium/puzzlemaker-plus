@@ -1,4 +1,5 @@
 shader_type spatial;
+render_mode world_vertex_coords;
 
 uniform sampler2D albedo_texture : source_color;
 
@@ -8,6 +9,7 @@ instance uniform vec3 selection_end;
 uniform vec3 tint_color : source_color = vec3(1, 1, 0);
 
 varying vec3 pos;
+
 
 void vertex() {
 	pos = VERTEX;

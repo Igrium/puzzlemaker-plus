@@ -26,7 +26,6 @@ public class VMFBuilder
 
         World world = new World();
         world.Solids.AddRange(Solids);
-        Godot.GD.Print(String.Join(",", Solids));
         writer.WriteClass(world);
     }
 

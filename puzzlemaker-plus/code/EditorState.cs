@@ -89,14 +89,15 @@ public sealed partial class EditorState : Node
     {
         // World.SetVoxel(0, 0, 0, new PuzzlemakerVoxel().WithOpen(true));
         // World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
-        World.Fill(new Vector3I(0, 0, 0), new Vector3I(7, 7, 7), new PuzzlemakerVoxel().WithOpen(true));
+        World.Fill(new Vector3I(-16, 0, -32), new Vector3I(32, 7, 32), new PuzzlemakerVoxel().WithOpen(true));
         World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
 
         //Vector3I portalable = new Vector3I(4, 0, 3);
         //World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalability(Direction.Down, true));
         World.UpdateVoxel(4, 0, 3, (block) => block.WithPortalability(Direction.Down, true));
 
-        EmitOnChunksUpdated(new Vector3(0, 0, 0));
+        UpdateAllChunks();
+        //EmitOnChunksUpdated(new Aabb(new Vector3(-4, 0, 4), new Vector3(8, 0, 8)));
     }
 
     public void EmitOnChunksUpdated(params Vector3[] chunks)
@@ -112,6 +113,11 @@ public sealed partial class EditorState : Node
     public void EmitOnChunksUpdated(IEnumerable<Vector3I> chunks)
     {
         EmitOnChunksUpdated(chunks.Select(vec => (Vector3)vec).ToArray());
+    }
+
+    public void UpdateAllChunks()
+    {
+        EmitOnChunksUpdated(World.Chunks.Keys);
     }
 
     public void EmitOnChunksUpdated(Aabb bounds)

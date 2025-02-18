@@ -63,7 +63,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
         UpdateBox(pos1, pos2, (pos, val) => val);
     }
 
-    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function, bool readOnly = false)
+    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function, bool _readOnly = false)
     {
         Vector3I min = pos1.Min(pos2);
         Vector3I max = pos1.Max(pos2);
@@ -71,17 +71,8 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
         Vector3I minChunk = VoxelWorld<T>.GetChunk(min);
         Vector3I maxChunk = VoxelWorld<T>.GetChunk(max);
 
-        Vector3I localMin = VoxelWorld<T>.GetChunk(min);
-        Vector3I localMax = VoxelWorld<T>.GetChunk(max);
-
-        VoxelChunk<T>? dummyChunk = null;
-
-        VoxelChunk<T> getDummyChunk()
-        {
-            if (dummyChunk == null)
-                dummyChunk = new VoxelChunk<T>();
-            return dummyChunk;
-        }
+        Vector3I localMin = VoxelWorld<T>.GetPosInChunk(min);
+        Vector3I localMax = VoxelWorld<T>.GetPosInChunk(max);
 
         for (int chunkX = minChunk.X; chunkX <= maxChunk.X; chunkX++)
         {
@@ -89,18 +80,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
             {
                 for (int chunkZ = minChunk.Z; chunkZ <= maxChunk.Z; chunkZ++)
                 {
-                    VoxelChunk<T>? chunk;
-
-                    if (readOnly)
-                    {
-                        chunk = GetReadableChunk(new Vector3I(chunkX, chunkY, chunkZ));
-                        if (chunk == null)
-                            chunk = getDummyChunk();
-                    }
-                    else
-                    {
-                        chunk = GetWritableChunk(new Vector3I(chunkX, chunkY, chunkZ));
-                    }
+                    VoxelChunk<T> chunk = GetWritableChunk(new Vector3I(chunkX, chunkY, chunkZ));
 
                     int minX = chunkX > minChunk.X ? 0 : localMin.X;
                     int minY = chunkY > minChunk.Y ? 0 : localMin.Y;
@@ -124,6 +104,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
             }
         }
     }
+    
 
     private VoxelChunk<T>? GetReadableChunk(Vector3I chunkPos)
     {

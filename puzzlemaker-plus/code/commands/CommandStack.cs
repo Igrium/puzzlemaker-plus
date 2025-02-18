@@ -20,7 +20,7 @@ public class CommandStack
     /// <summary>
     /// Called when a command throws an uncaught exception.
     /// </summary>
-    public ErrorHandler OnError { get; set; } = (message, ex) => GD.PushError(message, ex);
+    public ErrorHandler OnError { get; set; } = (message, ex) => GD.PushError(ex);
 
     /// <summary>
     /// Execute a command and add it to the undo stack.
@@ -30,17 +30,9 @@ public class CommandStack
     public virtual bool Execute(ICommand command)
     {
         _redoStack.Clear();
-        try
-        {
-            command.Execute();
-            _undoStack.Push(command);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            OnError("Error executing command.", ex);
-            return false;
-        }
+        command.Execute();
+        _undoStack.Push(command);
+        return true;
     }
 
     /// <summary>

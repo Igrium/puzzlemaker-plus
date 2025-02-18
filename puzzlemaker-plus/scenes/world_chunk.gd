@@ -45,9 +45,7 @@ func _on_input_event(camera: Node, event: InputEvent, event_position: Vector3, n
 
 func _on_updated_selection(selection: AABB):
 	selection = selection.grow(.001) # avoid z-fighting
-	var local_start := selection.position - Vector3(pos);
-	var local_end := selection.end - Vector3(pos)
 
-	set_instance_shader_parameter("selection_start", local_start)
-	set_instance_shader_parameter("selection_end", local_end)
+	set_instance_shader_parameter("selection_start", selection.position)
+	set_instance_shader_parameter("selection_end", selection.end)
 	

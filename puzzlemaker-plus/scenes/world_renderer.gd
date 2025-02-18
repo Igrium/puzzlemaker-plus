@@ -48,5 +48,5 @@ func clear():
 
 func _on_input_event(_camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouseButton:
-		if event.pressed:
+		if event.pressed and event.button_index == 1:
 			Editor.SelectRaycast(event_position, normal, event.shift_pressed)
