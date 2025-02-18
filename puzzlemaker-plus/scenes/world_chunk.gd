@@ -37,7 +37,6 @@ func render() -> void:
 		
 		self.mesh = a_mesh
 		_collision_shape.shape = shape
-		print(world)
 	else:
 		push_warning("No world found")
 

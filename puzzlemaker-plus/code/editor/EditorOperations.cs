@@ -13,13 +13,14 @@ namespace PuzzlemakerPlus;
 [GlobalClass]
 public partial class EditorOperations : Node
 {
-    private bool _prevPortalability;
-
     public void TogglePortalability()
     {
         EditorState editor = EditorState.Instance;
-        SelectionUtils.SetPortalable(editor.Selection, editor.World, !_prevPortalability);
+
+        bool portalable = SelectionUtils.AveragePortalability(editor.Selection, editor.World) > 0;
+        SelectionUtils.SetPortalable(editor.Selection, editor.World, !portalable);
+
         editor.EmitOnChunksUpdated(editor.Selection);
-        _prevPortalability = !_prevPortalability;
+
     }
 }
