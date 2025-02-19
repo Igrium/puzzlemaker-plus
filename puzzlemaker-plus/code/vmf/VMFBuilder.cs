@@ -26,7 +26,7 @@ public class VMFBuilder
 
         World world = new World();
         world.Solids.AddRange(Solids);
-        writer.WriteClass(world);
+          writer.WriteClass(world);
     }
 
     public void WriteVMF(string path)

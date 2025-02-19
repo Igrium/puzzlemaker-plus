@@ -36,3 +36,8 @@ func _make_shortcut(key: Key, ctrl_pressed: bool = true, shift_pressed: bool = f
 	inputevent.shift_pressed = shift_pressed
 	shortcut.events.append(inputevent)
 	return shortcut
+
+
+func _on_debug_index_pressed(index: int) -> void:
+	if index == 0:
+		$ThreadingTest.DoThreadingTest()

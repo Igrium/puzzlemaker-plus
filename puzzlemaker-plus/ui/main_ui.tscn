@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bd3mbm0pemh78"]
+[gd_scene load_steps=3 format=3 uid="uid://bd3mbm0pemh78"]
 
 [ext_resource type="Script" path="res://ui/main_ui.gd" id="1_ubv51"]
+[ext_resource type="Script" path="res://code/test/ThreadingTest.cs" id="2_34weo"]
 
 [node name="MainUi" type="Control"]
 layout_mode = 3
@@ -27,11 +28,19 @@ item_0/text = "Undo"
 item_1/text = "Redo"
 item_1/id = 1
 
+[node name="Debug" type="PopupMenu" parent="MenuBar"]
+item_count = 1
+item_0/text = "Do Thread Test"
+
 [node name="FD_VMFTest" type="FileDialog" parent="."]
 ok_button_text = "Save"
 access = 2
 use_native_dialog = true
 
+[node name="ThreadingTest" type="Node" parent="."]
+script = ExtResource("2_34weo")
+
 [connection signal="id_pressed" from="MenuBar/File" to="." method="_on_file_id_pressed"]
 [connection signal="index_pressed" from="MenuBar/Edit" to="." method="_on_edit_index_pressed"]
+[connection signal="index_pressed" from="MenuBar/Debug" to="." method="_on_debug_index_pressed"]
 [connection signal="file_selected" from="FD_VMFTest" to="." method="_on_fd_vmf_test_file_selected"]

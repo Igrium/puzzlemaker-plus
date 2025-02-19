@@ -1,7 +1,10 @@
 using Godot;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace PuzzlemakerPlus;
 
@@ -36,22 +39,24 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
         return new Vector3I(pos.X & 15, pos.Y & 15, pos.Z & 15);
     }
 
-    private readonly Dictionary<Vector3I, VoxelChunk<T>> chunks = new();
+    private readonly ConcurrentDictionary<Vector3I, VoxelChunk<T>> _chunks = new();
 
     /// <summary>
-    /// A dictionary of all the chunks in this world.
+    /// A dictionary of all the _chunks in this world.
     /// </summary>
-    public IDictionary<Vector3I, VoxelChunk<T>> Chunks => chunks;
+    public IDictionary<Vector3I, VoxelChunk<T>> Chunks => _chunks;
 
     public T? GetVoxel(int x, int y, int z)
     {
         Vector3I chunkPos = GetChunk(new Vector3I(x, y, z));
         Vector3I localPos = GetPosInChunk(new Vector3I(x, y, z));
 
-        var chunk = chunks.GetValueOrDefault(chunkPos);
-        if (chunk == null) return default;
-
-        return chunk.Get(localPos);
+        if (_chunks.TryGetValue(chunkPos, out var chunk))
+        {
+            return chunk.Get(localPos);
+        }
+        else return default;
+        
     }
 
     public T? GetVoxel(Vector3I pos)
@@ -121,13 +126,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 
     public VoxelChunk<T> GetOrCreateChunk(in Vector3I chunkPos) 
     {
-        var chunk = chunks.GetValueOrDefault(chunkPos);
-        if (chunk == null)
-        {
-            chunk = new VoxelChunk<T>();
-            chunks[chunkPos] = chunk;
-        }
-        return chunk;
+        return _chunks.GetOrAdd(chunkPos, pos => new VoxelChunk<T>());
     }
 
     /// <summary>
@@ -192,9 +191,12 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     public VoxelWorld<V> Transform<V>(Func<T, V> function)
     {
         VoxelWorld<V> result = new();
-        foreach (var (pos, chunk) in chunks)
+        lock (_chunks)
         {
-            result.chunks.Add(pos, chunk.Transform(function));
+            foreach (var (pos, chunk) in _chunks)
+            {
+                result._chunks[pos] = chunk.Transform(function);
+            }
         }
         return result;
     }
@@ -257,10 +259,10 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     /// </summary>
     public Vector3I GetMinPos()
     {
-        if (!chunks.Any()) return Vector3I.Zero;
+        if (!_chunks.Any()) return Vector3I.Zero;
 
         Vector3I minChunk = Vector3I.MaxValue;
-        foreach (var chunkPos in chunks.Keys)
+        foreach (var chunkPos in _chunks.Keys)
         {
             if (chunkPos.X < minChunk.X)
                 minChunk.X = chunkPos.X;
@@ -278,10 +280,10 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     /// </summary>
     public Vector3I GetMaxPos()
     {
-        if (!chunks.Any()) return Vector3I.Zero;
+        if (!_chunks.Any()) return Vector3I.Zero;
 
         Vector3I maxChunk = Vector3I.MinValue;
-        foreach (var chunkPos in chunks.Keys)
+        foreach (var chunkPos in _chunks.Keys)
         {
             if (chunkPos.X > maxChunk.X)
                 maxChunk.X = chunkPos.X;
@@ -301,6 +303,8 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 /// <typeparam name="T">Block type</typeparam>
 public class VoxelChunk<T>
 {
+    [JsonIgnore]
+    private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
     private readonly T[] _data = new T[16 * 16 * 16];
 
     /// <summary>
@@ -318,8 +322,11 @@ public class VoxelChunk<T>
     public T Get(int x, int y, int z)
     {
         AssertValidIndex(x, y, z);
-        int index = x + (y * 16) + (z * 16 * 16);
-        return _data[index];
+        using (new RWLockHandle(_rwLock, false))
+        {
+            int index = x + (y * 16) + (z * 16 * 16);
+            return _data[index];
+        }
     }
     
     /// <summary>
@@ -343,10 +350,13 @@ public class VoxelChunk<T>
     public T Set(int x, int y, int z, T value)
     {
         AssertValidIndex(x, y, z);
-        int index = x + (y * 16) + (z * 16 * 16);
-        T prev = _data[index];
-        _data[index] = value;
-        return prev;
+        using (new RWLockHandle(_rwLock, true))
+        {
+            int index = x + (y * 16) + (z * 16 * 16);
+            T prev = _data[index];
+            _data[index] = value;
+            return prev;
+        }
     }
 
     /// <summary>
@@ -364,16 +374,22 @@ public class VoxelChunk<T>
     {
         AssertValidIndex(x, y, z);
 
-        int index = x + (y * 16) + (z * 16 * 16);
-        function.Invoke(ref _data[index]);
+        using (new RWLockHandle(_rwLock, true))
+        {
+            int index = x + (y * 16) + (z * 16 * 16);
+            function.Invoke(ref _data[index]);
+        }
     }
 
     public void Update(int x, int y, int z, Func<T, T> function)
     {
         AssertValidIndex(x, y, z);
 
-        int index = x + (y * 16) + (z * 16 * 16);
-        _data[index] = function(_data[index]);
+        using (new RWLockHandle(_rwLock, true))
+        {
+            int index = x + (y * 16) + (z * 16 * 16);
+            _data[index] = function(_data[index]);
+        }
     }
 
     private void AssertValidIndex(int x, int y, int z)
@@ -388,22 +404,34 @@ public class VoxelChunk<T>
 
     public void Fill(T value)
     {
-        Array.Fill(_data, value);
+        using (new RWLockHandle(_rwLock, true))
+        {
+            Array.Fill(_data, value);
+        }
     }
 
     public VoxelChunk<V> Transform<V>(Func<T, V> function)
     {
         VoxelChunk<V> result = new();
-        for (int i = 0; i < _data.Length; i++)
+        using (new RWLockHandle(_rwLock, false))
         {
-            result._data[i] = function.Invoke(_data[i]);
+            for (int i = 0; i < _data.Length; i++)
+            {
+                result._data[i] = function.Invoke(_data[i]);
+            }
         }
         return result;
     }
 
     public void CopyTo(VoxelChunk<T> other)
     {
-        Array.Copy(_data, other._data, _data.Length);
+        using (new RWLockHandle(this._rwLock, false))
+        {
+            using (new RWLockHandle(other._rwLock, true))
+            {
+                Array.Copy(_data, other._data, _data.Length);
+            }
+        }
     }
 }
 
@@ -412,5 +440,38 @@ internal static class Vector3IExtensions
     public static int SumComponents(this Vector3I vec)
     {
         return vec.X + vec.Y + vec.Z;
+    }
+}
+
+internal struct RWLockHandle : IDisposable
+{
+    private readonly bool _isWriteMode;
+    private readonly ReaderWriterLockSlim _rwLock;
+
+    public RWLockHandle(ReaderWriterLockSlim rwLock, bool isWriteMode)
+    {
+        _isWriteMode = isWriteMode;
+        _rwLock = rwLock;
+
+        if (isWriteMode)
+        {
+            rwLock.EnterWriteLock();
+        }
+        else
+        {
+            rwLock.EnterReadLock();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_isWriteMode)
+        {
+            _rwLock.ExitWriteLock();
+        }
+        else
+        {
+            _rwLock.ExitReadLock();
+        }
     }
 }

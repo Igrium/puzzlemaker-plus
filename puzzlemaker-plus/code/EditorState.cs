@@ -30,9 +30,9 @@ public sealed partial class EditorState : Node
     public delegate void OnVoxelsUpdatedEventHandler(Vector3[] voxels);
 
     /// <summary>
-    /// Called when a set of chunks have had the voxels in them updated.
+    /// Called when a set of _chunks have had the voxels in them updated.
     /// </summary>
-    /// <param name="chunks">All chunks that were updated.</param>
+    /// <param name="chunks">All _chunks that were updated.</param>
     [Signal]
     public delegate void OnChunksUpdatedEventHandler(Vector3[] chunks);
 
