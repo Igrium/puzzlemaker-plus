@@ -30,7 +30,10 @@ func render() -> void:
 	var world: PuzzlemakerWorld = Editor.World
 	
 	if (world):
-		world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
+		# world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
+		var generator := AsyncMeshGenerator.Create(a_mesh, shape, world, pos * 16, 16, true)
+		generator.DoGreedyMeshAsync()
+		await generator.GreedyMeshFinished
 		# var surface_index = a_mesh.get_surface_count() - 1
 		# if (surface_index >= 0):
 		# 	a_mesh.surface_set_material(surface_index, material)

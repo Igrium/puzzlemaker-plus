@@ -30,4 +30,14 @@ public partial class ThreadingTest : Node
         }
         return null;
     }
+
+    public void GenAsyncMesh()
+    {
+        PuzzlemakerWorld world = EditorState.Instance.World;
+
+        foreach (var chunkPos in world.Chunks.Keys)
+        {
+            new AsyncMeshGenerator(null, null, world, chunkPos * 16, 16, true).DoGreedyMeshAsync();
+        }
+    }
 }
