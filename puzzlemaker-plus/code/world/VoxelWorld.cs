@@ -18,6 +18,7 @@ public delegate void VoxelOperator<T>(ref T value);
 
 public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 {
+    public const int CHUNK_SIZE = 16;
 
     /// <summary>
     /// Get the chunk position that a certian voxel belongs to.

@@ -37,7 +37,7 @@ public partial class ThreadingTest : Node
 
         foreach (var chunkPos in world.Chunks.Keys)
         {
-            new AsyncMeshGenerator(null, null, world, chunkPos * 16, 16, true).DoGreedyMeshAsync();
+            new AsyncMeshGenerator(null, null, world, chunkPos, true).DoGreedyMeshAsync();
         }
     }
 }

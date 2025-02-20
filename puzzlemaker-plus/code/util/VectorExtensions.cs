@@ -31,4 +31,9 @@ internal static class VectorExtensions
     {
         return new Vector3I((int)vec.X, (int)vec.Y, (int)vec.Z);
     }
+
+    public static int ManhattanDist(this Vector3I vec1, Vector3I vec2)
+    {
+        return Math.Abs(vec1.X - vec2.X) + Math.Abs(vec1.Y - vec2.Y) + Math.Abs(vec1.Z - vec2.Z);
+    }
 }

@@ -16,19 +16,17 @@ public partial class AsyncMeshGenerator : RefCounted
 
     private readonly PuzzlemakerWorld _world;
     private readonly Vector3I _offset;
-    private readonly int _chunkSize;
     private readonly bool _invert;
 
     private readonly ArrayMesh? _mesh; 
     private readonly ConcavePolygonShape3D? _collision;
 
-    public AsyncMeshGenerator(ArrayMesh? mesh, ConcavePolygonShape3D? collision, PuzzlemakerWorld world, Vector3I offset, int chunkSize, bool invert)
+    public AsyncMeshGenerator(ArrayMesh? mesh, ConcavePolygonShape3D? collision, PuzzlemakerWorld world, Vector3I chunkPos, bool invert)
     {
         _mesh = mesh;
         _collision = collision;
         _world = world;
-        _offset = offset;
-        _chunkSize = chunkSize;
+        _offset = chunkPos;
         _invert = invert;
     }
 
@@ -40,7 +38,7 @@ public partial class AsyncMeshGenerator : RefCounted
     private long DoGreedyMeshSync()
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-        Quad[] quads = new GreedyMesh().DoGreedyMesh(_world, _chunkSize, _offset, uvScale: .25f, invert: _invert).ToArray();
+        Quad[] quads = new GreedyMesh().DoGreedyMesh(_world, _offset, uvScale: .25f, invert: _invert).ToArray();
 
         if (_mesh != null)
         {
@@ -69,8 +67,8 @@ public partial class AsyncMeshGenerator : RefCounted
         return time;
     }
 
-    public static AsyncMeshGenerator Create(ArrayMesh? mesh, ConcavePolygonShape3D? collision, PuzzlemakerWorld world, Vector3I offset, int chunkSize, bool invert = true)
+    public static AsyncMeshGenerator Create(ArrayMesh? mesh, ConcavePolygonShape3D? collision, PuzzlemakerWorld world, Vector3I chunkPos, bool invert = true)
     {
-        return new AsyncMeshGenerator(mesh, collision, world, offset, chunkSize, invert);
+        return new AsyncMeshGenerator(mesh, collision, world, chunkPos, invert);
     }
 }

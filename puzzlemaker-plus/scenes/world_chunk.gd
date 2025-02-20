@@ -31,12 +31,11 @@ func render() -> void:
 	
 	if (world):
 		# world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
-		var generator := AsyncMeshGenerator.Create(a_mesh, shape, world, pos * 16, 16, true)
+		var generator := AsyncMeshGenerator.Create(a_mesh, shape, world, pos, true)
 		generator.DoGreedyMeshAsync()
-		await generator.GreedyMeshFinished
-		# var surface_index = a_mesh.get_surface_count() - 1
-		# if (surface_index >= 0):
-		# 	a_mesh.surface_set_material(surface_index, material)
+		var time = await generator.GreedyMeshFinished
+
+		print("Generated greedy mesh in %s ms." % time)
 		
 		self.mesh = a_mesh
 		_collision_shape.shape = shape

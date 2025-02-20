@@ -1,10 +1,22 @@
 using Godot;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PuzzlemakerPlus;
 
 public struct GreedyMesh
 {
+    // We need to keep track of both whether a world has been queried for an adjacent chunk AND whether it exists.
+    private struct OptionalChunk
+    {
+        public OptionalChunk(VoxelChunk<PuzzlemakerVoxel>? value)
+        {
+            this.value = value;
+        }
+
+        public VoxelChunk<PuzzlemakerVoxel>? value;
+    }
     private record struct FaceType
     {
         public FaceType(bool portalable, short subdivision)
@@ -38,7 +50,6 @@ public struct GreedyMesh
 
 
     private PuzzlemakerWorld _world;
-    private int _chunkSize;
     private Vector3I _chunkPos;
     private float _uvScale;
     private bool _invert;
@@ -52,14 +63,24 @@ public struct GreedyMesh
     private int _dir;
     private FaceType _faceType;
 
+    private VoxelChunk<PuzzlemakerVoxel> _chunk;
 
-    public IEnumerable<Quad> DoGreedyMesh(PuzzlemakerWorld world, int chunkSize, Vector3I chunkPos, float uvScale = 1, bool invert = false)
+    public IEnumerable<Quad> DoGreedyMesh(PuzzlemakerWorld world, Vector3I chunkPos, float uvScale = 1, bool invert = false)
     {
+
         _world = world;
-        _chunkSize = chunkSize;
         _chunkPos = chunkPos;
         _uvScale = uvScale;
         _invert = invert;
+
+        if (world.Chunks.TryGetValue(chunkPos, out var chunk))
+        {
+            _chunk = chunk;
+        }
+        else
+        {
+            yield break;
+        }
 
         // Sweep over each axis (X, Y and Z)
         for (_currentAxis = 0; _currentAxis < 3; ++_currentAxis)
@@ -77,10 +98,11 @@ public struct GreedyMesh
                     
 
                     // Check each slice of the chunk one at a time
-                    for (_position[_currentAxis] = -1; _position[_currentAxis] < _chunkSize;)
+                    for (_position[_currentAxis] = -1; _position[_currentAxis] < PuzzlemakerWorld.CHUNK_SIZE;)
                     {
                         ComputeMask();
                         ++_position[_currentAxis];
+
                         foreach (var quad in GenerateMeshFromMask())
                         {
                             yield return quad;
@@ -92,27 +114,41 @@ public struct GreedyMesh
         }
     }
 
+    private PuzzlemakerVoxel GetVoxel(Vector3I pos)
+    {
+        Vector3I chunkPos = PuzzlemakerWorld.GetChunk(pos);
+        Vector3I local = PuzzlemakerWorld.GetPosInChunk(pos);
+
+        // Avoid hash lookup of the block is in this chunk.
+        if (chunkPos == _chunkPos)
+        {
+            return _chunk.Get(local);
+        }
+        else
+        {
+            return _world.GetVoxel(pos);
+        }
+    }
+
     private void InitializeAxisVariables()
     {
         _axisU = (_currentAxis + 1) % 3;
         _axisV = (_currentAxis + 2) % 3;
         _position = new Vector3I();
         _direction = new Vector3I();
-        _mask = new bool[_chunkSize * _chunkSize];
+        _mask = new bool[PuzzlemakerWorld.CHUNK_SIZE * PuzzlemakerWorld.CHUNK_SIZE];
     }
 
     private void ComputeMask()
     {
         var n = 0;
-        for (_position[_axisV] = 0; _position[_axisV] < _chunkSize; ++_position[_axisV])
+        var offset = _chunkPos * PuzzlemakerWorld.CHUNK_SIZE;
+        for (_position[_axisV] = 0; _position[_axisV] < PuzzlemakerWorld.CHUNK_SIZE; ++_position[_axisV])
         {
-            for (_position[_axisU] = 0; _position[_axisU] < _chunkSize; ++_position[_axisU])
+            for (_position[_axisU] = 0; _position[_axisU] < PuzzlemakerWorld.CHUNK_SIZE; ++_position[_axisU])
             {
-                bool blockCurrent = _world.GetVoxel(_position + _chunkPos).IsOpen;
-                bool blockCompare = _world.GetVoxel(_position + _direction + _chunkPos).IsOpen;
-
-                PuzzlemakerVoxel currentBlock = _world.GetVoxel(_position + _chunkPos);
-                PuzzlemakerVoxel compareBlock = _world.GetVoxel(_position + _direction + _chunkPos);
+                PuzzlemakerVoxel currentBlock = GetVoxel(_position + offset);
+                PuzzlemakerVoxel compareBlock = GetVoxel(_position + _direction + offset);
 
                 // If _dir is 1, we're in the compare block looking at this one. Otherwise, we're in this one looking at the compare.
                 if (_dir == 1)
@@ -134,9 +170,9 @@ public struct GreedyMesh
         // Generate a mesh from the mask using lexicographic ordering,
         // by looping over each block in this slice of the chunk
         var n = 0;
-        for (var j = 0; j < _chunkSize; ++j)
+        for (var j = 0; j < PuzzlemakerWorld.CHUNK_SIZE; ++j)
         {
-            for (var i = 0; i < _chunkSize;)
+            for (var i = 0; i < PuzzlemakerWorld.CHUNK_SIZE;)
             {
                 if (_mask[n])
                 {
@@ -163,7 +199,6 @@ public struct GreedyMesh
                     // Create a quad for this face. Colour, normal or textures are not stored in this block vertex format.
                     var quad = CreateQuad(du, dv);
                     yield return quad;
-
                     // Clear this part of the mask, so we don't add duplicate faces
                     ClearMask(n, quadWidth, quadHeight);
                     i += quadWidth;
@@ -181,7 +216,7 @@ public struct GreedyMesh
     private int ComputeQuadWidth(int i, int n)
     {
         var quadWidth = 1;
-        while (i + quadWidth < _chunkSize && _mask[n + quadWidth])
+        while (i + quadWidth < PuzzlemakerWorld.CHUNK_SIZE && _mask[n + quadWidth])
         {
             quadWidth++;
         }
@@ -192,12 +227,12 @@ public struct GreedyMesh
     {
         var quadHeight = 1;
         var done = false;
-        while (j + quadHeight < _chunkSize)
+        while (j + quadHeight < PuzzlemakerWorld.CHUNK_SIZE)
         {
             for (var k = 0; k < quadWidth; ++k)
             {
                 // Check each block next to this quad
-                if (!_mask[n + k + quadHeight * _chunkSize])
+                if (!_mask[n + k + quadHeight * PuzzlemakerWorld.CHUNK_SIZE])
                 {
                     done = true;
                     break;
@@ -241,7 +276,7 @@ public struct GreedyMesh
         {
             for (var k = 0; k < quadWidth; ++k)
             {
-                _mask[n + k + l * _chunkSize] = false;
+                _mask[n + k + l * PuzzlemakerWorld.CHUNK_SIZE] = false;
             }
         }
     }

@@ -40,7 +40,7 @@ func _make_shortcut(key: Key, ctrl_pressed: bool = true, shift_pressed: bool = f
 
 func _on_debug_index_pressed(index: int) -> void:
 	if index == 0:
-		var gen := AsyncMeshGenerator.Create(null, null, Editor.World, Vector3i(0, 0, 0), 16, true)
+		var gen := AsyncMeshGenerator.Create(null, null, Editor.World, Vector3i(0, 0, 0), true)
 		gen.DoGreedyMeshAsync()
 		await gen.GreedyMeshFinished
 		print("Back in GDScript")
