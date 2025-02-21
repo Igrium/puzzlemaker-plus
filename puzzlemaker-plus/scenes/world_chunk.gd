@@ -33,9 +33,7 @@ func render() -> void:
 		# world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
 		var generator := AsyncMeshGenerator.Create(a_mesh, shape, world, pos, true)
 		generator.DoGreedyMeshAsync()
-		var time = await generator.GreedyMeshFinished
-
-		print("Generated greedy mesh in %s ms." % time)
+		await generator.GreedyMeshFinished
 		
 		self.mesh = a_mesh
 		_collision_shape.shape = shape

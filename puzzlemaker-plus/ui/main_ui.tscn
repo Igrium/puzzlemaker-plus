@@ -30,7 +30,7 @@ item_1/id = 1
 
 [node name="Debug" type="PopupMenu" parent="MenuBar"]
 item_count = 1
-item_0/text = "Do Thread Test"
+item_0/text = "Export Scene glTF"
 
 [node name="FD_VMFTest" type="FileDialog" parent="."]
 ok_button_text = "Save"

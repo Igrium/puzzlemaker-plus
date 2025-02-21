@@ -17,12 +17,12 @@ void vertex() {
 
 void fragment() {
 	vec3 color = texture(albedo_texture, UV).rgb;
-	
+
 	bool selected = selection_start.x <= pos.x && pos.x <= selection_end.x
 				&& selection_start.y <= pos.y && pos.y <= selection_end.y
 				&& selection_start.z <= pos.z && pos.z <= selection_end.z;
-		
-	
+
+
 	ALBEDO = color;
 	EMISSION = selected ? tint_color : vec3(0, 0, 0);
 	// Called for every pixel the material is visible on.

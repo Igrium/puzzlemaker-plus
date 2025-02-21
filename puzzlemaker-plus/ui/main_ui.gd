@@ -40,7 +40,12 @@ func _make_shortcut(key: Key, ctrl_pressed: bool = true, shift_pressed: bool = f
 
 func _on_debug_index_pressed(index: int) -> void:
 	if index == 0:
-		var gen := AsyncMeshGenerator.Create(null, null, Editor.World, Vector3i(0, 0, 0), true)
-		gen.DoGreedyMeshAsync()
-		await gen.GreedyMeshFinished
-		print("Back in GDScript")
+		_export_scene_gltf()
+
+func _export_scene_gltf() -> void:
+	var gltf_document_save := GLTFDocument.new()
+	var gltf_state_save := GLTFState.new()
+	gltf_document_save.append_from_scene(get_tree().current_scene, gltf_state_save)
+
+	gltf_document_save.write_to_filesystem(gltf_state_save, "user://scene.gltf")
+	print("Wrote gltf to " + ProjectSettings.globalize_path("user://scene.gltf"))

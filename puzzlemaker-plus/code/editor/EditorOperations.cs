@@ -23,7 +23,18 @@ public partial class EditorOperations : Node
         //SelectionUtils.SetPortalable(editor.Selection, editor.World, !portalable);
 
         //editor.EmitOnChunksUpdated(editor.Selection);
+    }
 
+    public void FillSelection()
+    {
+        EditorState editor = EditorState.Instance;
+        editor.CommandStack.Execute(new FillVoxelsCommand(editor.Selection, false));
+    }
+
+    public void EmptySelection()
+    {
+        EditorState editor = EditorState.Instance;
+        editor.CommandStack.Execute(new FillVoxelsCommand(editor.Selection, true));
     }
 
     public void Undo()
