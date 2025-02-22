@@ -89,7 +89,7 @@ public sealed partial class EditorState : Node
     {
         // World.SetVoxel(0, 0, 0, new PuzzlemakerVoxel().WithOpen(true));
         // World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
-        World.Fill(new Vector3I(-16, 0, -32), new Vector3I(32, 7, 32), new PuzzlemakerVoxel().WithOpen(true));
+        World.Fill(new Vector3I(-16, 0, -32), new Vector3I(31, 7, 31), new PuzzlemakerVoxel().WithOpen(true));
         World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
 
         //Vector3I portalable = new Vector3I(4, 0, 3);

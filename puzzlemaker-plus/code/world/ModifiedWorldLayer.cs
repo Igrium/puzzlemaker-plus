@@ -60,7 +60,20 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
 
     public void Fill(Vector3I pos1, Vector3I pos2, T value)
     {
-        UpdateBox(pos1, pos2, (pos, val) => val);
+        Vector3I min = pos1.Min(pos2);
+        Vector3I max = pos1.Max(pos2);
+        // TODO: make the optimized implementation work.
+        for (int x = min.X; x <= max.X; x++)
+        {
+            for (int y = min.Y; y <= max.Y; y++)
+            {
+                for (int z = min.Z; z <= max.Z; z++)
+                {
+                    SetVoxel(x, y, z, value);
+                }
+            }
+        }
+        // UpdateBox(pos1, pos2, (pos, val) => val);
     }
 
     public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function, bool _readOnly = false)
@@ -68,41 +81,53 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
         Vector3I min = pos1.Min(pos2);
         Vector3I max = pos1.Max(pos2);
 
-        Vector3I minChunk = VoxelWorld<T>.GetChunk(min);
-        Vector3I maxChunk = VoxelWorld<T>.GetChunk(max);
-
-        Vector3I localMin = VoxelWorld<T>.GetPosInChunk(min);
-        Vector3I localMax = VoxelWorld<T>.GetPosInChunk(max);
-
-        for (int chunkX = minChunk.X; chunkX <= maxChunk.X; chunkX++)
+        // TODO: make the optimized implementation work.
+        for (int x = min.X; x <= max.X; x++)
         {
-            for (int chunkY = minChunk.Y; chunkY <= maxChunk.Y; chunkY++)
+            for (int y = min.Y; y <= max.Y; y++)
             {
-                for (int chunkZ = minChunk.Z; chunkZ <= maxChunk.Z; chunkZ++)
+                for (int z = min.Z; z <= max.Z; z++)
                 {
-                    VoxelChunk<T> chunk = GetWritableChunk(new Vector3I(chunkX, chunkY, chunkZ));
-
-                    int minX = chunkX > minChunk.X ? 0 : localMin.X;
-                    int minY = chunkY > minChunk.Y ? 0 : localMin.Y;
-                    int minZ = chunkZ > minChunk.Z ? 0 : localMin.Z;
-
-                    int maxX = chunkX < maxChunk.X ? 15 : localMax.X;
-                    int maxY = chunkY < maxChunk.Y ? 15 : localMax.Y;
-                    int maxZ = chunkZ < maxChunk.Z ? 15 : localMax.Z;
-
-                    for (int x = minX; x <= maxX; x++)
-                    {
-                        for (int y = minY; y <= maxY; y++)
-                        {
-                            for (int z = minZ; z <= maxZ; z++)
-                            {
-                                chunk.Update(x, y, z, val => function(new Vector3I(x, y, z), val));
-                            }
-                        }
-                    }
+                    UpdateVoxel(x, y, z, val => function(new Vector3I(x, y, z), val));
                 }
             }
         }
+
+        // Vector3I minChunk = VoxelWorld<T>.GetChunk(min);
+        // Vector3I maxChunk = VoxelWorld<T>.GetChunk(max);
+
+        // Vector3I localMin = VoxelWorld<T>.GetPosInChunk(min);
+        // Vector3I localMax = VoxelWorld<T>.GetPosInChunk(max);
+
+        // for (int chunkX = minChunk.X; chunkX <= maxChunk.X; chunkX++)
+        // {
+        //     for (int chunkY = minChunk.Y; chunkY <= maxChunk.Y; chunkY++)
+        //     {
+        //         for (int chunkZ = minChunk.Z; chunkZ <= maxChunk.Z; chunkZ++)
+        //         {
+        //             VoxelChunk<T> chunk = GetWritableChunk(new Vector3I(chunkX, chunkY, chunkZ));
+
+        //             int minX = chunkX > minChunk.X ? 0 : localMin.X;
+        //             int minY = chunkY > minChunk.Y ? 0 : localMin.Y;
+        //             int minZ = chunkZ > minChunk.Z ? 0 : localMin.Z;
+
+        //             int maxX = chunkX < maxChunk.X ? 15 : localMax.X;
+        //             int maxY = chunkY < maxChunk.Y ? 15 : localMax.Y;
+        //             int maxZ = chunkZ < maxChunk.Z ? 15 : localMax.Z;
+
+        //             for (int x = minX; x <= maxX; x++)
+        //             {
+        //                 for (int y = minY; y <= maxY; y++)
+        //                 {
+        //                     for (int z = minZ; z <= maxZ; z++)
+        //                     {
+        //                         chunk.Update(x, y, z, val => function(new Vector3I(x, y, z), val));
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
     
 

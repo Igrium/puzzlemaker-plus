@@ -37,6 +37,13 @@ public partial class EditorOperations : Node
         editor.CommandStack.Execute(new FillVoxelsCommand(editor.Selection, true));
     }
 
+    public void ExtrudeSelection(bool pulls)
+    {
+        EditorState editor = EditorState.Instance;
+        Direction direction = Directions.GetClosestDirection(editor.SelectionNormal).Opposite();
+        editor.CommandStack.Execute(new ExtrudeCommand(editor.Selection, direction, editor.GridScale, pulls));
+    }
+
     public void Undo()
     {
         EditorState.Instance.CommandStack.Undo();

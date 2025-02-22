@@ -33,16 +33,6 @@ internal class FillVoxelsCommand : AbstractWorldCommand
     {
         bool portabale = SelectionUtils.AveragePortalability(new Aabb(_minPos, (_maxPos - _minPos) + new Vector3(1, 1, 1)), world) > 0;
         PuzzlemakerVoxel voxel = new PuzzlemakerVoxel().WithOpen(_isOpen).WithPortalability(portabale);
-        for (int x = _minPos.X; x <= _maxPos.X; x++)
-        {
-            for (int y = _minPos.Y; y <= _maxPos.Y; y++)
-            {
-                for (int z = _minPos.Z; z <= _maxPos.Z; z++)
-                {
-                    world.SetVoxel(x, y, z, voxel);
-                }
-            }
-        }
-        //world.Fill(_minPos, _maxPos, new PuzzlemakerVoxel().WithOpen(_isOpen).WithPortalability(portabale));
+        world.Fill(_minPos, _maxPos, voxel);
     }
 }

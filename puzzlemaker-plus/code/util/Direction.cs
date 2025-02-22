@@ -22,25 +22,25 @@ public static class Directions
     /// <summary>
     /// Get the cardinal direction that a given normal vector is closest to.
     /// </summary>
-    /// <param name="vector">The direction.</param>
+    /// <param name="normal">The direction.</param>
     /// <returns>The closest direction.</returns>
-    public static Direction GetClosestDirection(Vector3 vector)
+    public static Direction GetClosestDirection(Vector3 normal)
     {
-        float absX = MathF.Abs(vector.X);
-        float absY = MathF.Abs(vector.Y);
-        float absZ = MathF.Abs(vector.Z);
+        float absX = MathF.Abs(normal.X);
+        float absY = MathF.Abs(normal.Y);
+        float absZ = MathF.Abs(normal.Z);
 
         if (absX > absY && absX > absZ)
         {
-            return vector.X >= 0 ? Direction.Right : Direction.Left;
+            return normal.X >= 0 ? Direction.Right : Direction.Left;
         }
         else if (absY > absX && absY > absZ)
         {
-            return vector.Y >= 0 ? Direction.Up : Direction.Down;
+            return normal.Y >= 0 ? Direction.Up : Direction.Down;
         }
         else
         {
-            return vector.Z >= 0 ? Direction.Forward : Direction.Back;
+            return normal.Z >= 0 ? Direction.Forward : Direction.Back;
         }
     }
 
@@ -75,6 +75,19 @@ public static class Directions
         }
     }
 
+    public static bool IsPositive(this Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.Up:
+            case Direction.Right:
+            case Direction.Back:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static Direction FromAxis(int axis, bool negative)
     {
         switch(axis)
@@ -106,6 +119,7 @@ public static class Directions
 
     /// <summary>
     /// Given a plane facing this Direction, 
+    /// 
     /// get a vector determining the primary check Direction when performing a greedy mesh.
     /// </summary>
     /// <returns>Unit vector in the primary check Direction.</returns>

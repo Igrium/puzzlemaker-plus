@@ -64,6 +64,11 @@ public partial class EditorState
     /// <p>Alternatively, one could assert selection is based on voxels, being start-inclusive and end-exclusive.</p>
     /// </summary>
     public Aabb Selection => _selection;
+    
+    /// <summary>
+    /// The hit normal of the last selection raycast.
+    /// </summary>
+    public Vector3 SelectionNormal { get; private set; } = Vector3.Zero;
 
     public void SetSelection(Aabb selection)
     {
@@ -107,6 +112,7 @@ public partial class EditorState
         pos -= normal * .25f;
         Vector3I voxelPos = new Vector3I((int)MathF.Floor(pos.X), (int)MathF.Floor(pos.Y), (int)MathF.Floor(pos.Z));
         SelectFace(new VoxelFace(voxelPos, direction), expand);
+        SelectionNormal = normal;
     }
 
     private static Aabb ExpandToGrid(VoxelFace face, int gridScale = 1, int ignoreAxis = -1)
