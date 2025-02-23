@@ -40,7 +40,7 @@ public static class Directions
         }
         else
         {
-            return normal.Z >= 0 ? Direction.Forward : Direction.Back;
+            return normal.Z >= 0 ? Direction.Back : Direction.Forward;
         }
     }
 
