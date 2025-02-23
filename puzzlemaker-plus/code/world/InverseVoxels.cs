@@ -39,7 +39,7 @@ public static class InverseVoxels
     /// <param name="pos1">One corner of the box, inclusive.</param>
     /// <param name="pos2">The other corner of the box, inclusive.</param>
     /// <param name="voxel">Inverse voxel to set.</param>
-    public static void SetInverseVoxelBox(this IVoxelView<PuzzlemakerVoxel> world, Vector3I pos1, Vector3I pos2, PuzzlemakerVoxel voxel)
+    public static void FillInverseVoxels(this IVoxelView<PuzzlemakerVoxel> world, Vector3I pos1, Vector3I pos2, PuzzlemakerVoxel voxel)
     {
         Vector3I min = pos1.Min(pos2);
         Vector3I max = pos1.Max(pos2);

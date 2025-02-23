@@ -60,12 +60,23 @@ public class ExtrudeCommand : AbstractWorldCommand
                 for (int z = sampleMin.Z; z <= sampleMax.Z; z++)
                 {
                     Vector3I startPos = new Vector3I(x, y, z);
-                    PuzzlemakerVoxel voxel = world.GetVoxel(startPos);
-                    world.Fill(startPos, startPos + normal * _amount, voxel);
+                    PuzzlemakerVoxel voxel;
+                    if (_pulls)
+                    {
+                        voxel = world.GetInverseVoxel(startPos);
+                        world.FillInverseVoxels(startPos, startPos - normal * _amount, voxel);
+                    }
+                    else
+                    {
+                        voxel = world.GetVoxel(startPos);
+                        world.Fill(startPos, startPos + normal * _amount, voxel);
+                    }
                 }
             }
         }
 
+        if (_pulls)
+            normal = -normal;
         EditorState editor = EditorState.Instance;
         editor.SetSelection(editor.Selection.Move(normal * _amount));
     }
