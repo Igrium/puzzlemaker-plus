@@ -6,8 +6,8 @@ signal on_undo
 signal on_redo
 
 func _ready():
-	$MenuBar/Edit.set_item_shortcut(0, _make_shortcut(KEY_Z, true))
-	$MenuBar/Edit.set_item_shortcut(1, _make_shortcut(KEY_Z, true, true))
+	$MenuBar/Edit.set_item_shortcut(0, _make_shortcut("ui_undo"))
+	$MenuBar/Edit.set_item_shortcut(1, _make_shortcut("ui_redo"))
 
 func _on_file_id_pressed(id: int) -> void:
 	if id == 0:
@@ -28,7 +28,7 @@ func _on_edit_index_pressed(index: int) -> void:
 	elif index == 1:
 		on_redo.emit()
 
-func _make_shortcut(key: Key, ctrl_pressed: bool = true, shift_pressed: bool = false) -> Shortcut:
+func _make_key_shortcut(key: Key, ctrl_pressed: bool = true, shift_pressed: bool = false) -> Shortcut:
 	var shortcut = Shortcut.new()
 	var inputevent = InputEventKey.new()
 	inputevent.keycode = key
@@ -37,6 +37,10 @@ func _make_shortcut(key: Key, ctrl_pressed: bool = true, shift_pressed: bool = f
 	shortcut.events.append(inputevent)
 	return shortcut
 
+func _make_shortcut(action: StringName) -> Shortcut:
+	var shortcut = Shortcut.new()
+	shortcut.events.append_array(InputMap.action_get_events(action))
+	return shortcut
 
 func _on_debug_index_pressed(index: int) -> void:
 	if index == 0:

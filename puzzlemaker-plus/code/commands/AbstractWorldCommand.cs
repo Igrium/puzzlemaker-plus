@@ -15,6 +15,13 @@ public abstract class AbstractWorldCommand : ICommand
     private readonly Dictionary<Vector3I, VoxelChunk<PuzzlemakerVoxel>> _preChunks = new();
     private readonly Dictionary<Vector3I, VoxelChunk<PuzzlemakerVoxel>> _postChunks = new();
 
+    private Aabb _preSelection;
+    private Aabb _postSelection;
+
+    /// <summary>
+    /// If true, indicates that this action will update the editor selection when triggered, and it should be saved in the undo/redo state.
+    /// </summary>
+    public bool ModifiesSelection { get; protected set; }
 
     /// <summary>
     /// Actually run the command.
@@ -26,8 +33,11 @@ public abstract class AbstractWorldCommand : ICommand
     {
         EditorState editor = EditorState.Instance;
         ModifiedWorldLayer<PuzzlemakerVoxel> layer = new(editor.World);
+        _preSelection = editor.Selection;
+
         Execute(layer);
 
+        _postSelection = editor.Selection;
         foreach (var (pos, postChunk) in layer.UpdatedChunks)
         {
             VoxelChunk<PuzzlemakerVoxel> preChunk = new();
@@ -43,23 +53,33 @@ public abstract class AbstractWorldCommand : ICommand
         editor.EmitOnChunksUpdated(layer.UpdatedChunks.Keys);
     }
 
-    public void Redo()
-    {
-        EditorState editor = EditorState.Instance;
-        foreach (var (pos, postChunk) in _postChunks)
-        {
-            postChunk.CopyTo(editor.World.GetOrCreateChunk(pos));
-        }
-        editor.EmitOnChunksUpdated(_postChunks.Keys);
-    }
-
-    public void Undo()
+    public virtual void Undo()
     {
         EditorState editor = EditorState.Instance;
         foreach (var (pos, preChunk) in _preChunks)
         {
             preChunk.CopyTo(editor.World.GetOrCreateChunk(pos));
         }
+        if (ModifiesSelection)
+        {
+            editor.SetSelection(_preSelection);
+        }
         editor.EmitOnChunksUpdated(_preChunks.Keys);
     }
+
+    public virtual void Redo()
+    {
+        EditorState editor = EditorState.Instance;
+        foreach (var (pos, postChunk) in _postChunks)
+        {
+            postChunk.CopyTo(editor.World.GetOrCreateChunk(pos));
+        }
+        if (ModifiesSelection)
+        {
+            editor.SetSelection(_postSelection);
+        }
+
+        editor.EmitOnChunksUpdated(_postChunks.Keys);
+    }
+
 }

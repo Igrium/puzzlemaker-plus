@@ -18,6 +18,7 @@ public class ExtrudeCommand : AbstractWorldCommand
         _direction = direction;
         _amount = amount;
         _pulls = pulls;
+        ModifiesSelection = true;
     }
 
     protected override void Execute(IVoxelView<PuzzlemakerVoxel> world)
