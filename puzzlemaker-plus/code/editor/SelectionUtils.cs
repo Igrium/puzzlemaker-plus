@@ -55,7 +55,7 @@ public static class SelectionUtils
     /// <param name="world">World to apply to.</param>
     public static void SetPortalable(Aabb selection, IVoxelView<PuzzlemakerVoxel> world, bool portalable)
     {
-        foreach (var (pos, face) in EnumerateFaces(in selection))
+        foreach (var (pos, face) in EnumerateFaces(in selection, true))
         {
             world.UpdateVoxel(pos, block => block.WithPortalability(face, portalable));
         }
@@ -81,7 +81,7 @@ public static class SelectionUtils
                 nonPortalable++;
         }
 
-        foreach(var (pos, face) in EnumerateFaces(in selection))
+        foreach(var (pos, face) in EnumerateFaces(in selection, true))
         {
             PuzzlemakerVoxel voxel = world.GetVoxel(pos);
             if (voxel.IsOpen)
@@ -107,13 +107,13 @@ public static class SelectionUtils
     /// Enumerate over all the faces in a selection.
     /// </summary>
     /// <param name="selection">Selection box.</param>
-    /// <param name="exact">If true, each face must be entirely in the exact selection, othewise, selection is rounded to nearest int.</param>
+    /// <param name="includeInwardFaces">If set, faces belonging to voxels outside the box will also be returned if they overlap the box. Always true for 2D selections.</param>
     /// <returns>All faces in the selection.</returns>
-    public static IEnumerable<(Vector3I, Direction?)> EnumerateFaces(in Aabb selection, bool exact = false)
+    public static IEnumerable<(Vector3I, Direction?)> EnumerateFaces(in Aabb selection, bool includeInwardFaces = false)
     {
-        Vector3I min = exact ? selection.Position.CeilInt() : selection.Position.RoundInt();
-        Vector3I max = exact ? selection.End.FloorInt() : selection.End.RoundInt();
-        return EnumerateFaces(min, max);
+        Vector3I min =  selection.Position.RoundInt();
+        Vector3I max = selection.End.RoundInt();
+        return EnumerateFaces(min, max, includeInwardFaces);
     }
 
     /// <summary>
@@ -121,8 +121,9 @@ public static class SelectionUtils
     /// </summary>
     /// <param name="min">Selection minimum pos, inclusive.</param>
     /// <param name="max">Selection maximum pos, exclusive.</param>
+    /// <param name="includeInwardFaces">If set, faces belonging to voxels outside the box will also be returned if they overlap the box. Always true for 2D selections.</param>
     /// <returns>All faces in the selection. If direction is null, the entire block is selected.</returns>
-    public static IEnumerable<(Vector3I, Direction?)> EnumerateFaces(Vector3I min, Vector3I max)
+    public static IEnumerable<(Vector3I, Direction?)> EnumerateFaces(Vector3I min, Vector3I max, bool includeInwardFaces = false)
     {
         if (min == max)
             yield break;
@@ -140,6 +141,23 @@ public static class SelectionUtils
             foreach (var pos in EnumerateBox(min, max))
             {
                 yield return (pos, null);
+
+                // Check if we're at the edge and include inward faces.
+                if (includeInwardFaces)
+                {
+                    if (pos.X == min.X)
+                        yield return (pos + new Vector3I(-1, 0, 0), Direction.Left);
+                    if (pos.X == max.X - 1)
+                        yield return (pos + new Vector3I(1, 0, 0), Direction.Right);
+                    if (pos.Y == min.Y)
+                        yield return (pos + new Vector3I(0, -1, 0), Direction.Down);
+                    if (pos.Y == max.Y - 1)
+                        yield return (pos + new Vector3I(0, 1, 0), Direction.Up);
+                    if (pos.Z == min.Z)
+                        yield return (pos + new Vector3I(0, 0, -1), Direction.Forward);
+                    if (pos.Z == max.Z - 1)
+                        yield return (pos + new Vector3I(0, 0, 1), Direction.Back);
+                }
             }
             yield break;
         }
@@ -157,51 +175,51 @@ public static class SelectionUtils
         }
     }
 
-    public static bool IsFaceSelected(in Aabb selection, Vector3I pos, Direction face, bool exact = false)
-    {
-        Vector3I min = exact ? selection.Position.CeilInt() : selection.Position.RoundInt();
-        Vector3I max = exact ? selection.End.FloorInt() : selection.End.RoundInt();
-        return IsFaceSelected(min, max, pos, face);
-    }
+    //public static bool IsFaceSelected(in Aabb selection, Vector3I pos, Direction face, bool exact = false)
+    //{
+    //    Vector3I min = exact ? selection.Position.CeilInt() : selection.Position.RoundInt();
+    //    Vector3I max = exact ? selection.End.FloorInt() : selection.End.RoundInt();
+    //    return IsFaceSelected(min, max, pos, face);
+    //}
 
-    public static bool IsFaceSelected(Vector3I min, Vector3I max, Vector3I pos, Direction face)
-    {
-        if (min == max)
-            return false;
+    //public static bool IsFaceSelected(Vector3I min, Vector3I max, Vector3I pos, Direction face)
+    //{
+    //    if (min == max)
+    //        return false;
 
-        int axis;
-        if (min.X == max.X)
-            axis = 0;
-        else if (min.Y == max.Y)
-            axis = 1;
-        else if (min.Z == max.Z)
-            axis = 2;
-        else
-        {
-            // In a 3D selection, we just check the position.
-            return min.X <= pos.X && pos.X < max.X
-                && min.Y <= pos.Y && pos.Y < max.Y
-                && min.Z <= pos.Z && pos.Z < max.Z;
-        }
+    //    int axis;
+    //    if (min.X == max.X)
+    //        axis = 0;
+    //    else if (min.Y == max.Y)
+    //        axis = 1;
+    //    else if (min.Z == max.Z)
+    //        axis = 2;
+    //    else
+    //    {
+    //        // In a 3D selection, we just check the position.
+    //        return min.X <= pos.X && pos.X < max.X
+    //            && min.Y <= pos.Y && pos.Y < max.Y
+    //            && min.Z <= pos.Z && pos.Z < max.Z;
+    //    }
 
-        Vector3I normal = new Vector3I();
-        normal[axis] = 1;
-        Direction positive = Directions.FromAxis(axis, false);
-        Direction negative = Directions.FromAxis(axis, true);
+    //    Vector3I normal = new Vector3I();
+    //    normal[axis] = 1;
+    //    Direction positive = Directions.FromAxis(axis, false);
+    //    Direction negative = Directions.FromAxis(axis, true);
 
-        // Check if we're aligned to the plane.
-        if ((face == negative && pos[axis] == min[axis]) || (face == positive && pos[axis] == min[axis]))
-        {
-            // Check the other axes using the position as usual.
-            for (int i = 0; i <= 2; i++)
-            {
-                if (axis != i && !(min[i] <= pos[i] && pos[i] < max[i]))
-                    return false;
-            }
-            return true;
-        }
-        return false;
-    }
+    //    // Check if we're aligned to the plane.
+    //    if ((face == negative && pos[axis] == min[axis]) || (face == positive && pos[axis] == min[axis]))
+    //    {
+    //        // Check the other axes using the position as usual.
+    //        for (int i = 0; i <= 2; i++)
+    //        {
+    //            if (axis != i && !(min[i] <= pos[i] && pos[i] < max[i]))
+    //                return false;
+    //        }
+    //        return true;
+    //    }
+    //    return false;
+    //}
 
     private static IEnumerable<Vector3I> EnumerateBox(Vector3I min, Vector3I max, bool inclusive = false)
     {
