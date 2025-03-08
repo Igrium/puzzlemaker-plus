@@ -2,8 +2,7 @@ extends Node3D
 
 @export var chunk_scene := preload("res://scenes/world_chunk.tscn")
 
-# TODO: make this typed once 4.4 comes out
-var chunks: Dictionary = {}
+var chunks: Dictionary[Vector3i, WorldChunk] = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

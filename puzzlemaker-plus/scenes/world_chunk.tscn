@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://1hw75nbgk46w"]
 
-[ext_resource type="Script" path="res://scenes/world_chunk.gd" id="1_y567v"]
+[ext_resource type="Script" uid="uid://uyhs32ly8yyl" path="res://scenes/world_chunk.gd" id="1_y567v"]
 [ext_resource type="Material" uid="uid://dyvgr7q35fcid" path="res://assets/materials/clean/grid_light.tres" id="2_fx1e0"]
-[ext_resource type="Script" path="res://scripts/debug_visualizer.gd" id="3_te8ta"]
+[ext_resource type="Script" uid="uid://c6e5j18f4xk3d" path="res://scripts/debug_visualizer.gd" id="3_te8ta"]
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ca28r"]
 

@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bd3mbm0pemh78"]
 
-[ext_resource type="Script" path="res://ui/main_ui.gd" id="1_ubv51"]
-[ext_resource type="Script" path="res://code/test/ThreadingTest.cs" id="2_34weo"]
+[ext_resource type="Script" uid="uid://do1whabpgt0uc" path="res://ui/main_ui.gd" id="1_ubv51"]
+[ext_resource type="Script" uid="uid://bmytv642s7ume" path="res://code/test/ThreadingTest.cs" id="2_34weo"]
 
 [node name="MainUi" type="Control"]
 layout_mode = 3
