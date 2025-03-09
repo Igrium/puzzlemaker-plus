@@ -18,10 +18,13 @@ var _collision_shape: CollisionShape3D = $Area3D/CollisionShape3D
 
 
 func _ready() -> void:
-	Editor.connect("OnOpenProject", render)
+	Editor.connect("OnOpenProject", _on_open_project)
 	Editor.connect("OnUpdatedSelection", _on_updated_selection)
 	render()
 	pass
+
+func _on_open_project(_prj):
+	render()
 
 func render() -> void:
 	var a_mesh = ArrayMesh.new()

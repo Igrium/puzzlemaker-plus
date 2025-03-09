@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bd3mbm0pemh78"]
+[gd_scene load_steps=4 format=3 uid="uid://bd3mbm0pemh78"]
 
 [ext_resource type="Script" uid="uid://do1whabpgt0uc" path="res://ui/main_ui.gd" id="1_ubv51"]
-[ext_resource type="Script" uid="uid://bmytv642s7ume" path="res://code/test/ThreadingTest.cs" id="2_34weo"]
+[ext_resource type="Script" uid="uid://drwyh52tujvls" path="res://ui/popup_menu_item.gd" id="2_hlo7n"]
+[ext_resource type="Script" uid="uid://0nvsysvmol76" path="res://ui/unsaved_confirmation_dialog.gd" id="4_x3h8h"]
 
 [node name="MainUi" type="Control"]
 layout_mode = 3
@@ -19,28 +20,91 @@ anchor_right = 1.0
 grow_horizontal = 2
 
 [node name="File" type="PopupMenu" parent="MenuBar"]
-item_count = 1
-item_0/text = "Save Test VMF"
+
+[node name="NewProject" type="Node" parent="MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "New"
+accelerator = &"new_project"
+
+[node name="OpenProject" type="Node" parent="MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Open"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="Save" type="Node" parent="MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Save"
+accelerator = &"save"
+separator = true
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="SaveAs" type="Node" parent="MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Save As"
+accelerator = &"save_as"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="ExportVMF" type="Node" parent="MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Export VMF"
+separator = true
+metadata/_custom_type_script = "uid://drwyh52tujvls"
 
 [node name="Edit" type="PopupMenu" parent="MenuBar"]
-item_count = 2
-item_0/text = "Undo"
-item_1/text = "Redo"
-item_1/id = 1
+
+[node name="Undo" type="Node" parent="MenuBar/Edit"]
+script = ExtResource("2_hlo7n")
+text = "Undo"
+accelerator = &"ui_undo"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="Redo" type="Node" parent="MenuBar/Edit"]
+script = ExtResource("2_hlo7n")
+text = "Redo"
+accelerator = &"ui_redo"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
 
 [node name="Debug" type="PopupMenu" parent="MenuBar"]
 item_count = 1
 item_0/text = "Export Scene glTF"
+item_0/id = 0
 
-[node name="FD_VMFTest" type="FileDialog" parent="."]
-ok_button_text = "Save"
+[node name="FD_VMFExport" type="FileDialog" parent="."]
+title = "Export VMF File"
 access = 2
+filters = PackedStringArray("*.vmf;Valve Map Files;text/plain")
 use_native_dialog = true
 
-[node name="ThreadingTest" type="Node" parent="."]
-script = ExtResource("2_34weo")
+[node name="FD_OpenProject" type="FileDialog" parent="."]
+title = "Open a File"
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
+use_native_dialog = true
 
-[connection signal="id_pressed" from="MenuBar/File" to="." method="_on_file_id_pressed"]
+[node name="FD_SaveProject" type="FileDialog" parent="."]
+title = "Save Project As"
+access = 2
+filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
+use_native_dialog = true
+
+[node name="UnsavedConfirmationDialog" type="ConfirmationDialog" parent="."]
+title = "Are you sure?"
+initial_position = 1
+size = Vector2i(229, 100)
+dialog_text = "You have unsaved changes."
+script = ExtResource("4_x3h8h")
+
+[connection signal="pressed" from="MenuBar/File/NewProject" to="." method="_on_new_project_pressed"]
+[connection signal="pressed" from="MenuBar/File/OpenProject" to="." method="_on_open_project_pressed"]
+[connection signal="pressed" from="MenuBar/File/Save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="MenuBar/File/SaveAs" to="." method="_on_save_as_pressed"]
+[connection signal="pressed" from="MenuBar/File/ExportVMF" to="." method="_on_export_vmf_pressed"]
 [connection signal="index_pressed" from="MenuBar/Edit" to="." method="_on_edit_index_pressed"]
+[connection signal="pressed" from="MenuBar/Edit/Undo" to="." method="_on_undo_pressed"]
+[connection signal="pressed" from="MenuBar/Edit/Redo" to="." method="_on_redo_pressed"]
 [connection signal="index_pressed" from="MenuBar/Debug" to="." method="_on_debug_index_pressed"]
-[connection signal="file_selected" from="FD_VMFTest" to="." method="_on_fd_vmf_test_file_selected"]
+[connection signal="file_selected" from="FD_VMFExport" to="." method="_on_fd_vmf_export_file_selected"]
+[connection signal="file_selected" from="FD_OpenProject" to="." method="_on_fd_open_project_file_selected"]
+[connection signal="file_selected" from="FD_SaveProject" to="." method="_on_fd_save_project_file_selected"]

@@ -32,6 +32,7 @@ public class CommandStack
         _redoStack.Clear();
         command.Execute();
         _undoStack.Push(command);
+        EditorState.Instance.UnSaved = true;
         return true;
     }
 
@@ -47,14 +48,16 @@ public class CommandStack
             {
                 command.Undo();
                 _redoStack.Push(command);
-                return true;
             }
             catch (Exception ex)
             {
                 OnError("Error undoing command.", ex);
                 _redoStack.Clear(); // We likely have an invalid state now
                 _undoStack.Clear();
+                return false;
             }
+            EditorState.Instance.UnSaved = true;
+            return true;
         }
         return false;
     }
@@ -71,14 +74,16 @@ public class CommandStack
             {
                 command.Redo();
                 _undoStack.Push(command);
-                return true;
             }
             catch (Exception ex)
             {
                 OnError("Error redoing command.", ex);
                 _undoStack.Clear(); // We likely have an invalid state now.
                 _redoStack.Clear();
+                return false;
             }
+            EditorState.Instance.UnSaved = true;
+            return true;
         }
         return false;
     }

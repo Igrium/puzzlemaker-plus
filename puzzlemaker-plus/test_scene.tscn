@@ -41,7 +41,3 @@ script = ExtResource("7_elxd6")
 
 [node name="Operations" type="Node" parent="KeyListener"]
 script = ExtResource("6_3ygax")
-
-[connection signal="on_open_test_vmf" from="CanvasLayer/MainUi" to="VMFTest" method="TestLoadVMF"]
-[connection signal="on_redo" from="CanvasLayer/MainUi" to="KeyListener/Operations" method="Redo"]
-[connection signal="on_undo" from="CanvasLayer/MainUi" to="KeyListener/Operations" method="Undo"]

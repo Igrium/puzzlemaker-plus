@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Godot;
 
 namespace PuzzlemakerPlus;
 
 [GlobalClass]
+[JsonConverter(typeof(PuzzlemakerWorldJsonConverter))]
 public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
 {   
     /// <summary>
@@ -52,6 +55,94 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
             }
             builder.ToShape(collision);
         }
+    }
+
+    /// <summary>
+    /// Read a voxel chunk from a base-64-encoded string.
+    /// </summary>
+    /// <param name="base64">Base-64 string.</param>
+    /// <returns>The chunk.</returns>
+    public static VoxelChunk<PuzzlemakerVoxel> ReadChunk(string base64)
+    {
+        byte[] data = Convert.FromBase64String(base64);
+        VoxelChunk<PuzzlemakerVoxel> chunk = new();
+        for (int i = 0; i < chunk.Data.Length; i++)
+        {
+            PuzzlemakerVoxel voxel = new PuzzlemakerVoxel();
+            voxel.Flags = data[i];
+            chunk.Data[i] = voxel;
+        }
+        return chunk;
+    }
+
+    /// <summary>
+    /// Encode a voxel chunk into a base-64-encoded string.
+    /// </summary>
+    /// <param name="chunk">The chunk.</param>
+    /// <returns>Base-64-encoded string.</returns>
+    public static string WriteChunk(VoxelChunk<PuzzlemakerVoxel> chunk)
+    {
+        byte[] data = new byte[chunk.Data.Length];
+        for (int i = 0; i < data.Length; i++)
+        {
+            data[i] = chunk.Data[i].Flags;
+        }
+        return Convert.ToBase64String(data);
+    }
+}
+
+public sealed class PuzzlemakerWorldJsonConverter : JsonConverter<PuzzlemakerWorld>
+{
+    public override PuzzlemakerWorld Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartObject)
+            throw new JsonException("Voxel world must be a json object.");
+
+
+        PuzzlemakerWorld world = new PuzzlemakerWorld();
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.Comment)
+                continue;
+            if (reader.TokenType == JsonTokenType.EndObject)
+                return world;
+
+            // KEY
+            if (reader.TokenType != JsonTokenType.PropertyName)
+                throw new JsonException();
+
+            string propertyName = reader.GetString() ?? throw new JsonException();
+
+
+            // Value
+            reader.Read();
+            if (reader.TokenType != JsonTokenType.String)
+                throw new JsonException("Chunk data must be a Base-64-encoded string.");
+
+            string value = reader.GetString() ?? throw new JsonException();
+
+            string[] coords = propertyName.Split(',');
+            Vector3I pos = new Vector3I(
+                int.Parse(coords[0]),
+                int.Parse(coords[1]),
+                int.Parse(coords[2]));
+
+            VoxelChunk<PuzzlemakerVoxel> chunk = PuzzlemakerWorld.ReadChunk(value);
+            world.Chunks.Add(pos, chunk);
+        }
+        throw new JsonException("Unclosed object in puzzlemaker world");
+    }
+
+    public override void Write(Utf8JsonWriter writer, PuzzlemakerWorld value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        foreach (var (pos, chunk) in value.Chunks)
+        {
+            writer.WriteString($"{pos.X},{pos.Y},{pos.Z}", PuzzlemakerWorld.WriteChunk(chunk));
+        }
+        
+        writer.WriteEndObject();
     }
 }
 

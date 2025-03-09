@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Godot;
 using PuzzlemakerPlus.Commands;
 
@@ -21,6 +22,12 @@ public sealed partial class EditorState : Node
     /// <param name="project">The project
     [Signal]
     public delegate void OnOpenProjectEventHandler(PuzzlemakerProject project);
+
+    [Signal]
+    public delegate void OnChangeProjectNameEventHandler(string? newValue);
+
+    [Signal]
+    public delegate void OnSetUnsavedEventHandler(bool unsaved);
 
     /// <summary>
     /// Called when a set of voxels have been updated.
@@ -51,8 +58,40 @@ public sealed partial class EditorState : Node
 
     public CommandStack CommandStack => Project.CommandStack;
 
+    /// <summary>
+    /// The name of the currently open project. Null if the project has not been saved.
+    /// </summary>
+    public string? ProjectName
+    {
+        get => Project.FileName;
+        set
+        {
+            if (Project.FileName == value) return;
+            Project.FileName = value;
+            EmitSignal(SignalName.OnChangeProjectName, value!);
+        }
+    }
+
+    public bool HasProjectName => !string.IsNullOrWhiteSpace(ProjectName);
+
     [Export]
     public LevelTheme Theme { get; set; } = new();
+
+    private bool _unsaved;
+
+    /// <summary>
+    /// Whether the currently open project has unsaved changes.
+    /// </summary>
+    public bool UnSaved
+    {
+        get => _unsaved;
+        set
+        {
+            if (_unsaved == value) return;
+            _unsaved = value;
+            EmitSignal(SignalName.OnSetUnsaved, value);
+        }
+    }
 
     public EditorState()
     {
@@ -83,6 +122,50 @@ public sealed partial class EditorState : Node
         if (project == Project) return;
         Project = project;
         EmitSignal(SignalName.OnOpenProject, project);
+        EmitSignal(SignalName.OnChangeProjectName, project.FileName!);
+        UnSaved = false;
+    }
+
+    public void OpenProjectFile(string filepath)
+    {
+        PuzzlemakerProject? project;
+        using (var stream = new FileAccessStream(filepath))
+        {
+            project = JsonSerializer.Deserialize<PuzzlemakerProject>(stream);
+        }
+        if (project == null)
+            throw new Exception("Json deserializer returned null.");
+        project.FileName = filepath;
+        OpenProject(project);
+    }
+
+    public void SaveProjectAs(string filepath)
+    {
+        using (var stream = new FileAccessStream(filepath, Godot.FileAccess.ModeFlags.Write))
+        {
+            Project.WriteFile(stream);
+        }
+        ProjectName = filepath;
+        UnSaved = false;
+        GD.Print("Saved to " + filepath);
+    }
+
+    public void SaveProject()
+    {
+        if (!HasProjectName)
+            throw new InvalidOperationException("Project name has not been set. Please use SaveProjectAs()");
+
+        SaveProjectAs(ProjectName!);
+    }
+
+    public bool Undo()
+    {
+        return CommandStack.Undo();
+    }
+
+    public bool Redo()
+    {
+        return CommandStack.Redo();
     }
     
     public void AddTestVoxels() 
