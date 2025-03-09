@@ -8,6 +8,8 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
+using Godot;
+using Godot.NativeInterop;
 
 
 namespace PuzzlemakerPlus.Item;
@@ -17,7 +19,7 @@ namespace PuzzlemakerPlus.Item;
 /// Each instance of an item will correspond to an instance of this class; for example, if there's two buttons in the map, two Items will exist.
 /// The subclass of Item that's instansiated is determined by the ItemType and the item converterType's json.
 /// </summary>
-public class Item
+public partial class Item : RefCounted
 {
     /// <summary>
     /// The ItemType this item is an instance of.
@@ -28,6 +30,11 @@ public class Item
     {
         this.Type = type;
     }
+
+    [ItemProp]
+    public Vector3 Position { get; set; }
+
+    private readonly BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.FlattenHierarchy;
 
     /// <summary>
     /// Read a set of properties from a json object and apply them to this item.
@@ -41,9 +48,7 @@ public class Item
             if (itemProp == null)
                 continue;
 
-            string serialName = itemProp.SerialName ?? prop.Name;
-
-            if (json.TryGetPropertyValue(serialName, out var node))
+            if (json.TryGetPropertyValue(prop.Name, out var node))
             {
                 JsonSerializerOptions localOptions = options;
                 JsonConverterAttribute? jsonConverter = prop.GetCustomAttribute<JsonConverterAttribute>();
@@ -67,13 +72,11 @@ public class Item
     /// <param name="json">Json object to write to.</param>
     public virtual void WriteJson(JsonObject json, JsonSerializerOptions options)
     {
-        foreach (PropertyInfo prop in this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+        foreach (PropertyInfo prop in this.GetType().GetProperties(_bindingFlags))
         {
             ItemProp? itemProp = prop.GetCustomAttribute<ItemProp>();
             if (itemProp == null)
                 continue;
-
-            string serialName = itemProp.SerialName ?? prop.Name;
 
             JsonSerializerOptions localOptions = options;
             JsonConverterAttribute? jsonConverter = prop.GetCustomAttribute<JsonConverterAttribute>();
@@ -87,8 +90,118 @@ public class Item
 
             JsonNode? node = JsonSerializer.SerializeToNode(prop.GetValue(json, null), localOptions);
 
-            json[serialName] = node;
+            json[prop.Name] = node;
         }
     }
 
+    /// <summary>
+    /// Get the display name of a property.
+    /// </summary>
+    /// <param name="propName">Property ID.</param>
+    /// <returns>The display name; null if no property with that name exists.</returns>
+    public string? GetPropertyDisplayName(string propName)
+    {
+        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
+        return prop?.GetCustomAttribute<ItemProp>()?.DisplayName;
+    }
+
+    /// <summary>
+    /// Get an array of all property names in this item.
+    /// </summary>
+    /// <returns>All property names.</returns>
+    public string[] GetItemProperties()
+    {
+        return this.GetType().GetProperties(_bindingFlags)
+            .Where(prop => prop.GetCustomAttribute<ItemProp>() != null).Select(prop => prop.Name).ToArray();
+    }
+
+    public bool HasProperty(string propName)
+    {
+        return this.GetType().GetProperty(propName, _bindingFlags)?.GetCustomAttribute<ItemProp>() != null;
+    }
+
+    /// <summary>
+    /// Attempt to retrieve the value of a property by name. Only use for dynamic property reading; it's faster to read the property directly.
+    /// </summary>
+    /// <typeparam name="T">Property type.</typeparam>
+    /// <param name="propName">Property name.</param>
+    /// <param name="value">Variable to store value in.</param>
+    /// <returns>If the property was found and is the correct type.</returns>
+    public bool TryGetPropertyValue<T>(string propName, out T? value)
+    {
+        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
+        if (prop?.GetCustomAttribute<ItemProp>() == null)
+        {
+            value = default;
+            return false;
+        }
+
+        var val = prop.GetValue(this);
+        if (val is T)
+        {
+            value = (T)val;
+            return true;
+        }
+        else
+        {
+            value = default;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Get a property value as a variant. Value must be variant-compatible.
+    /// </summary>
+    /// <param name="propName"></param>
+    /// <returns></returns>
+    public Variant GetPropertyValue(string propName)
+    {
+        if (TryGetPropertyValue<object>(propName, out var val))
+        {
+            try
+            {
+                return Variant.From(val);
+            }
+            catch (Exception)
+            {
+                GD.PushWarning($"Unable to create variant from {val}. Make sure it is a variant-compatible type!");
+                return default;
+            }
+        }
+        else return default;
+    }
+
+    /// <summary>
+    /// Attempt to set the value of a property by name. Only use for dynamic property writing; it's faster to set the property directly.
+    /// </summary>
+    /// <typeparam name="T">Type to set.</typeparam>
+    /// <param name="propName">Property name.</param>
+    /// <param name="value">Value to set.</param>
+    /// <returns>If the property was found and is the correct type.</returns>
+    public bool TrySetPropertyValue<T>(string propName, in T value)
+    {
+        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
+        if (prop?.GetCustomAttribute<ItemProp>() == null)
+        {
+            return false;
+        }
+
+        if (prop.PropertyType.IsAssignableFrom(typeof(T)))
+        {
+            prop.SetValue(this, value);
+            return true;
+        }
+        else return false;
+    }
+
+    /// <summary>
+    /// Set the value of a property by name as a variant. Only use for dynamic property writing; it's faster to set the property directly.
+    /// </summary>
+    /// <param name="propName">Property name.</param>
+    /// <param name="value">Value to set.</param>
+    /// <returns>If the property was found and is the correct type.</returns>
+    public bool SetPropertyValue(string propName, Variant value)
+    {
+        return TrySetPropertyValue(propName, value.Obj);
+    }
 }

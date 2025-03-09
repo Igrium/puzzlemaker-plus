@@ -12,11 +12,8 @@ public class ItemProp : Attribute
 {
     public string? DisplayName { get; }
 
-    public string? SerialName { get; }
-
-    public ItemProp(string? displayName = null, string? serialName = null)
+    public ItemProp(string? displayName = null)
     {
         DisplayName = displayName;
-        SerialName = serialName;
     }
 }
