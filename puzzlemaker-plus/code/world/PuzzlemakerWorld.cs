@@ -105,7 +105,10 @@ public sealed class PuzzlemakerWorldJsonConverter : JsonConverter<PuzzlemakerWor
             if (reader.TokenType == JsonTokenType.Comment)
                 continue;
             if (reader.TokenType == JsonTokenType.EndObject)
+            {
+                //GD.Print($"Loaded {world.Chunks.Count} chunk(s) from json.");
                 return world;
+            }
 
             // KEY
             if (reader.TokenType != JsonTokenType.PropertyName)

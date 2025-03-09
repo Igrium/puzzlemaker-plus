@@ -131,7 +131,7 @@ public sealed partial class EditorState : Node
         PuzzlemakerProject? project;
         using (var stream = new FileAccessStream(filepath))
         {
-            project = JsonSerializer.Deserialize<PuzzlemakerProject>(stream);
+            project = PuzzlemakerProject.ReadFile(stream);
         }
         if (project == null)
             throw new Exception("Json deserializer returned null.");

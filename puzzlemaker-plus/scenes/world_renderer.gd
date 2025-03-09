@@ -12,15 +12,15 @@ func _ready() -> void:
 	Editor.NewProject()
 	Editor.AddTestVoxels()
 
-func _on_open_project(_project):
+func _on_open_project(_project: PuzzlemakerProject):
 	clear()
-
+	_on_chunks_updated(_project.GetOccupiedChunks())
+	
 func _on_chunks_updated(updated_chunks: PackedVector3Array):
 	for pos in updated_chunks:
 		var chunk_pos := Vector3i(pos)
 		var chunk = _get_chunk(chunk_pos)
 		chunk.render()
-	
 
 func _get_chunk(pos: Vector3i) -> WorldChunk:
 	var chunk: WorldChunk

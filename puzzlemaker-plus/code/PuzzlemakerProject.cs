@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Godot;
@@ -30,6 +31,7 @@ public partial class PuzzlemakerProject : RefCounted
 
     private PuzzlemakerProject(PuzzlemakerProjectJson json)
     {
+        GD.Print("Loaded project from json: " + json);
         World = json.World;
     }
 
@@ -38,6 +40,15 @@ public partial class PuzzlemakerProject : RefCounted
         PuzzlemakerProjectJson json = new PuzzlemakerProjectJson();
         json.World = World;
         return json;
+    }
+
+    /// <summary>
+    /// Get an array of all the chunks in the world that contain voxels. Utility to call from GDScript.
+    /// </summary>
+    /// <returns>PackedVector3Array of occupied chunks.</returns>
+    public Vector3[] GetOccupiedChunks()
+    {
+        return World.Chunks.Keys.Select(vec => new Vector3(vec.X, vec.Y, vec.Z)).ToArray();
     }
 
     public void WriteFile(Stream stream)
@@ -52,7 +63,7 @@ public partial class PuzzlemakerProject : RefCounted
         return new PuzzlemakerProject(json);
     }
 
-    private class PuzzlemakerProjectJson
+    private record class PuzzlemakerProjectJson
     {
         public PuzzlemakerWorld World { get; set; } = new PuzzlemakerWorld();
     }
