@@ -102,7 +102,18 @@ public partial class Item : RefCounted
     public string? GetPropertyDisplayName(string propName)
     {
         PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
-        return prop?.GetCustomAttribute<ItemProp>()?.DisplayName;
+        return ItemProp.GetPropertyDisplayName(prop);
+    }
+
+    /// <summary>
+    /// Get the display type of a property.
+    /// </summary>
+    /// <param name="propName">Property ID</param>
+    /// <returns>The display type; null if no property with that name exists.</returns>
+    public string? GetPropertyDisplayType(string propName)
+    {
+        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
+        return ItemProp.GetPropertyDisplayType(prop);
     }
 
     /// <summary>
@@ -158,11 +169,11 @@ public partial class Item : RefCounted
     {
         if (TryGetPropertyValue<object>(propName, out var val))
         {
-            try
+            if (VariantUtils.TryCreateVariant(in val, out var variant))
             {
-                return Variant.From(val);
+                return variant;
             }
-            catch (Exception)
+            else
             {
                 GD.PushWarning($"Unable to create variant from {val}. Make sure it is a variant-compatible type!");
                 return default;
@@ -204,4 +215,5 @@ public partial class Item : RefCounted
     {
         return TrySetPropertyValue(propName, value.Obj);
     }
+
 }
