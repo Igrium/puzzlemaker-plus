@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Godot;
 
-namespace PuzzlemakerPlus.Item;
+namespace PuzzlemakerPlus.Items;
 
 /// <summary>
 /// A simple wrapper around ItemProp data to use in GDScript

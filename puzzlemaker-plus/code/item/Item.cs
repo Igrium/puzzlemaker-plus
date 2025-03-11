@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Godot;
 
-namespace PuzzlemakerPlus.Item;
+namespace PuzzlemakerPlus.Items;
 
 /// <summary>
 /// An item within the editor. 
@@ -32,13 +34,18 @@ public partial class Item : ItemPropHolder
     /// The ItemType this item is an instance of.
     /// </summary>
     public ItemType Type { get; }
-
     public PuzzlemakerProject Project { get; }
 
-    public Item(ItemType type, PuzzlemakerProject project)
+    /// <summary>
+    /// A unique ID for the item that's used during serialization.
+    /// </summary>
+    public string ID { get; }
+
+    public Item(ItemType type, PuzzlemakerProject project, string id)
     {
-        this.Type = type;
+        Type = type;
         Project = project;
+        ID = id;
     }
 
     private Vector3 _position;
@@ -141,4 +148,5 @@ public partial class Item : ItemPropHolder
     {
         return GetEditorModel(Variant, editorTheme);
     }
+
 }

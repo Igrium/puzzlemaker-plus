@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Godot;
 
-namespace PuzzlemakerPlus.Item;
+namespace PuzzlemakerPlus.Items;
 
 /// <summary>
 /// A single item type such as a cube or a button.
@@ -17,6 +17,9 @@ namespace PuzzlemakerPlus.Item;
 public sealed class ItemType
 {
     public string ItemClassName { get; set; } = "Item";
+
+    [JsonIgnore]
+    public string ID { get; internal set; } = "";
 
     [JsonRequired]
     public Dictionary<string, ItemVariant> Variants { get; } = new Dictionary<string, ItemVariant>();
@@ -33,6 +36,18 @@ public sealed class ItemType
             return v.GetEditorModel(editorTheme);
         else
             return null;
+    }
+
+    /// <summary>
+    /// Create an empty instance of this item type.
+    /// </summary>
+    /// <param name="project">Project to create the instance in. Does not actually add it to the project.</param>
+    /// <param name="id">Item ID to assign.</param>
+    /// <returns>The new item instance.</returns>
+    /// <remarks>This could throw all sorts of exceptions. Best to try and catch them.</remarks>
+    public Item CreateInstance(PuzzlemakerProject project, string id)
+    {
+        return ItemClasses.CreateInstance(ItemClassName, this, project, id);
     }
 }
 

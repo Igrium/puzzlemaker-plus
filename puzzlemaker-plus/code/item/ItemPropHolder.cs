@@ -13,7 +13,7 @@ using Godot.Collections;
 using Godot.NativeInterop;
 
 
-namespace PuzzlemakerPlus.Item;
+namespace PuzzlemakerPlus.Items;
 
 /// <summary>
 /// An object that can hold and reflectively access item properties.

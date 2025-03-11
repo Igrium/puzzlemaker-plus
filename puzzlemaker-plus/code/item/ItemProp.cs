@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace PuzzlemakerPlus.Item;
+namespace PuzzlemakerPlus.Items;
 
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 public class ItemProp : Attribute
