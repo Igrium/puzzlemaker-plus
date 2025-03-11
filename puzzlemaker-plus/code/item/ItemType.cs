@@ -21,8 +21,7 @@ public sealed class ItemType
     [JsonIgnore]
     public string ID { get; internal set; } = "";
 
-    [JsonRequired]
-    public Dictionary<string, ItemVariant> Variants { get; } = new Dictionary<string, ItemVariant>();
+    public Dictionary<string, ItemVariant> Variants { get; set; } = new Dictionary<string, ItemVariant>();
 
     /// <summary>
     /// Get the editor model to use for a given variant and theme.
@@ -63,10 +62,9 @@ public sealed class ItemVariant
     /// </summary>
     public Direction? AttachDirection { get; set; } = Direction.Down;
 
-    public List<ItemVariantTheme> Themes { get; } = new();
+    public List<ItemVariantTheme> Themes { get; set; } = new();
 
-    [JsonConverter(typeof(DictOrValueConverter<string>))]
-    public Dictionary<string, string> EditorModel { get; } = new();
+    public Dictionary<string, string> EditorModel { get; set; } = new();
 
     /// <summary>
     /// Get the editor model to use for a given theme.
@@ -93,7 +91,7 @@ public sealed class ItemVariant
     /// <returns>The variant theme, or null if the package dev messed up and didn't specify any theme entries.</returns>
     public ItemVariantTheme? GetVariantTheme(string levelTheme)
     {
-        var theme = Themes.Where(theme => theme.Name.Contains(levelTheme)).OrderBy(theme => theme.Name.Count()).First();
+        var theme = Themes.Where(theme => theme.Names.Contains(levelTheme)).OrderBy(theme => theme.Names.Count()).First();
         return theme ?? Themes.FirstOrDefault();
     }
 }
@@ -103,8 +101,7 @@ public sealed class ItemVariantTheme
     /// <summary>
     /// The theme name(s) that this variant will apply to. Leave empty to signify that this should be used for all level themes.
     /// </summary>
-    [JsonConverter(typeof(ListOrValueConverter<string>))]
-    public List<string> Name { get; } = new();
+    public List<string> Names { get; } = new();
 
     /// <summary>
     /// The VMF instance that this theme variant will use.

@@ -135,7 +135,8 @@ public partial class PackageManager : Node
             {
                 itemType = JsonSerializer.Deserialize<ItemType>(stream, JsonUtils.JsonOptions) ?? throw new Exception("Item type didn't load.");
             }
-            
+            itemType.ID = name;
+
             if (ItemTypes.ContainsKey(name))
             {
                 GD.PushWarning("Duplicate item type: " + name);
@@ -145,11 +146,17 @@ public partial class PackageManager : Node
             GD.Print("Loaded " + resourcePath);
             return itemType;
         }
+        // Don't flood the console with stack trace if it's the package dev's fault.
+        catch (JsonException e)
+        {
+            GD.PrintErr($"Unable to load json for {resourcePath}: ", e.Message);
+        }
         catch (Exception e)
         {
-            PrintError($"Unable to load item {name}", e);
-            return null;
+            GD.PushError($"Unable to load {resourcePath}: ", e);
+
         }
+        return null;
     }
 
     protected static void PrintError(string message, Exception ex)
