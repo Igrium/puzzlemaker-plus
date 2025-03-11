@@ -172,7 +172,7 @@ public partial class PackageManager : Node
     /// <returns>The texture, or null if it could not be loaded.</returns>
     public static Texture2D? LoadImageTexture(string resourcePath)
     {
-        if (ResourceLoader.Exists(resourcePath, "ImageTexture"))
+        if (ResourceLoader.Exists(resourcePath, "Texture2D"))
         {
             Resource res = ResourceLoader.Load(resourcePath, "Texture2D");
             if (res is Texture2D tex)
