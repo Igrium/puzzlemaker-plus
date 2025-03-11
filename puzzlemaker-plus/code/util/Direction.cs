@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Godot;
 
 namespace PuzzlemakerPlus;
 
+[JsonConverter(typeof(DirectionJsonConverter))]
 public enum Direction
 {
     Up,
@@ -18,7 +20,7 @@ public enum Direction
 }
 
 public static class Directions
-{   
+{
     /// <summary>
     /// Get the cardinal direction that a given normal vector is closest to.
     /// </summary>
@@ -90,7 +92,7 @@ public static class Directions
 
     public static Direction FromAxis(int axis, bool negative)
     {
-        switch(axis)
+        switch (axis)
         {
             case 0:
                 return negative ? Direction.Right : Direction.Left;
@@ -105,7 +107,7 @@ public static class Directions
 
     public static Direction Opposite(this Direction direction)
     {
-        switch(direction)
+        switch (direction)
         {
             case Direction.Up: return Direction.Down;
             case Direction.Down: return Direction.Up;
@@ -125,7 +127,7 @@ public static class Directions
     /// <returns>Unit vector in the primary check Direction.</returns>
     public static Direction GetPerpendicularDir1(this Direction direction)
     {
-        switch(direction)
+        switch (direction)
         {
             case Direction.Up: return Direction.Right;
             case Direction.Down: return Direction.Right;
@@ -139,7 +141,7 @@ public static class Directions
 
     public static Direction GetPerpendicularDir2(this Direction direction)
     {
-        switch(direction)
+        switch (direction)
         {
             case Direction.Up: return Direction.Forward;
             case Direction.Down: return Direction.Forward;
@@ -149,5 +151,73 @@ public static class Directions
             case Direction.Back: return Direction.Up;
             default: return Direction.Forward;
         }
+    }
+
+    /// <summary>
+    /// Get the axis and direction this direction is facing.
+    /// </summary>
+    /// <returns>The axis, in the form "X+", "X-", etc.</returns>
+    public static string GetAxisString(this Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.Up: return "Y+";
+            case Direction.Down: return "Y-";
+            case Direction.Left: return "X-";
+            case Direction.Right: return "X+";
+            case Direction.Forward: return "Z-";
+            case Direction.Back: return "Z+";
+            default: return "";
+        }
+    }
+
+    public static bool TryParseAxisString(string str, out Direction result)
+    {
+        result = default;
+        str = str.Trim().ToUpper();
+        if (str.Length != 2)
+            return false;
+
+        switch (str[0])
+        {
+            case 'Y':
+                if (str[1] == '+')
+                {
+                    result = Direction.Up;
+                    return true;
+                }
+                else if (str[1] == '-')
+                {
+                    result = Direction.Down;
+                    return true;
+                }
+                break;
+            case 'X':
+                if (str[1] == '+')
+                {
+                    result = Direction.Right;
+                    return true;
+                }
+                else if (str[1] == '-')
+                {
+                    result = Direction.Left;
+                    return true;
+                }
+                break;
+            case 'Z':
+                if (str[1] == '+')
+                {
+                    result = Direction.Back;
+                    return true;
+                }
+                else if (str[1] == '-')
+                {
+                    result = Direction.Forward;
+                    return true;
+                }
+                break;
+        }
+
+        return false;
     }
 }

@@ -1,219 +1,144 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 using Godot;
-using Godot.NativeInterop;
-
 
 namespace PuzzlemakerPlus.Item;
 
 /// <summary>
 /// An item within the editor. 
 /// Each instance of an item will correspond to an instance of this class; for example, if there's two buttons in the map, two Items will exist.
-/// The subclass of Item that's instansiated is determined by the ItemType and the item converterType's json.
+/// The subclass of ItemPropHolder that's instansiated is determined by the ItemType and the item converterType's json.
 /// </summary>
-public partial class Item : RefCounted
+public partial class Item : ItemPropHolder
 {
+    /// <summary>
+    /// Called when the position of the item is updated.
+    /// </summary>
+    /// <param name="oldPos">The previous position.</param>
+    /// <param name="newPos">The new position.</param>
+    [Signal]
+    public delegate void UpdatePositionEventHandler(Vector3 oldPos, Vector3 newPos);
+
+    [Signal]
+    public delegate void UpdateRotationEventHandler(Vector3 oldRot, Vector3 newRot);
+
+    [Signal]
+    public delegate void SetVariantEventHandler(string oldVal, string newVal);
+
     /// <summary>
     /// The ItemType this item is an instance of.
     /// </summary>
     public ItemType Type { get; }
 
-    public Item(ItemType type)
+    public PuzzlemakerProject Project { get; }
+
+    public Item(ItemType type, PuzzlemakerProject project)
     {
         this.Type = type;
+        Project = project;
     }
 
+    private Vector3 _position;
+
+    /// <summary>
+    /// The position of the item in editor space.
+    /// </summary>
     [ItemProp]
-    public Vector3 Position { get; set; }
+    public Vector3 Position
+    {
+        get => _position;
+        set
+        {
+            Vector3 oldPos = _position;
+            _position = value;
+            EmitSignal(SignalName.UpdatePosition, oldPos, value);
+        }
+    }
 
-    private readonly BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.FlattenHierarchy;
+    private Vector3 _rotation;
 
     /// <summary>
-    /// Read a set of properties from a json object and apply them to this item.
+    /// The YXZ euler rotation of the item in radians
     /// </summary>
-    /// <param name="json">Json object to read from.</param>
-    public virtual void ReadJson(JsonObject json, JsonSerializerOptions options)
+    [ItemProp]
+    public Vector3 Rotation
     {
-        foreach (PropertyInfo prop in this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+        get => _rotation;
+        set
         {
-            ItemProp? itemProp = prop.GetCustomAttribute<ItemProp>();
-            if (itemProp == null)
-                continue;
-
-            if (json.TryGetPropertyValue(prop.Name, out var node))
-            {
-                JsonSerializerOptions localOptions = options;
-                JsonConverterAttribute? jsonConverter = prop.GetCustomAttribute<JsonConverterAttribute>();
-                if (jsonConverter != null)
-                {
-                    localOptions = new JsonSerializerOptions(options);
-                    var converter = jsonConverter.CreateConverter(prop.PropertyType);
-                    if (converter != null)
-                        localOptions.Converters.Add(converter);
-                }
-                
-                prop.SetValue(this, JsonSerializer.Deserialize(node, prop.PropertyType, localOptions));
-            }
-            
+            Vector3 oldRot = _rotation;
+            _rotation = value;
+            EmitSignal(SignalName.UpdateRotation, oldRot, value);
         }
     }
 
     /// <summary>
-    /// Write all the properties from this item into a json object.
+    /// The rotation of this item as a quaternion.
     /// </summary>
-    /// <param name="json">Json object to write to.</param>
-    public virtual void WriteJson(JsonObject json, JsonSerializerOptions options)
+    public Quaternion RotationQuat
     {
-        foreach (PropertyInfo prop in this.GetType().GetProperties(_bindingFlags))
+        get => Quaternion.FromEuler(_rotation);
+        set => Rotation = value.GetEuler();
+    }
+
+    private string _variant = "";
+
+    /// <summary>
+    /// The name of the current item variant.
+    /// </summary>
+    [ItemProp]
+    public string Variant
+    {
+        get => _variant;
+        set
         {
-            ItemProp? itemProp = prop.GetCustomAttribute<ItemProp>();
-            if (itemProp == null)
-                continue;
-
-            JsonSerializerOptions localOptions = options;
-            JsonConverterAttribute? jsonConverter = prop.GetCustomAttribute<JsonConverterAttribute>();
-            if (jsonConverter != null)
-            {
-                localOptions = new JsonSerializerOptions(options);
-                var converter = jsonConverter.CreateConverter(prop.PropertyType);
-                if (converter != null)
-                    localOptions.Converters.Add(converter);
-            }
-
-            JsonNode? node = JsonSerializer.SerializeToNode(prop.GetValue(json, null), localOptions);
-
-            json[prop.Name] = node;
+            string oldVal = _variant;
+            _variant = value;
+            EmitSignal(SignalName.SetVariant, oldVal, value);
         }
     }
 
     /// <summary>
-    /// Get the display name of a property.
+    /// A shortcut getter to retrieve the current variant instance from the type.
     /// </summary>
-    /// <param name="propName">Property ID.</param>
-    /// <returns>The display name; null if no property with that name exists.</returns>
-    public string? GetPropertyDisplayName(string propName)
+    public ItemVariant? ItemVariant => Type.Variants.GetValueOrDefault(_variant);
+
+    /* GDScript Utility Functions */
+
+    public string[] GetVariants()
     {
-        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
-        return ItemProp.GetPropertyDisplayName(prop);
+        return Type.Variants.Keys.ToArray();
     }
 
     /// <summary>
-    /// Get the display type of a property.
+    /// Return a collection of all variant display names. For use in GDScript.
     /// </summary>
-    /// <param name="propName">Property ID</param>
-    /// <returns>The display type; null if no property with that name exists.</returns>
-    public string? GetPropertyDisplayType(string propName)
+    /// <returns>Dictionary with variant IDs and their display names</returns>
+    public virtual Godot.Collections.Dictionary<string, string> GetVariantDisplayNames()
     {
-        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
-        return ItemProp.GetPropertyDisplayType(prop);
+        Godot.Collections.Dictionary<string, string> dict = new();
+        foreach (var (id, var) in Type.Variants)
+        {
+            dict[id] = var.DisplayName ?? id;
+        }
+        return dict;
+    }
+
+    public virtual string? GetEditorModel(string variant, string? editorTheme)
+    {
+        return Type.GetEditorModel(variant, editorTheme);
     }
 
     /// <summary>
-    /// Get an array of all property names in this item.
+    /// Get the current editor model. Make sure to call after changes to variant or theme.
     /// </summary>
-    /// <returns>All property names.</returns>
-    public string[] GetItemProperties()
+    /// <param name="editorTheme">Theme to get the model for.</param>
+    /// <returns>The resource path of the editor model. Null if there's something wrong and there is no model.</returns>
+    public string? GetEditorModel(string? editorTheme)
     {
-        return this.GetType().GetProperties(_bindingFlags)
-            .Where(prop => prop.GetCustomAttribute<ItemProp>() != null).Select(prop => prop.Name).ToArray();
+        return GetEditorModel(Variant, editorTheme);
     }
-
-    public bool HasProperty(string propName)
-    {
-        return this.GetType().GetProperty(propName, _bindingFlags)?.GetCustomAttribute<ItemProp>() != null;
-    }
-
-    /// <summary>
-    /// Attempt to retrieve the value of a property by name. Only use for dynamic property reading; it's faster to read the property directly.
-    /// </summary>
-    /// <typeparam name="T">Property type.</typeparam>
-    /// <param name="propName">Property name.</param>
-    /// <param name="value">Variable to store value in.</param>
-    /// <returns>If the property was found and is the correct type.</returns>
-    public bool TryGetPropertyValue<T>(string propName, out T? value)
-    {
-        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
-        if (prop?.GetCustomAttribute<ItemProp>() == null)
-        {
-            value = default;
-            return false;
-        }
-
-        var val = prop.GetValue(this);
-        if (val is T)
-        {
-            value = (T)val;
-            return true;
-        }
-        else
-        {
-            value = default;
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Get a property value as a variant. Value must be variant-compatible.
-    /// </summary>
-    /// <param name="propName"></param>
-    /// <returns></returns>
-    public Variant GetPropertyValue(string propName)
-    {
-        if (TryGetPropertyValue<object>(propName, out var val))
-        {
-            if (VariantUtils.TryCreateVariant(in val, out var variant))
-            {
-                return variant;
-            }
-            else
-            {
-                GD.PushWarning($"Unable to create variant from {val}. Make sure it is a variant-compatible type!");
-                return default;
-            }
-        }
-        else return default;
-    }
-
-    /// <summary>
-    /// Attempt to set the value of a property by name. Only use for dynamic property writing; it's faster to set the property directly.
-    /// </summary>
-    /// <typeparam name="T">Type to set.</typeparam>
-    /// <param name="propName">Property name.</param>
-    /// <param name="value">Value to set.</param>
-    /// <returns>If the property was found and is the correct type.</returns>
-    public bool TrySetPropertyValue<T>(string propName, in T value)
-    {
-        PropertyInfo? prop = GetType().GetProperty(propName, _bindingFlags);
-        if (prop?.GetCustomAttribute<ItemProp>() == null)
-        {
-            return false;
-        }
-
-        if (prop.PropertyType.IsAssignableFrom(typeof(T)))
-        {
-            prop.SetValue(this, value);
-            return true;
-        }
-        else return false;
-    }
-
-    /// <summary>
-    /// Set the value of a property by name as a variant. Only use for dynamic property writing; it's faster to set the property directly.
-    /// </summary>
-    /// <param name="propName">Property name.</param>
-    /// <param name="value">Value to set.</param>
-    /// <returns>If the property was found and is the correct type.</returns>
-    public bool SetPropertyValue(string propName, Variant value)
-    {
-        return TrySetPropertyValue(propName, value.Obj);
-    }
-
 }
