@@ -29,7 +29,7 @@ internal class FileAccessStream : Stream
     /// <exception cref="IOException">Thrown when the file cannot be opened.</exception>
     public FileAccessStream(string path, FileAccess.ModeFlags modeFlags = FileAccess.ModeFlags.Read)
     {
-        _fileAccess = FileAccess.Open(path, modeFlags) ?? throw new IOException("Failed to open file.");
+        _fileAccess = FileAccess.Open(path, modeFlags) ?? throw new IOException($"Failed to open file '{path}'.");
         _fileLength = (long)_fileAccess.GetLength();
         _position = 0;
         ModeFlags = modeFlags;
