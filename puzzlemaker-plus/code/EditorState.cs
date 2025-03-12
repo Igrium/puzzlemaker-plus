@@ -77,6 +77,9 @@ public sealed partial class EditorState : Node
     [Export]
     public LevelTheme Theme { get; set; } = new();
 
+    // TODO: actually implement theme swaps.
+    public string ThemeName { get; private set; } = "clean";
+
     private bool _unsaved;
 
     /// <summary>
@@ -107,65 +110,6 @@ public sealed partial class EditorState : Node
         var theme = LevelTheme.LoadTheme("res://assets/themes/clean.json");
         if (theme != null)
             Theme = theme;
-    }
-
-    public PuzzlemakerProject NewProject()
-    {
-        GD.Print("Creating new project...");
-        PuzzlemakerProject project = new PuzzlemakerProject();
-        OpenProject(project);
-        return project;
-    }
-
-    public void OpenProject(PuzzlemakerProject project)
-    {
-        if (project == Project) return;
-        Project = project;
-        EmitSignal(SignalName.OnOpenProject, project);
-        EmitSignal(SignalName.OnChangeProjectName, project.FileName!);
-        UnSaved = false;
-    }
-
-    public void OpenProjectFile(string filepath)
-    {
-        PuzzlemakerProject? project;
-        using (var stream = new FileAccessStream(filepath))
-        {
-            project = PuzzlemakerProject.ReadFile(stream);
-        }
-        if (project == null)
-            throw new Exception("Json deserializer returned null.");
-        project.FileName = filepath;
-        OpenProject(project);
-    }
-
-    public void SaveProjectAs(string filepath)
-    {
-        using (var stream = new FileAccessStream(filepath, Godot.FileAccess.ModeFlags.Write))
-        {
-            Project.WriteFile(stream);
-        }
-        ProjectName = filepath;
-        UnSaved = false;
-        GD.Print("Saved to " + filepath);
-    }
-
-    public void SaveProject()
-    {
-        if (!HasProjectName)
-            throw new InvalidOperationException("Project name has not been set. Please use SaveProjectAs()");
-
-        SaveProjectAs(ProjectName!);
-    }
-
-    public bool Undo()
-    {
-        return CommandStack.Undo();
-    }
-
-    public bool Redo()
-    {
-        return CommandStack.Redo();
     }
     
     public void AddTestVoxels() 

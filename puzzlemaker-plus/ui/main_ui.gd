@@ -45,3 +45,6 @@ func _on_undo_pressed() -> void:
 
 func _on_redo_pressed() -> void:
 	Editor.Redo()
+
+func _on_add_test_item_pressed() -> void:
+	Editor.AddItem("testitem", Vector3(0, 0, 0))

@@ -29,7 +29,7 @@ public abstract class AbstractWorldCommand : ICommand
     /// <param name="world">World to run on. Automatically keeps track of changes for undo/redo.</param>
     protected abstract void Execute(IVoxelView<PuzzlemakerVoxel> world);
 
-    public void Execute()
+    public bool Execute()
     {
         EditorState editor = EditorState.Instance;
         ModifiedWorldLayer<PuzzlemakerVoxel> layer = new(editor.World);
@@ -51,6 +51,7 @@ public abstract class AbstractWorldCommand : ICommand
         }
 
         editor.EmitOnChunksUpdated(layer.UpdatedChunks.Keys);
+        return true;
     }
 
     public virtual void Undo()

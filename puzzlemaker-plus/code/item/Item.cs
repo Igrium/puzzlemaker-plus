@@ -14,6 +14,7 @@ namespace PuzzlemakerPlus.Items;
 /// Each instance of an item will correspond to an instance of this class; for example, if there's two buttons in the map, two Items will exist.
 /// The subclass of ItemPropHolder that's instansiated is determined by the ItemType and the item converterType's json.
 /// </summary>
+[GlobalClass]
 public partial class Item : ItemPropHolder
 {
     /// <summary>
@@ -149,4 +150,12 @@ public partial class Item : ItemPropHolder
         return GetEditorModel(Variant, editorTheme);
     }
 
+    /// <summary>
+    /// Get the editor model for the current theme. Make sure to call after changes to variant or theme.
+    /// </summary>
+    /// <returns></returns>
+    public string? GetEditorModel()
+    {
+        return GetEditorModel(Variant, EditorState.Instance.ThemeName);
+    }
 }

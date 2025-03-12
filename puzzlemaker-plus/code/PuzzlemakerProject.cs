@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using Godot;
 using PuzzlemakerPlus.Commands;
 using PuzzlemakerPlus.Items;
@@ -17,6 +16,20 @@ namespace PuzzlemakerPlus;
 [GlobalClass]
 public partial class PuzzlemakerProject : RefCounted
 {
+    /// <summary>
+    /// Called after an item has been added to the project.
+    /// </summary>
+    /// <param name="item">The item instance.</param>
+    [Signal]
+    public delegate void ItemAddedEventHandler(Item item);
+
+    /// <summary>
+    /// Called after an item has been removed from the project.
+    /// </summary>
+    /// <param name="item">The item. Could still be referenced in places such as the undo stack.</param>
+    [Signal]
+    public delegate void ItemRemovedEventHandler(Item item);
+
     public PuzzlemakerWorld World { get; }
 
     public CommandStack CommandStack { get; } = new();
@@ -26,7 +39,9 @@ public partial class PuzzlemakerProject : RefCounted
     /// </summary>
     public string? FileName { get; set; }
 
-    public Dictionary<string, Item> Items { get; } = new();
+    private Dictionary<string, Item> _items = new();
+
+    public IReadOnlyDictionary<string, Item> Items { get => _items; }
 
     public PuzzlemakerProject()
     {
@@ -88,7 +103,7 @@ public partial class PuzzlemakerProject : RefCounted
         {
             Item item = itemType.CreateInstance(this, id);
             item.ReadJson(json, options);
-            Items.Add(id, item);
+            AddItem(item);
             return item;
         }
         else
@@ -102,6 +117,92 @@ public partial class PuzzlemakerProject : RefCounted
         item.WriteJson(json, options);
         json["Type"] = item.Type.ID;
         return json;
+    }
+
+    /// <summary>
+    /// Add an item to this project.
+    /// </summary>
+    /// <param name="item">Item to add.</param>
+    /// <returns>If the item's ID didn't conflict with another item's ID and it was added.</returns>
+    /// <exception cref="ArgumentException">If the item belongs to the wrong project.</exception>
+    public virtual bool AddItem(Item item)
+    {
+        if (item.Project != this)
+            throw new ArgumentException("Item belongs to the wrong project.", nameof(item));
+
+        if (!_items.TryAdd(item.ID, item))
+        {
+            GD.PushWarning($"An item already exists with ID {item.ID}. Ignoring.");
+            return false;
+        }
+        EmitSignal(SignalName.ItemAdded, item);
+        return true;
+    }
+
+    /// <summary>
+    /// Attempt to remove an item from this project.
+    /// </summary>
+    /// <param name="item">Item to remove.</param>
+    /// <returns>If the item was found.</returns>
+    public virtual bool RemoveItem(Item item)
+    {
+        if (_items.Remove(item.ID))
+        {
+            EmitSignal(SignalName.ItemRemoved, item);
+            return true;
+        }
+        else return false;
+    }
+
+    /// <summary>
+    /// Attempt to remove an item from this project by its ID.
+    /// </summary>
+    /// <param name="id">ID of item to remove.</param>
+    /// <returns>If the item was found.</returns>
+    public bool RemoveItem(string id)
+    {
+        if (_items.TryGetValue(id, out var item))
+        {
+            return RemoveItem(item);
+        }
+        else return false;
+    }
+
+    /// <summary>
+    /// Create an item and add it to this project.
+    /// </summary>
+    /// <param name="type">Item type to instantiate.</param>
+    /// <param name="id">ID to give it. Null for automatic ID.</param>
+    /// <returns>The item, or null if there was an error stopping it from being created.</returns>
+    public Item? CreateItem(ItemType type, string? id = null)
+    {
+        if (id == null)
+            id = GetEmptyItemID();
+
+        Item item;
+        try
+        {
+            item = type.CreateInstance(this, id);
+        }
+        catch (Exception e)
+        {
+            GD.PushError($"Error instantiating item {type.ID}: ", e);
+            return null;
+        }
+
+        return AddItem(item) ? item : null;
+    }
+
+    public string GetEmptyItemID()
+    {
+        int count = Items.Count;
+        string id = "item-" + count;
+        while (Items.ContainsKey(id))
+        {
+            count++;
+            id = "item-" + count;
+        }
+        return id;
     }
 
     /// <summary>

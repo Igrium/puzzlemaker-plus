@@ -42,6 +42,18 @@ public partial class PackageManager : Node
 
     public IDictionary<string, ItemType> ItemTypes { get; } = new ConcurrentDictionary<string, ItemType>();
 
+    /// <summary>
+    /// Get an item type from its ID.
+    /// </summary>
+    /// <param name="name">The type ID.</param>
+    /// <returns>The type, or null if no type with that ID exists.</returns>
+    public ItemType? GetItemType(string name)
+    {
+        if (ItemTypes.TryGetValue(name, out var itemType))
+            return itemType;
+        else return null;
+    }
+
     private bool _initialPackageLoad = true;
 
     public override void _Ready()
@@ -157,19 +169,6 @@ public partial class PackageManager : Node
 
         }
         return null;
-    }
-
-    protected static void PrintError(string message, Exception ex)
-    {
-        if (OS.HasFeature("editor"))
-        {
-            GD.PushError(message, ex);
-            GD.PrintErr(message + ": " + ex.Message);
-        }
-        else
-        {
-            GD.PushError(message + ": ", ex.Message);
-        }
     }
 
     /// <summary>

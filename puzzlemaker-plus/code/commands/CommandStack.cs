@@ -30,10 +30,25 @@ public class CommandStack
     public virtual bool Execute(ICommand command)
     {
         _redoStack.Clear();
-        command.Execute();
-        _undoStack.Push(command);
-        EditorState.Instance.UnSaved = true;
-        return true;
+
+        bool success = false;
+        try
+        {
+            success = command.Execute();
+        }
+        catch (Exception ex)
+        {
+            GD.PushError("Error executing command: ", ex);
+            _undoStack.Clear(); // If it threw instead of returning false, we likely have an invalid state.
+        }
+
+        if (success)
+        {
+            _undoStack.Push(command);
+            EditorState.Instance.UnSaved = true;
+        }
+
+        return success;
     }
 
     /// <summary>

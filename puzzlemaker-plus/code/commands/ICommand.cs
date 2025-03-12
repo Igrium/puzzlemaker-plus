@@ -14,7 +14,10 @@ public interface ICommand
     /// <summary>
     /// Execute the command for the first time.
     /// </summary>
-    public void Execute();
+    /// <returns>If the command was executed successfully.</returns>
+    /// <remarks>If execute returns false, it failed some check and didn't modify the scene.
+    /// If it throws an exception, the scene is considered contaminated, and the undo stack is cleared.</remarks>
+    public bool Execute();
 
     /// <summary>
     /// Undo the command. Expects the project state is exactly as Execute() left it.
