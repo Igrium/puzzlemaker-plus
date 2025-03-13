@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dv7fn7ipy175r"]
+[gd_scene load_steps=9 format=3 uid="uid://dv7fn7ipy175r"]
 
 [ext_resource type="Script" uid="uid://cfslk1m0s33iy" path="res://addons/orbit-controls/orbit-controls.gd" id="3_honq3"]
 [ext_resource type="Script" uid="uid://dikh45he3mcwp" path="res://scenes/selection_highlight.gd" id="3_vny2r"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bd3mbm0pemh78" path="res://ui/main_ui.tscn" id="5_urfbl"]
 [ext_resource type="Script" uid="uid://cv3rlgw4wpa47" path="res://code/editor/EditorOperations.cs" id="6_3ygax"]
 [ext_resource type="Script" uid="uid://dnmlwkuhc6thf" path="res://scenes/key_listener.gd" id="7_elxd6"]
+[ext_resource type="Script" uid="uid://cxg6q4fsg8jkj" path="res://scenes/item/item_renderers.gd" id="8_buypi"]
 
 [node name="Node3D" type="Node3D"]
 
@@ -41,3 +42,6 @@ script = ExtResource("7_elxd6")
 
 [node name="Operations" type="Node" parent="KeyListener"]
 script = ExtResource("6_3ygax")
+
+[node name="ItemRenderers" type="Node3D" parent="."]
+script = ExtResource("8_buypi")

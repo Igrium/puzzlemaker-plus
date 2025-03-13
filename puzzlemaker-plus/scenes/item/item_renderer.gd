@@ -1,7 +1,7 @@
 extends Node3D
 class_name ItemRenderer
 
-const ITEM_RENDERER_SCENE := preload("res://item/item_renderer.tscn")
+const ITEM_RENDERER_SCENE := preload("res://scenes/item/item_renderer.tscn")
 
 @export var placeholder_mesh := preload("res://assets/models/placeholder_cube.tscn")
 
@@ -14,7 +14,18 @@ func set_item(item: Item):
 		push_warning("Item renderer already has an item instance. Behavior may be unexpected.")
 	
 	_item = item
+	item.UpdatePosition.connect(_update_position)
+	item.UpdateRotation.connect(_update_rotation)
+	
+	position = item.Position
+	rotation = item.Rotation
 	update_model()
+
+func _update_position(old_pos: Vector3, new_pos: Vector3):
+	self.position = new_pos
+
+func _update_rotation(old_rot: Vector3, new_rot: Vector3):
+	self.rotation = new_rot 
 
 func update_model():
 	if (is_instance_valid(_editor_model)):
@@ -38,4 +49,5 @@ func update_model():
 static func create_item_renderer(item: Item) -> ItemRenderer:
 	var scene: ItemRenderer = ITEM_RENDERER_SCENE.instantiate()
 	scene.set_item(item)
+	scene.name = item.ID
 	return scene

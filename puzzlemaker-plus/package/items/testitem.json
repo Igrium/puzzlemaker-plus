@@ -1,7 +1,9 @@
 {
 	"Variants": {
-		"clean": {
-			
+		"Standard": {
+			"EditorModel": {
+				"default": "res://package/assets/models/Television_01_2k.gltf"
+			}
 		}
 	}
 }

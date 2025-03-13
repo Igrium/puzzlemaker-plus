@@ -95,6 +95,7 @@ use_native_dialog = true
 title = "Are you sure?"
 initial_position = 1
 size = Vector2i(229, 100)
+force_native = true
 dialog_text = "You have unsaved changes."
 script = ExtResource("4_x3h8h")
 
