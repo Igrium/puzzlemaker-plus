@@ -21,10 +21,10 @@ func set_item(item: Item):
 	rotation = item.Rotation
 	update_model()
 
-func _update_position(old_pos: Vector3, new_pos: Vector3):
+func _update_position(_old_pos: Vector3, new_pos: Vector3):
 	self.position = new_pos
 
-func _update_rotation(old_rot: Vector3, new_rot: Vector3):
+func _update_rotation(_old_rot: Vector3, new_rot: Vector3):
 	self.rotation = new_rot 
 
 func update_model():

@@ -11,6 +11,9 @@ func _on_open_project(project: PuzzlemakerProject):
 	project.ItemAdded.connect(_on_item_added)
 	project.ItemRemoved.connect(_on_item_removed)
 	
+	for item: Item in project.GetItems():
+		_on_item_added(item)
+	
 func _on_item_added(item: Item):
 	var renderer = ItemRenderer.create_item_renderer(item)
 	add_child(renderer)

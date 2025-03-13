@@ -180,6 +180,7 @@ public class Vector3JsonConverter : JsonConverter<Vector3>
                         break;
 
                     vec[i] = GetNumber(ref reader);
+                    i++;
                 }
                 return vec;
             case JsonTokenType.StartObject:

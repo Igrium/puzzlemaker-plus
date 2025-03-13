@@ -193,6 +193,22 @@ public partial class PuzzlemakerProject : RefCounted
         return AddItem(item) ? item : null;
     }
 
+    /// <summary>
+    /// Get all the items in this project as a godot array.
+    /// </summary>
+    /// <returns>Item array. This array is a duplicate; changes to the item set will NOT reflect here, and vice-versa.</returns>
+    public Godot.Collections.Array<Item> GetItems()
+    {
+        var items = new Godot.Collections.Array<Item>();
+        items.AddRange(Items.Values);
+        return items;
+    }
+
+    public string[] GetItemIDs()
+    {
+        return Items.Keys.ToArray();
+    }
+
     public string GetEmptyItemID()
     {
         int count = Items.Count;

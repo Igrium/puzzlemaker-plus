@@ -21,7 +21,7 @@ namespace PuzzlemakerPlus.Items;
 public partial class ItemPropHolder : RefCounted
 {
 
-    private readonly BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.FlattenHierarchy;
+    private readonly BindingFlags _bindingFlags = BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Public;
 
     /// <summary>
     /// Read a set of properties from a json object and apply them to this item.
@@ -75,7 +75,7 @@ public partial class ItemPropHolder : RefCounted
                     localOptions.Converters.Add(converter);
             }
 
-            JsonNode? node = JsonSerializer.SerializeToNode(prop.GetValue(json, null), localOptions);
+            JsonNode? node = JsonSerializer.SerializeToNode(prop.GetValue(this), localOptions);
 
             json[prop.Name] = node;
         }
