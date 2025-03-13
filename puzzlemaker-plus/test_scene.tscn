@@ -1,13 +1,13 @@
 [gd_scene load_steps=9 format=3 uid="uid://dv7fn7ipy175r"]
 
 [ext_resource type="Script" uid="uid://cfslk1m0s33iy" path="res://addons/orbit-controls/orbit-controls.gd" id="3_honq3"]
-[ext_resource type="Script" uid="uid://dikh45he3mcwp" path="res://scenes/selection_highlight.gd" id="3_vny2r"]
+[ext_resource type="Script" uid="uid://dikh45he3mcwp" path="res://scenes/scripts/selection_highlight.gd" id="3_vny2r"]
 [ext_resource type="Script" uid="uid://bb78ubga3sgf3" path="res://code/test/VMFTest.cs" id="4_odcwv"]
-[ext_resource type="Script" uid="uid://fie576e1k73d" path="res://scenes/world_renderer.gd" id="5_4w6vq"]
+[ext_resource type="Script" uid="uid://fie576e1k73d" path="res://scenes/scripts/world_renderer.gd" id="5_4w6vq"]
 [ext_resource type="PackedScene" uid="uid://bd3mbm0pemh78" path="res://ui/main_ui.tscn" id="5_urfbl"]
 [ext_resource type="Script" uid="uid://cv3rlgw4wpa47" path="res://code/editor/EditorOperations.cs" id="6_3ygax"]
-[ext_resource type="Script" uid="uid://dnmlwkuhc6thf" path="res://scenes/key_listener.gd" id="7_elxd6"]
-[ext_resource type="Script" uid="uid://cxg6q4fsg8jkj" path="res://scenes/item/item_renderers.gd" id="8_buypi"]
+[ext_resource type="Script" uid="uid://dnmlwkuhc6thf" path="res://scenes/scripts/key_listener.gd" id="7_elxd6"]
+[ext_resource type="Script" uid="uid://cxg6q4fsg8jkj" path="res://scenes/scripts/item_renderers.gd" id="8_buypi"]
 
 [node name="Node3D" type="Node3D"]
 

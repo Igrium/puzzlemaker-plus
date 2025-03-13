@@ -25,6 +25,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     /// </summary>
     /// <param name="pos">World position to test.</param>
     /// <returns>Chunk position.</returns>
+    [Obsolete("Use extension method to Vector3I instead.")]
     public static Vector3I GetChunk(Vector3I pos)
     {
         return new Vector3I(pos.X >> 4, pos.Y >> 4, pos.Z >> 4);
@@ -35,6 +36,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     /// </summary>
     /// <param name="pos">Voxel global position.</param>
     /// <returns>Position relative to chunk.</returns>
+    [Obsolete("Use extension method to Vector3I instead.")]
     public static Vector3I GetPosInChunk(Vector3I pos)
     {
         return new Vector3I(pos.X & 15, pos.Y & 15, pos.Z & 15);
@@ -49,8 +51,9 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 
     public T? GetVoxel(int x, int y, int z)
     {
-        Vector3I chunkPos = GetChunk(new Vector3I(x, y, z));
-        Vector3I localPos = GetPosInChunk(new Vector3I(x, y, z));
+        Vector3I pos = new Vector3I(x, y, z);
+        Vector3I chunkPos = pos.GetChunk();
+        Vector3I localPos = pos.GetLocalPos();
 
         if (_chunks.TryGetValue(chunkPos, out var chunk))
         {

@@ -37,8 +37,28 @@ internal static class VectorExtensions
         return Math.Abs(vec1.X - vec2.X) + Math.Abs(vec1.Y - vec2.Y) + Math.Abs(vec1.Z - vec2.Z);
     }
 
-    public static Aabb Move(this Aabb aabb, Vector3 vec) 
+    public static Aabb Move(this in Aabb aabb, in Vector3 vec) 
     {
         return new Aabb(aabb.Position + vec, aabb.Size);
+    }
+
+    /// <summary>
+    /// Get the chunk that a given voxel belongs to.
+    /// </summary>
+    /// <param name="vec">Global voxel position.</param>
+    /// <returns>Chunk coordinate.</returns>
+    public static Vector3I GetChunk(this in Vector3I vec)
+    {
+        return new Vector3I(vec.X >> 4, vec.Y >> 4, vec.Z >> 4);
+    }
+
+    /// <summary>
+    /// Get the position of a voxel relative to its local chunk.
+    /// </summary>
+    /// <param name="vec">Global voxel position.</param>
+    /// <returns>Chunk-relative position.</returns>
+    public static Vector3I GetLocalPos(this in Vector3I vec)
+    {
+        return new Vector3I(vec.X & 15, vec.Y & 15, vec.Z & 15);
     }
 }

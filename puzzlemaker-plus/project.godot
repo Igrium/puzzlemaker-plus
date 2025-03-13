@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Puzzlemaker Plus"
-run/main_scene="res://test_scene.tscn"
+run/main_scene="uid://c8opainusd88g"
 config/features=PackedStringArray("4.4", "C#", "Mobile")
 config/icon="res://icon.svg"
 

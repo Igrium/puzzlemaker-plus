@@ -6,15 +6,12 @@ var chunks: Dictionary[Vector3i, WorldChunk] = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	Editor.connect("OnOpenProject", _on_open_project)
 	Editor.connect("OnChunksUpdated", _on_chunks_updated)
-
-	Editor.NewProject()
-	Editor.AddTestVoxels()
-
-func _on_open_project(_project: PuzzlemakerProject):
-	clear()
-	_on_chunks_updated(_project.GetOccupiedChunks())
+	_on_chunks_updated($"..".project.GetOccupiedChunks())
+	
+#func _on_open_project(_project: PuzzlemakerProject):
+	#clear()
+	#_on_chunks_updated(_project.GetOccupiedChunks())
 	
 func _on_chunks_updated(updated_chunks: PackedVector3Array):
 	for pos in updated_chunks:

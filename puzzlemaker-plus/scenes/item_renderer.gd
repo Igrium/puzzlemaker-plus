@@ -1,7 +1,7 @@
 extends Node3D
 class_name ItemRenderer
 
-const ITEM_RENDERER_SCENE := preload("res://scenes/item/item_renderer.tscn")
+const ITEM_RENDERER_SCENE := preload("res://scenes/item_renderer.tscn")
 
 @export var placeholder_mesh := preload("res://assets/models/placeholder_cube.tscn")
 
@@ -45,9 +45,3 @@ func update_model():
 	
 	_editor_model = model.instantiate()
 	add_child(_editor_model)
-
-static func create_item_renderer(item: Item) -> ItemRenderer:
-	var scene: ItemRenderer = ITEM_RENDERER_SCENE.instantiate()
-	scene.set_item(item)
-	scene.name = item.ID
-	return scene

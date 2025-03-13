@@ -230,6 +230,17 @@ public partial class PuzzlemakerProject : RefCounted
         return World.Chunks.Keys.Select(vec => new Vector3(vec.X, vec.Y, vec.Z)).ToArray();
     }
 
+    /// <summary>
+    /// Add an initial set of voxels to the world so editing can commence.
+    /// </summary>
+    public void AddInitialVoxels()
+    {
+        Vector3I min = new Vector3I(-16, 0, -16);
+        Vector3I max = new Vector3I(15, 7, 15);
+        World.Fill(min, max, new PuzzlemakerVoxel() { IsOpen = true });
+
+        EditorState.Instance.EmitOnChunksUpdated(min.GetChunk(), max.GetChunk());
+    }
 
     public void WriteFile(Stream stream)
     {

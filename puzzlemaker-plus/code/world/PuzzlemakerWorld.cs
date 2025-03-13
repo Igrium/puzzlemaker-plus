@@ -58,6 +58,26 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
     }
 
     /// <summary>
+    /// Check if this world is empty.
+    /// </summary>
+    /// <returns>True if there are no voxels in the world with the IsOpen flag.</returns>
+    public bool IsEmpty()
+    {
+        if (!Chunks.Any()) return true;
+
+        foreach (var chunk in Chunks.Values)
+        {
+            int len = chunk.Data.Length;
+            for (int i = 0; i < len; i++)
+            {
+                if (chunk.Data[i].IsOpen)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /// <summary>
     /// Read a voxel chunk from a base-64-encoded string.
     /// </summary>
     /// <param name="base64">Base-64 string.</param>
@@ -89,6 +109,7 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
         }
         return Convert.ToBase64String(data);
     }
+
 }
 
 public sealed class PuzzlemakerWorldJsonConverter : JsonConverter<PuzzlemakerWorld>

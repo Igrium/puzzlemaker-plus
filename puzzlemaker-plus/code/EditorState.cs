@@ -112,20 +112,20 @@ public sealed partial class EditorState : Node
             Theme = theme;
     }
     
-    public void AddTestVoxels() 
-    {
-        // World.SetVoxel(0, 0, 0, new PuzzlemakerVoxel().WithOpen(true));
-        // World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
-        World.Fill(new Vector3I(-16, 0, -32), new Vector3I(31, 7, 31), new PuzzlemakerVoxel().WithOpen(true));
-        World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
+    //public void AddTestVoxels() 
+    //{
+    //    // World.SetVoxel(0, 0, 0, new PuzzlemakerVoxel().WithOpen(true));
+    //    // World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
+    //    World.Fill(new Vector3I(-16, 0, -32), new Vector3I(31, 7, 31), new PuzzlemakerVoxel().WithOpen(true));
+    //    World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
 
-        //Vector3I portalable = new Vector3I(4, 0, 3);
-        //World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalability(Direction.Down, true));
-        World.UpdateVoxel(4, 0, 3, (block) => block.WithPortalability(Direction.Down, true));
+    //    //Vector3I portalable = new Vector3I(4, 0, 3);
+    //    //World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalability(Direction.Down, true));
+    //    World.UpdateVoxel(4, 0, 3, (block) => block.WithPortalability(Direction.Down, true));
 
-        UpdateAllChunks();
-        //EmitOnChunksUpdated(new Aabb(new Vector3(-4, 0, 4), new Vector3(8, 0, 8)));
-    }
+    //    UpdateAllChunks();
+    //    //EmitOnChunksUpdated(new Aabb(new Vector3(-4, 0, 4), new Vector3(8, 0, 8)));
+    //}
 
     public void EmitOnChunksUpdated(params Vector3[] chunks)
     {
@@ -149,29 +149,27 @@ public sealed partial class EditorState : Node
 
     public void EmitOnChunksUpdated(Aabb bounds)
     {
-        Vector3I minChunk = (bounds.Position / 16f).FloorInt();
-        Vector3I maxChunk = (bounds.End / 16f).FloorInt();
-
-        if (minChunk == maxChunk)
-        {
-            EmitOnChunksUpdated(minChunk);
-        }
-        else
-        {
-            List<Vector3> chunks = new List<Vector3>();
-            for (int x = minChunk.X; x <= maxChunk.X; x++)
-            {
-                for (int y = minChunk.Y; x <= maxChunk.Y; y++)
-                {
-                    for (int z = minChunk.Z; x <= maxChunk.Z; z++)
-                    {
-                        chunks.Add(new Vector3(x, y, z));
-                    }
-                }
-            }
-
-            EmitOnChunksUpdated(chunks.ToArray());
-        }
+        Vector3I minChunk = bounds.Position.RoundInt().GetChunk();
+        Vector3I maxChunk = bounds.End.RoundInt().GetChunk();
+        EmitOnChunksUpdated(minChunk, maxChunk);
     }
 
+    public void EmitOnChunksUpdated(Vector3I min, Vector3I max)
+    {
+        Vector3I size = (max - min).Abs();
+        Vector3[] chunks = new Vector3[(size.X + 1) * (size.Y + 1) * (size.Z + 1)];
+
+        int i = 0;
+        for (int x = min.X; x <= max.X; x++)
+        {
+            for (int y = min.Y; y <= max.Y; y++)
+            {
+                for (int z = min.Z; z <= max.Z; z++)
+                {
+                    chunks[i++] = new Vector3(x, y, z);
+                }
+            }
+        }
+        EmitOnChunksUpdated(chunks);
+    }
 }
