@@ -172,7 +172,7 @@ public partial class PackageManager : Node
     }
 
     /// <summary>
-    /// Load a texture from the packages. Load imported resource if there is one; otherwise, load from file.
+    /// Load a texture from the packages. Load imported resource if there is one; otherwise, Load from file.
     /// </summary>
     /// <param name="resourcePath">Resource path. Should start with 'res://'</param>
     /// <returns>The texture, or null if it could not be loaded.</returns>
@@ -197,7 +197,7 @@ public partial class PackageManager : Node
     }
 
     /// <summary>
-    /// Load a model as a packed scene from the packages. Load imported resource if there is one; otherwise, load from file.
+    /// Load a model as a packed scene from the packages. Load imported resource if there is one; otherwise, Load from file.
     /// </summary>
     /// <param name="resourcePath">Resourece path. Should start with 'res://'</param>
     /// <returns>The model scene, or null if it could not be loaded.</returns>

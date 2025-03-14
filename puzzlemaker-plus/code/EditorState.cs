@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using Godot;
 using PuzzlemakerPlus.Commands;
 
@@ -56,6 +55,50 @@ public sealed partial class EditorState : Node
     /// </summary>
     public PuzzlemakerWorld World => Project.World;
 
+    public LevelTheme? Theme { get; private set; }
+    public string ThemeName { get; private set; } = "res://assets/editor_themes/clean.json";
+
+    /// <summary>
+    /// Load a level theme from a file path.
+    /// </summary>
+    /// <param name="filepath">Theme's file path.</param>
+    /// <returns>If the theme was able to load.</returns>
+    public bool LoadTheme(string filepath)
+    {
+        GD.Print("Loading theme " + filepath);
+        LevelTheme? newTheme = LevelTheme.Load(filepath);
+        if (newTheme == null)
+            return false;
+
+        Theme = newTheme;
+        ThemeName = System.IO.Path.GetFileNameWithoutExtension(filepath);
+        return true;
+    }
+
+    public string EditorThemeName => Theme?.EditorTheme ?? EditorTheme.DEFAULT;
+
+    /// <summary>
+    /// Load the current editor theme from the level theme and return it.
+    /// </summary>
+    /// <returns>The editor theme.</returns>
+    public EditorTheme GetEditorTheme()
+    {
+        return LoadEditorTheme(EditorThemeName);
+    }
+
+    private static EditorTheme LoadEditorTheme(string filepath)
+    {
+        Resource res = ResourceLoader.Load(filepath, "EditorTheme");
+        if (filepath == EditorTheme.DEFAULT)
+        {
+            return (EditorTheme)res;
+        }
+        else
+        {
+            return res is EditorTheme theme ? theme : LoadEditorTheme(EditorTheme.DEFAULT);
+        }
+    }
+
     public CommandStack CommandStack => Project.CommandStack;
 
     /// <summary>
@@ -73,12 +116,6 @@ public sealed partial class EditorState : Node
     }
 
     public bool HasProjectName => !string.IsNullOrWhiteSpace(ProjectName);
-
-    [Export]
-    public LevelTheme Theme { get; set; } = new();
-
-    // TODO: actually implement theme swaps.
-    public string ThemeName { get; private set; } = "clean";
 
     private bool _unsaved;
 
@@ -101,30 +138,14 @@ public sealed partial class EditorState : Node
         if (_instance != null)
             GD.PushWarning("Tried to initialize EditorState twice!");
         _instance = this;
+
     }
 
     public override void _Ready()
     {
         base._Ready();
-        var theme = LevelTheme.LoadTheme("res://assets/themes/clean.json");
-        if (theme != null)
-            Theme = theme;
+        LoadTheme(ThemeName);
     }
-    
-    //public void AddTestVoxels() 
-    //{
-    //    // World.SetVoxel(0, 0, 0, new PuzzlemakerVoxel().WithOpen(true));
-    //    // World.SetVoxel(0, 0, 1, new PuzzlemakerVoxel().WithOpen(true));
-    //    World.Fill(new Vector3I(-16, 0, -32), new Vector3I(31, 7, 31), new PuzzlemakerVoxel().WithOpen(true));
-    //    World.SetVoxel(new Vector3I(0, 0, 0), new PuzzlemakerVoxel().WithOpen(false));
-
-    //    //Vector3I portalable = new Vector3I(4, 0, 3);
-    //    //World.SetVoxel(portalable, World.GetVoxel(portalable).WithPortalability(Direction.Down, true));
-    //    World.UpdateVoxel(4, 0, 3, (block) => block.WithPortalability(Direction.Down, true));
-
-    //    UpdateAllChunks();
-    //    //EmitOnChunksUpdated(new Aabb(new Vector3(-4, 0, 4), new Vector3(8, 0, 8)));
-    //}
 
     public void EmitOnChunksUpdated(params Vector3[] chunks)
     {

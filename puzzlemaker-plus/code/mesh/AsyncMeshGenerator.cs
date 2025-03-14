@@ -67,7 +67,7 @@ public partial class AsyncMeshGenerator : RefCounted
             {
                 builder.AddQuad(quads[i]);
             }
-            builder.ToMesh(_mesh, EditorState.Instance.Theme.EditorMaterials);
+            builder.ToMesh(_mesh, EditorState.Instance.GetEditorTheme().WallTextures.ToArray());
         }
 
         if (_collision != null)

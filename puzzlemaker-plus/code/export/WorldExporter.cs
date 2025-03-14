@@ -40,7 +40,7 @@ public class WorldExporter
 
     private string? GetTexture(int index)
     {
-        string[] tex = Theme.VoxelTextures;
+        string[] tex = Theme.WallTextures;
         if (tex.Length == 0)
             return null;
 

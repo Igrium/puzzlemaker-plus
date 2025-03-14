@@ -1,148 +1,138 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Godot;
 
 namespace PuzzlemakerPlus;
 
-public partial class LevelTheme : RefCounted
+[JsonConverter(typeof(LevelThemeJsonConverter))]
+public sealed partial class LevelTheme : RefCounted
 {
-    /// <summary>
-    /// The material to use for rendering voxels.
-    /// </summary>
-    [Export]
-    [JsonIgnore]
-    public Material VoxelMaterial { get; set; } = ResourceLoader.Load<Material>("res://assets/materials/editor_voxels.tres");
-
-    /// <summary>
-    /// Asset paths for textures to use in the editor.
-    /// </summary>
-    [Export]
-    public string[] EditorTextures { get; set; } = new string[0];
-
-    /// <summary>
-    /// Deserialized godot materials for editor voxels. Use LoadMaterials() to load them.
-    /// </summary>
-    [JsonIgnore]
-    public Material[] EditorMaterials { get; private set; } = new Material[0];
-
-    /// <summary>
-    /// Load all voxel textures from their respective paths. Call after updating EditorTextures or VoxelMaterial.
-    /// </summary>
-    public void LoadMaterials()
+    // RefCounted doesn't work well with json serializer, so keep a separate instance for json.
+    // This is really dumb...
+    internal class Internal
     {
-        EditorMaterials = new Material[EditorTextures.Length];
-        for (int i = 0; i < EditorTextures.Length; i++)
-        {
-            string path = EditorTextures[i];
-            Texture2D tex;
-            try
-            {
-                tex = ResourceLoader.Load<Texture2D>(path);
-            }
-            catch (Exception e)
-            {
-                GD.PushError($"Unable to load editor texture '{path}'", e);
-                continue;
-            }
+        public string? EditorTheme { get; set; } = null;
+        public string[] WallTextures { get; set; } = Array.Empty<string>();
+        public string[] FloorTextures { get; set; } = Array.Empty<string>();
+        public string[] CeilingTextures { get; set; } = Array.Empty<string>();
+    }
 
-            Material mat = (Material)VoxelMaterial.Duplicate();
-            mat.Set("shader_parameter/albedo_texture", tex);
-            EditorMaterials[i] = mat;
-        }
+    readonly internal Internal _internal;
+
+    public LevelTheme()
+    {
+        _internal = new();
+    }
+
+    internal LevelTheme(Internal @internal)
+    {
+        _internal = @internal;
     }
 
     /// <summary>
-    /// Get the texture to use for a given portalability and subdivision level.
+    /// Path to the editor theme to use. If null, use default editor theme.
+    /// </summary>
+    public string? EditorTheme { get => _internal.EditorTheme; set => _internal.EditorTheme = value; }
+
+    public string[] WallTextures { get => _internal.WallTextures; set => _internal.WallTextures = value; }
+    public string[] FloorTextures { get => _internal.FloorTextures; set => _internal.FloorTextures = value; }
+    public string[] CeilingTextures { get => _internal.FloorTextures; set => _internal.FloorTextures = value; }
+
+    /// <summary>
+    /// Get the wall texture to use for a given portalability and subdivision.
+    /// </summary>
+    /// <param name="portalable">Portalability</param>
+    /// <param name="subdiv">Subdivision level</param>
+    /// <returns>The texture, or null if no texture could be found.</returns>
+    public string? GetWallTexture(bool portalable, int subdiv)
+    {
+        return GetTexture(portalable, subdiv, WallTextures, true);
+    }
+
+    /// <summary>
+    /// Get the floor texture to use for a given portalability and subdivision.
+    /// </summary>
+    /// <param name="portalable">Portalability</param>
+    /// <param name="subdiv">Subdivision level</param>
+    /// <returns>The texture, or null if no texture could be found.</returns>
+    public string? GetFloorTexture(bool portalable, int subdiv)
+    {
+        return GetTexture(portalable, subdiv, FloorTextures, false) ?? GetWallTexture(portalable, subdiv);
+    }
+
+    /// <summary>
+    /// Get the ceiling texture to use for a given portalability and subdivision.
+    /// </summary>
+    /// <param name="portalable">Portalability</param>
+    /// <param name="subdiv">Subdivision level</param>
+    /// <returns>The texture, or null if no texture could be found.</returns>
+    public string? GetCeilingTexture(bool portalable, int subdiv)
+    {
+        return GetTexture(portalable, subdiv, CeilingTextures, false) ?? GetWallTexture(portalable, subdiv);
+    }
+
+    /// <summary>
+    /// Get the editor texture to use for a given portalability and subdivision.
     /// </summary>
     /// <param name="portalable">Portalability.</param>
-    /// <param name="subdiv">Subdivision level. 0 = 128 hammer units; 1 = 64 hammer units; 2 = 32 hammer units.</param>
-    /// <returns>The editor material for this face. Null if none was found.</returns>
-    public Material? GetEditorTexture(bool portalable, int subdiv)
+    /// <param name="subdiv">Subdivision.</param>
+    /// <param name="textureList">List of textures to pull from.</param>
+    /// <param name="clampSubdiv">If set and the subdivision is greater than the max subdivision count, the subdivision will be clamped.</param>
+    /// <returns>The texture, or null if no texture could be found for that portalability and subdivision level.</returns>
+    public static string? GetTexture(bool portalable, int subdiv, string[] textureList, bool clampSubdiv = true)
     {
         if (subdiv < 0)
-            throw new ArgumentOutOfRangeException(nameof(subdiv));
+            return null;
 
-        int maxCount = EditorMaterials.Length;
+        int maxCount = textureList.Length;
         int maxSubdiv = maxCount / 2;
-        if (subdiv > maxSubdiv)
+        if (subdiv > maxSubdiv && clampSubdiv)
             subdiv = maxSubdiv;
 
         int index = subdiv * 2 + (portalable ? 1 : 0);
-        if (index >= maxCount)
-        {
-            GD.PushError($"Unable to get voxel texture for portalability {portalable} with subdivision {subdiv}.");
-            return null;
-        }
-
-        return EditorMaterials[index];
+        return index < maxCount ? textureList[index] : null;
     }
 
     /// <summary>
-    /// Source engine paths for textures to use in-game
+    /// Attempt to Load a level theme from a file.
     /// </summary>
-    [Export]
-    public string[] VoxelTextures { get; set; } = new string[0];
-
-    public string? GetVoxelTexture(bool portalable, int subdiv)
+    /// <param name="path">File path to Load from.</param>
+    /// <returns>The level theme, or null if it could not be loaded.</returns>
+    public static LevelTheme? Load(string path)
     {
-        if (subdiv < 0)
-            throw new ArgumentOutOfRangeException(nameof(subdiv));
-
-        int maxCount = VoxelTextures.Length;
-        int maxSubdiv = maxCount / 2;
-        if (subdiv > maxSubdiv)
-            subdiv = maxSubdiv;
-
-        int index = subdiv * 2 + (portalable ? 1 : 0);
-        if (index >= maxCount)
+        try
         {
-            GD.PushError($"Unable to get voxel texture for portalability {portalable} with subdivision {subdiv}.");
-            return null;
-        }
-
-        return VoxelTextures[index];
-    }
-
-    /// <summary>
-    /// Attempt to load a level theme from the given resource path.
-    /// </summary>
-    /// <param name="path">Path to load from.</param>
-    /// <returns>The theme, or null if the theme couldn't be loaded.</returns>
-    public static LevelTheme? LoadTheme(string path)
-    {
-        GD.Print($"Loading theme: '{path}'");
-        LevelTheme? theme;
-        using (var file = FileAccess.Open(path, FileAccess.ModeFlags.Read))
-        {
-            if (file == null)
+            using (FileAccessStream stream = new FileAccessStream(path))
             {
-                GD.PushError("Unable to load theme. ", FileAccess.GetOpenError());
-                return null;
-            }
-            string json = file.GetAsText();
-            try
-            {
-                theme = FromJson(json);
-            }
-            catch (Exception e)
-            {
-                GD.PushError("Unable to load theme. ", e);
-                return null;
+                return JsonSerializer.Deserialize<LevelTheme>(stream, JsonUtils.JsonOptions);
             }
         }
+        catch (JsonException e)
+        {
+            GD.PrintErr(e.Message); // No need to spam console with stack trace if it's the package dev's fault.
+        }
+        catch (Exception e)
+        {
+            GD.PushError(e);
+        }
+        return null;
+    }
+}
 
-        theme?.LoadMaterials();
-        return theme;
+internal class LevelThemeJsonConverter : JsonConverter<LevelTheme>
+{
+    public override LevelTheme? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        LevelTheme result = new();
+        LevelTheme.Internal? @internal = options.GetConverter<LevelTheme.Internal>().Read(ref reader, typeof(LevelTheme.Internal), options);
+        return @internal != null ? new LevelTheme(@internal) : new LevelTheme();
     }
 
-    public static LevelTheme? FromJson(string json)
+    public override void Write(Utf8JsonWriter writer, LevelTheme value, JsonSerializerOptions options)
     {
-        return JsonSerializer.Deserialize<LevelTheme>(json);
-    }
-
-    public static string ToJson(LevelTheme theme)
-    {
-        return JsonSerializer.Serialize(theme);
+        options.GetConverter<LevelTheme.Internal>().Write(writer, value._internal, options);
     }
 }

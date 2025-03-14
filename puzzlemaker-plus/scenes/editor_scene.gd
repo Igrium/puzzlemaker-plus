@@ -2,6 +2,7 @@ extends Node3D
 
 ## The scene that will be instantiated when a project is opened.
 @export var project_packed_scene: PackedScene
+@export var editor_theme: EditorTheme
 
 var _project_scene: ProjectScene
 

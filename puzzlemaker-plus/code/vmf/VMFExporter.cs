@@ -16,7 +16,13 @@ public partial class VMFExporter : RefCounted
     public void ExportVMF(string path)
     {
         VMFBuilder builder = new VMFBuilder();
-        WorldExporter exporter = new WorldExporter(EditorState.Instance.Theme);
+        LevelTheme? theme = EditorState.Instance.Theme;
+        if (theme == null)
+        {
+            GD.PrintErr("Unable to export VMF: no editor theme loaded.");
+            return;
+        }
+        WorldExporter exporter = new WorldExporter(theme);
         exporter.ExportWorld(builder, EditorState.Instance.World);
 
         GD.Print("Saving VMF to " + path);
