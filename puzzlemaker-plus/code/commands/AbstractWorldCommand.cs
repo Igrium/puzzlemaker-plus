@@ -15,6 +15,8 @@ public abstract class AbstractWorldCommand : ICommand
     private readonly Dictionary<Vector3I, VoxelChunk<PuzzlemakerVoxel>> _preChunks = new();
     private readonly Dictionary<Vector3I, VoxelChunk<PuzzlemakerVoxel>> _postChunks = new();
 
+    private ISet<Vector3I>? _updatedChunks = null;
+
     private Aabb _preSelection;
     private Aabb _postSelection;
 
@@ -50,7 +52,8 @@ public abstract class AbstractWorldCommand : ICommand
             _postChunks[pos] = postChunk;
         }
 
-        editor.EmitOnChunksUpdated(layer.UpdatedChunks.Keys);
+        _updatedChunks = layer.AdjoiningChunks;
+        editor.EmitOnChunksUpdated(_updatedChunks);
         return true;
     }
 
@@ -65,7 +68,7 @@ public abstract class AbstractWorldCommand : ICommand
         {
             editor.SetSelection(_preSelection);
         }
-        editor.EmitOnChunksUpdated(_preChunks.Keys);
+        editor.EmitOnChunksUpdated(_updatedChunks ?? throw new Exception("Dumbass code doesn't work"));
     }
 
     public virtual void Redo()
@@ -80,7 +83,7 @@ public abstract class AbstractWorldCommand : ICommand
             editor.SetSelection(_postSelection);
         }
 
-        editor.EmitOnChunksUpdated(_postChunks.Keys);
+        editor.EmitOnChunksUpdated(_updatedChunks ?? throw new Exception("Dumbass code doesn't work"));
     }
 
 }

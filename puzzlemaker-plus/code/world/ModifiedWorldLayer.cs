@@ -17,7 +17,16 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
 
     private readonly Dictionary<Vector3I, VoxelChunk<T>> _updatedChunks = new();
 
+    private readonly HashSet<Vector3I> _adjoiningChunks = new();
+
     public IDictionary<Vector3I, VoxelChunk<T>> UpdatedChunks => _updatedChunks;
+
+    /// <summary>
+    /// All chunks which have been updated or are next to a voxel that has been updated.
+    /// Use this when meshing to avoid issues.
+    /// </summary>
+    public ISet<Vector3I> AdjoiningChunks => _adjoiningChunks;
+
     public ModifiedWorldLayer(VoxelWorld<T> world)
     {
         World = world;
@@ -45,6 +54,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
     public T? SetVoxel(Vector3I pos, T value)
     {
         VoxelChunk<T> chunk = GetWritableChunk(pos.GetChunk());
+        MarkVoxelUpdated(pos);
         return chunk.SetVoxel(pos.GetChunkLocalPos(), value);
     }
 
@@ -54,6 +64,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
         Vector3I localPos = pos.GetChunkLocalPos();
 
         VoxelChunk<T> chunk = GetWritableChunk(pos.GetChunk());
+        MarkVoxelUpdated(pos);
 
         chunk.UpdateVoxel(localPos.X, localPos.Y, localPos.Z, function);
     }
@@ -158,5 +169,27 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
         }
         _updatedChunks[chunkPos] = chunk;
         return chunk;
+    }
+
+    private void MarkVoxelUpdated(in Vector3I worldPos)
+    {
+        Vector3I chunkPos = worldPos.GetChunk();
+        AdjoiningChunks.Add(chunkPos);
+
+        Vector3I localPos = worldPos.GetChunkLocalPos();
+
+        // Mark adjoining chunks updated as well for meshing
+        if (localPos.X == 0)
+            AdjoiningChunks.Add(chunkPos + new Vector3I(-1, 0, 0));
+        else if (localPos.X == 15)
+            AdjoiningChunks.Add(chunkPos + new Vector3I(1, 0, 0));
+        if (localPos.Y == 0)
+            AdjoiningChunks.Add(chunkPos + new Vector3I(0, -1, 0));
+        else if (localPos.Y == 15)
+            AdjoiningChunks.Add(chunkPos + new Vector3I(0, 1, 0));
+        if (localPos.Z == 0)
+            AdjoiningChunks.Add(chunkPos + new Vector3I(0, 0, -1));
+        else if (localPos.Z == 15)
+            AdjoiningChunks.Add(chunkPos + new Vector3I(0, 0, 1));
     }
 }
