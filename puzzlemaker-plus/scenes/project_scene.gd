@@ -7,5 +7,5 @@ var project: PuzzlemakerProject
 
 func _ready() -> void:
 	if (project.World.IsEmpty()):
-		#project.AddInitialVoxels()
+		project.AddInitialVoxels()
 		pass

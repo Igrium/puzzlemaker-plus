@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
@@ -34,192 +35,162 @@ public class NewGreedyMesh
         }
     }
 
-    public static void DoGreedyMesh(IVoxelView<PuzzlemakerVoxel> world, Action<Quad> quadConsumer, int chunkSize = 16, float uvScale = 1, bool invert = false)
+    // Code ported from https://0fps.net/2012/06/30/meshing-in-a-minecraft-game/
+
+    // Note this implementation does not support different block types or block normals
+    // The original author describes how to do this here: https://0fps.net/2012/07/07/meshing-minecraft-part-2/
+
+
+
+    public static void DoGreedyMesh(IVoxelView<PuzzlemakerVoxel> world, Action<Quad> faceConsumer, int chunkSize = 16, float uvScale = 1, bool invert = false)
     {
 
-        FaceType[] mask = new FaceType[chunkSize * chunkSize];
-
-        // Sweep over each axis
-        for (int axis = 0; axis < 3; axis++)
+        // Sweep over each axis (X, Y and Z)
+        for (var axis = 0; axis < 3; ++axis)
         {
-            Array.Fill(mask, default);
-
+            int u, v, k, l, w, h;
             int uAxis = (axis + 1) % 3;
             int vAxis = (axis + 2) % 3;
+            var pos = new Vector3I();
+            var normal = new Vector3I();
 
-            Direction dir = Directions.FromAxis(axis, false);
-            Vector3I normal = Vector3I.Zero;
+            var mask = new FaceType[chunkSize * chunkSize];
             normal[axis] = 1;
 
-            // Check each slice of the chunk
-            Vector3I pos = new();
-            int b = 0;
+            // Check each slice of the chunk one at a time
             for (pos[axis] = -1; pos[axis] < chunkSize;)
             {
-                // Compute mask
-                int n = 0;
-                for (pos[vAxis] = 0; pos[vAxis] < chunkSize; pos[vAxis]++)
+                Direction direction = Directions.FromAxis(axis, false);
+                // Compute the mask
+                var n = 0;
+                for (pos[vAxis] = 0; pos[vAxis] < chunkSize; ++pos[vAxis])
                 {
-                    for (pos[uAxis] = 0; pos[uAxis] < chunkSize; pos[uAxis]++)
+                    for (pos[uAxis] = 0; pos[uAxis] < chunkSize; ++pos[uAxis])
                     {
                         PuzzlemakerVoxel currentBlock = world.GetVoxel(pos);
                         PuzzlemakerVoxel compareBlock = world.GetVoxel(pos + normal);
 
-                        // For positive-facing we're in the compare block looking at this one. Otherwise, we're in this one looking at compare.
-                        // TODO: Is this true?
-
+                        // Reverse normal: compare block looking at this one. Forward: this looking at compare.
                         if (currentBlock.IsOpen && !compareBlock.IsOpen)
                         {
-                            mask[n] = FaceType.FromVoxel(currentBlock, dir, false);
+                            mask[n++] = FaceType.FromVoxel(currentBlock, direction, false);
                         }
-                        else if (compareBlock.IsOpen && !currentBlock.IsOpen)
+                        else if (!currentBlock.IsOpen && compareBlock.IsOpen)
                         {
-                            mask[n] = FaceType.FromVoxel(compareBlock, dir.Opposite(), true);
+                            mask[n++] = FaceType.FromVoxel(compareBlock, direction.Opposite(), true);
                         }
-                        
-                        n++;
+                        else
+                        {
+                            mask[n++] = default;
+                        }
+
+
+
+                        // normal determines the normal (X, Y or Z) that we are searching
+                        // m.IsBlockAt(pos,y,z) takes global map positions and returns true if a block exists there
+
+                        //bool blockCurrent = 0 <= pos[axis] ? IsBlockAt(pos[0] + chunkPosX, pos[1] + chunkPosY, pos[2] + chunkPosZ) : true;
+                        //bool blockCompare = pos[axis] < chunkSize - 1 ? IsBlockAt(pos[0] + normal[0] + chunkPosX, pos[1] + normal[1] + chunkPosY, pos[2] + normal[2] + chunkPosZ) : true;
+
+                        //// The mask is set to true if there is a visible face between two blocks,
+                        ////   u.e. both aren't empty and both aren't blocks
+                        //mask[n++] = blockCurrent != blockCompare;
                     }
                 }
 
-                pos[axis]++;
+                ++pos[axis];
 
-                // Generate a mesh from the mask using lexicographic ordering,
-                // by looping over each block in this slice of the chunk
-                for (byte r = 0; r < 2; r++)
+                n = 0;
+
+                // Generate a mesh from the mask using lexicographic ordering,      
+                //   by looping over each block in this slice of the chunk
+                for (v = 0; v < chunkSize; ++v)
                 {
-                    bool reverse = r == 1;
-
-                    n = 0;
-                    for (int v = 0; v < chunkSize; v++)
+                    for (u = 0; u < chunkSize;)
                     {
-                        //GD.Print(v);
-                        for (int u = 0; u < chunkSize;)
+                        FaceType face = mask[n];
+                        if (face.solid)
                         {
-                            //GD.Print(u);
-                            FaceType face = mask[n];
-                            if (face.solid)
+                            // Compute the width of this quad and store it in w                        
+                            //   This is done by searching along the current axis until mask[n + w] is false
+                            for (w = 1; u + w < chunkSize && mask[n + w] == face; w++) { }
+
+                            // Compute the height of this quad and store it in h                        
+                            //   This is done by checking if every block next to this row (range 0 to w) is also part of the mask.
+                            //   For example, if w is 5 we currently have a quad of dimensions 1 pos 5. To reduce triangle count,
+                            //   greedy meshing will attempt to expand this quad out to chunkSize pos 5, but will stop if it reaches a hole in the mask
+
+                            var done = false;
+                            for (h = 1; v + h < chunkSize; h++)
                             {
-
-                                // Compute the width of this quad and store it in quadWidth
-                                // This is done by searching along the current axis until mask[n + quadWidth] is false
-                                int quadWidth = 1;
-                                while (u + quadWidth < PuzzlemakerWorld.CHUNK_SIZE && mask[n + quadWidth] == face)
+                                // Check each block next to this quad
+                                for (k = 0; k < w; ++k)
                                 {
-                                    //GD.Print("widthLoop");
-                                    quadWidth++;
-                                }
-
-                                // Compute the height of this quad and store it in quadHeight
-                                // This is done by checking if every block next to this row (range 0 to quadWidth) is also part of the mask.
-                                // For example, if quadWidth is 5 we currently have a quad of dimensions 1 Position 5. To reduce triangle count,
-                                // greedy meshing will attempt to expand this quad out to chunkSize Position 5, but will stop if it reaches a hole in the mask
-                                int quadHeight = 1;
-                                bool done = false;
-                                while (v + quadHeight < PuzzlemakerWorld.CHUNK_SIZE)
-                                {
-
-                                    for (int k = 0; k < quadWidth; k++)
+                                    // If there's a hole in the mask, exit
+                                    if (mask[n + k + h * chunkSize] != face)
                                     {
-                                        //GD.Print("heightLoop");
-                                        // Check each block next to this quad
-                                        if (mask[n + k + quadHeight * chunkSize] != face)
-                                        {
-                                            done = true;
-                                            break;
-                                        }
-                                    }
-                                    if (done)
+                                        done = true;
                                         break;
-                                    quadHeight++;
-                                }
-                                pos[uAxis] = u;
-                                pos[vAxis] = v;
-
-                                // du and dv determine the size and orientation of this face
-                                Vector3I du = new();
-                                du[uAxis] = quadWidth;
-
-                                Vector3I dv = new();
-                                dv[vAxis] = quadHeight;
-
-                                // CREATE QUAD
-                                var quad = new Quad
-                                    (
-                                        new Vector3I(pos[0], pos[1], pos[2]),
-                                        new Vector3I(pos[0] + du[0], pos[1] + du[1], pos[2] + du[2]),
-                                        new Vector3I(pos[0] + du[0] + dv[0], pos[1] + du[1] + dv[1], pos[2] + du[2] + dv[2]),
-                                        new Vector3I(pos[0] + dv[0], pos[1] + dv[1], pos[2] + dv[2])
-                                    ).WithResetNormals();
-
-                                // Compute UVs
-                                quad.UV1 = new Vector2(pos[uAxis] * uvScale, 1 - pos[vAxis] * uvScale);
-                                quad.UV2 = new Vector2((pos[uAxis] + du[uAxis]) * uvScale, 1 - pos[vAxis] * uvScale);
-                                quad.UV3 = new Vector2((pos[uAxis] + du[uAxis]) * uvScale, 1 - (pos[vAxis] + dv[vAxis]) * uvScale);
-                                quad.UV4 = new Vector2(pos[uAxis] * uvScale, 1 - (pos[vAxis] + dv[vAxis]) * uvScale);
-
-                                if ((face.reverse && !invert) || (!face.reverse && invert))
-                                {
-                                    quad = quad.Flipped();
-                                }
-
-                                quad.MaterialIndex = face.GetMaterialIndex();
-                                quadConsumer(quad);
-
-
-                                // Clear this part of the mask, so we don't add duplicate faces
-                                for (var l = 0; l < quadHeight; l++)
-                                {
-                                    for (var k = 0; k < quadWidth; k++)
-                                    {
-                                        mask[n + quadWidth + l * chunkSize] = default;
                                     }
                                 }
 
-                                u += quadWidth;
-                                n += quadHeight;
+                                if (done)
+                                    break;
                             }
-                            else
+
+                            pos[uAxis] = u;
+                            pos[vAxis] = v;
+
+                            // du and dv determine the size and orientation of this face
+                            var du = new Vector3I();
+                            du[uAxis] = w;
+
+                            var dv = new Vector3I();
+                            dv[vAxis] = h;
+
+                            // Create quad for this face.
+                            Quad quad = new Quad(pos, pos + du, pos + du + dv, pos + dv);
+                            quad.ResetNormals();
+
+                            quad.UV1 = new Vector2(pos[uAxis] * uvScale, 1 - pos[vAxis] * uvScale);
+                            quad.UV2 = new Vector2((pos[uAxis] + du[uAxis]) * uvScale, 1 - pos[vAxis] * uvScale);
+                            quad.UV3 = new Vector2((pos[uAxis] + du[uAxis]) * uvScale, 1 - (pos[vAxis] + dv[vAxis]) * uvScale);
+                            quad.UV4 = new Vector2(pos[uAxis] * uvScale, 1 - (pos[vAxis] + dv[vAxis]) * uvScale);
+
+                            if (face.reverse != invert) // face.reverse && !invert || !face.reverse && invert
                             {
-                                u++;
-                                n++;
+                                quad = quad.Flipped();
                             }
+
+                            quad.MaterialIndex = face.GetMaterialIndex();
+
+                            faceConsumer(quad);
+
+                            // Create a quad for this face. Colour, normal or textures are not stored in this block vertex format.
+                            //BlockVertex.AppendQuad(new Int3(pos[0], pos[1], pos[2]),                 // Top-left vertice position
+                            //                       new Int3(pos[0] + du[0], pos[1] + du[1], pos[2] + du[2]),         // Top right vertice position
+                            //                       new Int3(pos[0] + dv[0], pos[1] + dv[1], pos[2] + dv[2]),         // Bottom left vertice position
+                            //                       new Int3(pos[0] + du[0] + dv[0], pos[1] + du[1] + dv[1], pos[2] + du[2] + dv[2])  // Bottom right vertice position
+                            //                       );
+
+                            // Clear this part of the mask, so we don't add duplicate faces
+                            for (l = 0; l < h; ++l)
+                                for (k = 0; k < w; ++k)
+                                    mask[n + k + l * chunkSize] = default;
+
+                            // Increment counters and continue
+                            u += w;
+                            n += w;
                         }
-
+                        else
+                        {
+                            u++;
+                            n++;
+                        }
                     }
-
                 }
-                GD.Print(pos[axis]);
             }
-
-            GD.Print($"Looped {b} times");
-
-
-            //for (int b = 0; b < 2; b++)
-            //{
-            //    bool negative = b == 1;
-            //    Vector3I pos = Vector3I.Zero;
-
-            //    Direction dir = Directions.FromAxis(axis, negative);
-
-
-            //    // Move through the chunk from front to back.
-            //    for (pos[axis] = -1; pos[axis] < ChunkSize;)
-            //    {
-            //        // Compute forwardMask
-
-            //        int n = 0;
-            //        for (int v = 0; v < ChunkSize; v++)
-            //        {
-            //            for (int u = 0; u < ChunkSize; u++)
-            //            {
-            //                pos[axisU] = u;
-            //                pos[axisV] = v;
-
-            //                forwardMask[n++] = getVoxelFace(in pos, dir);
-            //            }
-            //        }
-            //    }
-            //}
         }
     }
+
 }

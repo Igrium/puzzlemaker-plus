@@ -85,7 +85,7 @@ public struct GreedyMesh
         // Sweep over each axis (X, Y and Z)
         for (_currentAxis = 0; _currentAxis < 3; ++_currentAxis)
         {
-            // 0 = negative, 1 = positive.
+            // 1 = negative, 0 = positive.
             for (_dir = 0; _dir <= 1; _dir++)
             {
                 _dirEnum = Directions.FromAxis(_currentAxis, _dir == 0);
@@ -150,7 +150,7 @@ public struct GreedyMesh
                 PuzzlemakerVoxel currentBlock = GetVoxel(_position + offset);
                 PuzzlemakerVoxel compareBlock = GetVoxel(_position + _direction + offset);
 
-                // If _dir is 1, we're in the compare block looking at this one. Otherwise, we're in this one looking at the compare.
+                // If _dir is 1 (negative), we're in the compare block looking at this one. Otherwise, we're in this one looking at the compare.
                 if (_dir == 1)
                 {
                     FaceType f = FaceType.FromVoxel(currentBlock, _dirEnum);
