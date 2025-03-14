@@ -21,28 +21,6 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 {
     public const int CHUNK_SIZE = 16;
 
-    /// <summary>
-    /// GetVoxel the chunk position that a certian voxel belongs to.
-    /// </summary>
-    /// <param name="pos">World position to test.</param>
-    /// <returns>Chunk position.</returns>
-    [Obsolete("Use extension method to Vector3I instead.")]
-    public static Vector3I GetChunk(Vector3I pos)
-    {
-        return new Vector3I(pos.X >> 4, pos.Y >> 4, pos.Z >> 4);
-    }
-
-    /// <summary>
-    /// GetVoxel the local position within a voxel's chunk that a voxel resides at.
-    /// </summary>
-    /// <param name="pos">Voxel global position.</param>
-    /// <returns>Position relative to chunk.</returns>
-    [Obsolete("Use extension method to Vector3I instead.")]
-    public static Vector3I GetPosInChunk(Vector3I pos)
-    {
-        return new Vector3I(pos.X & 15, pos.Y & 15, pos.Z & 15);
-    }
-
     private readonly ConcurrentDictionary<Vector3I, VoxelChunk<T>> _chunks = new();
 
     /// <summary>
@@ -54,7 +32,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     {
         Vector3I pos = new Vector3I(x, y, z);
         Vector3I chunkPos = pos.GetChunk();
-        Vector3I localPos = pos.GetLocalPos();
+        Vector3I localPos = pos.GetChunkLocalPos();
 
         if (_chunks.TryGetValue(chunkPos, out var chunk))
         {
@@ -130,11 +108,11 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
         Vector3I min = pos1.Min(pos2);
         Vector3I max = pos1.Max(pos2);
 
-        Vector3I minChunk = GetChunk(min);
-        Vector3I maxChunk = GetChunk(max);
+        Vector3I minChunk = min.GetChunk();
+        Vector3I maxChunk = max.GetChunk();
 
-        Vector3I localMin = GetPosInChunk(min);
-        Vector3I localMax = GetPosInChunk(max);
+        Vector3I localMin = min.GetChunkLocalPos();
+        Vector3I localMax = max.GetChunkLocalPos();
 
         for (int chunkX = minChunk.X; chunkX <= maxChunk.X; chunkX++)
         {

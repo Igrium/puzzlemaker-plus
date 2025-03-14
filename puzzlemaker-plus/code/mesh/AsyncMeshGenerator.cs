@@ -53,7 +53,7 @@ public partial class AsyncMeshGenerator : RefCounted
         ChunkView<PuzzlemakerVoxel> view = new(_world, _offset);
         try
         {
-            NewGreedyMesh.DoGreedyMesh(view, quads.Add, uvScale: .25f);
+            GreedyMesh.DoGreedyMesh(view, quads.Add, uvScale: .25f);
         }
         catch (Exception e)
         {

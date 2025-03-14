@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using Godot;
 using PuzzlemakerPlus.VMF;
 using VMFLib.Parsers;
@@ -21,7 +22,10 @@ public class WorldExporter
         foreach (var pos in world.Chunks.Keys)
         {
             Vector3I blockPos = pos * PuzzlemakerWorld.CHUNK_SIZE;
-            foreach (var quad in new GreedyMesh().DoGreedyMesh(world, pos, invert: true))
+            List<Quad> quads = new();
+            GreedyMesh.DoGreedyMesh(new ChunkView<PuzzlemakerVoxel>(world, pos), quads.Add);
+
+            foreach (var quad in quads)
             {
                 Quad transformed = quad + blockPos;
                 // TODO: Is there anything we can do to make the output hammer geo cleaner?

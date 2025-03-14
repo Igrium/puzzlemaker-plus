@@ -14,48 +14,6 @@ namespace PuzzlemakerPlus;
 [JsonConverter(typeof(PuzzlemakerWorldJsonConverter))]
 public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
 {   
-    /// <summary>
-    /// Draw a set of blocks from this world into a mesh.
-    /// </summary>
-    /// <param name="mesh">Mesh to add to.</param>
-    /// <param name="chunk">The chunk coordinate of the chunk to render.</param>
-    /// <param name="invert">If set, render the inside of the blocks instead of the outside.</param>
-    public void RenderChunk(ArrayMesh mesh, Vector3I chunk, bool invert = true) 
-    {
-        RenderChunkAndCollision(mesh, null, chunk, invert);
-    }
-
-    /// <summary>
-    /// Create render and collision geometry from a set of blocks from this world.
-    /// </summary>
-    /// <param name="mesh">Mesh to add render geometry to.</param>
-    /// <param name="collision">Shape to add collision geometry to.</param>
-    /// <param name="chunk">The chunk coordinate of the chunk to render</param>
-    /// <param name="invert">If set, render the inside of the blocks instead of the outside.</param>
-    public void RenderChunkAndCollision(ArrayMesh? mesh, ConcavePolygonShape3D? collision, Vector3I chunk, bool invert = true)
-    {
-        Quad[] quads = new GreedyMesh().DoGreedyMesh(this, chunk, uvScale: .25f, invert: invert).ToArray();
-        
-        if (mesh != null)
-        {
-            MultiMeshBuilder builder = new();
-            for (int i = 0; i < quads.Length; i++)
-            {
-                builder.AddQuad(in quads[i]);
-            }
-            builder.ToMesh(mesh, EditorState.Instance.Theme.EditorMaterials);
-        }
-
-        if (collision != null)
-        {
-            PolygonShapeBuilder builder = new PolygonShapeBuilder();
-            for (int i = 0; i < quads.Length; i++)
-            {
-                builder.AddQuad(in quads[i]);
-            }
-            builder.ToShape(collision);
-        }
-    }
 
     /// <summary>
     /// Check if this world is empty.

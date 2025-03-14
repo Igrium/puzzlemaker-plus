@@ -30,11 +30,11 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
 
     public T? GetVoxel(Vector3I pos)
     {
-        VoxelChunk<T>? chunk = GetReadableChunk(VoxelWorld<T>.GetChunk(pos));
+        VoxelChunk<T>? chunk = GetReadableChunk(pos.GetChunk());
         if (chunk == null)
             return default;
 
-        return chunk.GetVoxel(VoxelWorld<T>.GetPosInChunk(pos));
+        return chunk.GetVoxel(pos.GetChunkLocalPos());
     }
 
     public T? SetVoxel(int x, int y, int z, T value)
@@ -44,16 +44,16 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
 
     public T? SetVoxel(Vector3I pos, T value)
     {
-        VoxelChunk<T> chunk = GetWritableChunk(VoxelWorld<T>.GetChunk(pos));
-        return chunk.SetVoxel(VoxelWorld<T>.GetPosInChunk(pos), value);
+        VoxelChunk<T> chunk = GetWritableChunk(pos.GetChunk());
+        return chunk.SetVoxel(pos.GetChunkLocalPos(), value);
     }
 
     public void UpdateVoxel(int x, int y, int z, Func<T, T> function)
     {
         Vector3I pos = new Vector3I(x, y, z);
-        Vector3I localPos = VoxelWorld<T>.GetPosInChunk(pos);
+        Vector3I localPos = pos.GetChunkLocalPos();
 
-        VoxelChunk<T> chunk = GetWritableChunk(VoxelWorld<T>.GetChunk(pos));
+        VoxelChunk<T> chunk = GetWritableChunk(pos.GetChunk());
 
         chunk.UpdateVoxel(localPos.X, localPos.Y, localPos.Z, function);
     }

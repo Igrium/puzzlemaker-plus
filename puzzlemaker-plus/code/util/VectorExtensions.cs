@@ -62,7 +62,7 @@ internal static class VectorExtensions
     /// </summary>
     /// <param name="vec">Global voxel position.</param>
     /// <returns>Chunk-relative position.</returns>
-    public static Vector3I GetLocalPos(this in Vector3I vec)
+    public static Vector3I GetChunkLocalPos(this in Vector3I vec)
     {
         return new Vector3I(vec.X & 15, vec.Y & 15, vec.Z & 15);
     }
