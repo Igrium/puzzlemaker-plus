@@ -35,7 +35,6 @@ public partial class LevelTheme : RefCounted
         for (int i = 0; i < EditorTextures.Length; i++)
         {
             string path = EditorTextures[i];
-            GD.Print("Loading editor texture: " + path);
             Texture2D tex;
             try
             {

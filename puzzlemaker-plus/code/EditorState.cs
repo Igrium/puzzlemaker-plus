@@ -106,7 +106,6 @@ public sealed partial class EditorState : Node
     public override void _Ready()
     {
         base._Ready();
-        GD.Print("Editor state is ready!");
         var theme = LevelTheme.LoadTheme("res://assets/themes/clean.json");
         if (theme != null)
             Theme = theme;

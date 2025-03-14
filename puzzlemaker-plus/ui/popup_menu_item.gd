@@ -32,7 +32,6 @@ func _ready() -> void:
 		parent.add_separator()
 
 	_index = parent.item_count;
-	print(_index)
 	parent.add_item(text, _index)
 	
 	if accelerator:

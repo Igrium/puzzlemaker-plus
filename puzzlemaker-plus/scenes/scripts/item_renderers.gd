@@ -17,7 +17,6 @@ func _on_item_added(item: Item):
 	var renderer = _create_item_renderer(item)
 	add_child(renderer)
 	items[item] = renderer
-	print("Added item " + item.ID)
 
 func _on_item_removed(item: Item):
 	var renderer = items.get(item, null)

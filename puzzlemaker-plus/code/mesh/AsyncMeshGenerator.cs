@@ -59,7 +59,6 @@ public partial class AsyncMeshGenerator : RefCounted
         {
             GD.PushError(e);
         }
-        GD.Print("done greedy mesh");
 
         if (_mesh != null)
         {
