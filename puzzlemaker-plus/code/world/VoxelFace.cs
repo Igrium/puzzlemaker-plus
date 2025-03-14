@@ -41,7 +41,7 @@ public struct VoxelFace
     }
 
     /// <summary>
-    /// Get the vertices of this voxel face.
+    /// GetVoxel the vertices of this voxel face.
     /// </summary>
     /// <returns>Face vertices in clockwise order looking at the voxel.</returns>
     public readonly (Vector3I, Vector3I, Vector3I, Vector3I) GetVertices()

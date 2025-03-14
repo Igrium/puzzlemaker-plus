@@ -52,6 +52,11 @@ internal static class VectorExtensions
         return new Vector3I(vec.X >> 4, vec.Y >> 4, vec.Z >> 4);
     }
 
+    public static Vector3I ChunkStartPos(this in Vector3I vec)
+    {
+        return new Vector3I(vec.X << 4, vec.Y << 4, vec.Z << 4);
+    }
+
     /// <summary>
     /// Get the position of a voxel relative to its local chunk.
     /// </summary>
@@ -61,4 +66,5 @@ internal static class VectorExtensions
     {
         return new Vector3I(vec.X & 15, vec.Y & 15, vec.Z & 15);
     }
+
 }

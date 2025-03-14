@@ -34,7 +34,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
         if (chunk == null)
             return default;
 
-        return chunk.Get(VoxelWorld<T>.GetPosInChunk(pos));
+        return chunk.GetVoxel(VoxelWorld<T>.GetPosInChunk(pos));
     }
 
     public T? SetVoxel(int x, int y, int z, T value)
@@ -45,7 +45,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
     public T? SetVoxel(Vector3I pos, T value)
     {
         VoxelChunk<T> chunk = GetWritableChunk(VoxelWorld<T>.GetChunk(pos));
-        return chunk.Set(VoxelWorld<T>.GetPosInChunk(pos), value);
+        return chunk.SetVoxel(VoxelWorld<T>.GetPosInChunk(pos), value);
     }
 
     public void UpdateVoxel(int x, int y, int z, Func<T, T> function)
@@ -55,7 +55,7 @@ public class ModifiedWorldLayer<T> : IVoxelView<T>
 
         VoxelChunk<T> chunk = GetWritableChunk(VoxelWorld<T>.GetChunk(pos));
 
-        chunk.Update(localPos.X, localPos.Y, localPos.Z, function);
+        chunk.UpdateVoxel(localPos.X, localPos.Y, localPos.Z, function);
     }
 
     public void Fill(Vector3I pos1, Vector3I pos2, T value)

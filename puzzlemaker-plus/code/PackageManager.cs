@@ -43,7 +43,7 @@ public partial class PackageManager : Node
     public IDictionary<string, ItemType> ItemTypes { get; } = new ConcurrentDictionary<string, ItemType>();
 
     /// <summary>
-    /// Get an item type from its ID.
+    /// GetVoxel an item type from its ID.
     /// </summary>
     /// <param name="name">The type ID.</param>
     /// <returns>The type, or null if no type with that ID exists.</returns>

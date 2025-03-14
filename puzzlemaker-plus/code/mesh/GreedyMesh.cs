@@ -122,7 +122,7 @@ public struct GreedyMesh
         // Avoid hash lookup of the block is in this chunk.
         if (chunkPos == _chunkPos)
         {
-            return _chunk.Get(local);
+            return _chunk.GetVoxel(local);
         }
         else
         {
@@ -170,24 +170,24 @@ public struct GreedyMesh
         // Generate a mesh from the mask using lexicographic ordering,
         // by looping over each block in this slice of the chunk
         var n = 0;
-        for (var j = 0; j < PuzzlemakerWorld.CHUNK_SIZE; ++j)
+        for (var v = 0; v < PuzzlemakerWorld.CHUNK_SIZE; ++v)
         {
-            for (var i = 0; i < PuzzlemakerWorld.CHUNK_SIZE;)
+            for (var u = 0; u < PuzzlemakerWorld.CHUNK_SIZE;)
             {
                 if (_mask[n])
                 {
                     // Compute the width of this quad and store it in quadWidth
                     // This is done by searching along the current axis until mask[n + quadWidth] is false
-                    var quadWidth = ComputeQuadWidth(i, n);
+                    var quadWidth = ComputeQuadWidth(u, n);
 
                     // Compute the height of this quad and store it in quadHeight
                     // This is done by checking if every block next to this row (range 0 to quadWidth) is also part of the mask.
                     // For example, if quadWidth is 5 we currently have a quad of dimensions 1 Position 5. To reduce triangle count,
                     // greedy meshing will attempt to expand this quad out to chunkSize Position 5, but will stop if it reaches a hole in the mask
-                    var quadHeight = ComputeQuadHeight(j, n, quadWidth);
+                    var quadHeight = ComputeQuadHeight(v, n, quadWidth);
 
-                    _position[_axisU] = i;
-                    _position[_axisV] = j;
+                    _position[_axisU] = u;
+                    _position[_axisV] = v;
 
                     // du and dv determine the size and orientation of this face
                     var du = new int[3];
@@ -201,33 +201,33 @@ public struct GreedyMesh
                     yield return quad;
                     // Clear this part of the mask, so we don't add duplicate faces
                     ClearMask(n, quadWidth, quadHeight);
-                    i += quadWidth;
+                    u += quadWidth;
                     n += quadWidth;
                 }
                 else
                 {
-                    i++;
+                    u++;
                     n++;
                 }
             }
         }
     }
 
-    private int ComputeQuadWidth(int i, int n)
+    private int ComputeQuadWidth(int u, int n)
     {
         var quadWidth = 1;
-        while (i + quadWidth < PuzzlemakerWorld.CHUNK_SIZE && _mask[n + quadWidth])
+        while (u + quadWidth < PuzzlemakerWorld.CHUNK_SIZE && _mask[n + quadWidth])
         {
             quadWidth++;
         }
         return quadWidth;
     }
 
-    private int ComputeQuadHeight(int j, int n, int quadWidth)
+    private int ComputeQuadHeight(int v, int n, int quadWidth)
     {
         var quadHeight = 1;
         var done = false;
-        while (j + quadHeight < PuzzlemakerWorld.CHUNK_SIZE)
+        while (v + quadHeight < PuzzlemakerWorld.CHUNK_SIZE)
         {
             for (var k = 0; k < quadWidth; ++k)
             {

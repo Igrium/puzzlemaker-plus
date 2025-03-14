@@ -32,20 +32,41 @@ public partial class AsyncMeshGenerator : RefCounted
 
     public void DoGreedyMeshAsync()
     {
-        Task.Run(DoGreedyMeshSync);
+        Task.Run(() =>
+        {
+            try
+            {
+                DoGreedyMeshSync();
+            }
+            catch (Exception e)
+            {
+                GD.PushError(e);
+            }
+        });
     }
 
     private long DoGreedyMeshSync()
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-        Quad[] quads = new GreedyMesh().DoGreedyMesh(_world, _offset, uvScale: .25f, invert: _invert).ToArray();
+        //Quad[] quads = new GreedyMesh().DoGreedyMesh(_world, _offset, uvScale: .25f, invert: _invert).ToArray();
+        List<Quad> quads = new List<Quad>();
+        ChunkView<PuzzlemakerVoxel> view = new(_world, _offset);
+        try
+        {
+            NewGreedyMesh.DoGreedyMesh(view, quads.Add);
+        }
+        catch (Exception e)
+        {
+            GD.PushError(e);
+        }
+        GD.Print("done greedy mesh");
 
         if (_mesh != null)
         {
             MultiMeshBuilder builder = new();
-            for (int i = 0; i < quads.Length; i++)
+            for (int i = 0; i < quads.Count; i++)
             {
-                builder.AddQuad(in quads[i]);
+                builder.AddQuad(quads[i]);
             }
             builder.ToMesh(_mesh, EditorState.Instance.Theme.EditorMaterials);
         }
@@ -53,9 +74,9 @@ public partial class AsyncMeshGenerator : RefCounted
         if (_collision != null)
         {
             PolygonShapeBuilder builder = new PolygonShapeBuilder();
-            for (int i = 0; i < quads.Length; i++)
+            for (int i = 0; i < quads.Count; i++)
             {
-                builder.AddQuad(in quads[i]);
+                builder.AddQuad(quads[i]);
             }
             builder.ToShape(_collision);
         }

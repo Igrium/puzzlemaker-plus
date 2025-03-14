@@ -9,7 +9,7 @@ using Godot;
 namespace PuzzlemakerPlus;
 
 [JsonConverter(typeof(DirectionJsonConverter))]
-public enum Direction
+public enum Direction : byte
 {
     Up,
     Down,
@@ -22,7 +22,7 @@ public enum Direction
 public static class Directions
 {
     /// <summary>
-    /// Get the cardinal direction that a given normal vector is closest to.
+    /// GetVoxel the cardinal direction that a given normal vector is closest to.
     /// </summary>
     /// <param name="normal">The direction.</param>
     /// <returns>The closest direction.</returns>
@@ -95,11 +95,11 @@ public static class Directions
         switch (axis)
         {
             case 0:
-                return negative ? Direction.Right : Direction.Left;
+                return negative ? Direction.Left : Direction.Right;
             case 1:
-                return negative ? Direction.Up : Direction.Down;
+                return negative ? Direction.Down : Direction.Up;
             case 2:
-                return negative ? Direction.Back : Direction.Forward;
+                return negative ? Direction.Forward : Direction.Back;
             default:
                 throw new ArgumentOutOfRangeException(nameof(axis), "Axis must be 0 (x), 1 (y) or 2 (z).");
         }
@@ -154,7 +154,7 @@ public static class Directions
     }
 
     /// <summary>
-    /// Get the axis and direction this direction is facing.
+    /// GetVoxel the axis and direction this direction is facing.
     /// </summary>
     /// <returns>The axis, in the form "X+", "X-", etc.</returns>
     public static string GetAxisString(this Direction direction)

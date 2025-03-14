@@ -82,7 +82,7 @@ public partial class ItemPropHolder : RefCounted
     }
 
     /// <summary>
-    /// Get a PropertyInfo reference to an item property.
+    /// GetVoxel a PropertyInfo reference to an item property.
     /// </summary>
     /// <param name="propName">Property name.</param>
     /// <returns>The property info. Null if no item property was found with that name.</returns>
@@ -93,7 +93,7 @@ public partial class ItemPropHolder : RefCounted
     }
 
     /// <summary>
-    /// Get the ItemProp attribute instance for a given item property.
+    /// GetVoxel the ItemProp attribute instance for a given item property.
     /// </summary>
     /// <param name="propName">Property name.</param>
     /// <returns>The ItemProp object. Null if no item property was found by that name.</returns>
@@ -103,7 +103,7 @@ public partial class ItemPropHolder : RefCounted
     }
 
     /// <summary>
-    /// Get the display name of a property.
+    /// GetVoxel the display name of a property.
     /// </summary>
     /// <param name="propName">Property ID.</param>
     /// <returns>The display name; null if no property with that name exists.</returns>
@@ -114,7 +114,7 @@ public partial class ItemPropHolder : RefCounted
     }
 
     /// <summary>
-    /// Get the display type of a property.
+    /// GetVoxel the display type of a property.
     /// </summary>
     /// <param name="propName">Property ID</param>
     /// <returns>The display type; null if no property with that name exists.</returns>
@@ -125,7 +125,7 @@ public partial class ItemPropHolder : RefCounted
     }
 
     /// <summary>
-    /// Get an array of all property names in this item.
+    /// GetVoxel an array of all property names in this item.
     /// </summary>
     /// <returns>All property names.</returns>
     public string[] GetItemProperties()
@@ -169,7 +169,7 @@ public partial class ItemPropHolder : RefCounted
     }
 
     /// <summary>
-    /// Get a property value as a variant. Value must be variant-compatible.
+    /// GetVoxel a property value as a variant. Value must be variant-compatible.
     /// </summary>
     /// <param name="propName"></param>
     /// <returns></returns>
@@ -225,7 +225,7 @@ public partial class ItemPropHolder : RefCounted
     }
 
     /// <summary>
-    /// Get the display info for all the properties in this item. Mainly intended for GDScript.
+    /// GetVoxel the display info for all the properties in this item. Mainly intended for GDScript.
     /// </summary>
     /// <returns>Godot dictionary of property display info.</returns>
     public Godot.Collections.Dictionary<string, ItemPropDisplayData> GetPropertiesDisplayData()

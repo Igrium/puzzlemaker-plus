@@ -24,7 +24,7 @@ public sealed class ItemType
     public Dictionary<string, ItemVariant> Variants { get; set; } = new Dictionary<string, ItemVariant>();
 
     /// <summary>
-    /// Get the editor model to use for a given variant and theme.
+    /// GetVoxel the editor model to use for a given variant and theme.
     /// </summary>
     /// <param name="variant">Variant ID to use.</param>
     /// <param name="editorTheme">Editor theme to use. Null to use default theme.</param>
@@ -67,7 +67,7 @@ public sealed class ItemVariant
     public Dictionary<string, string> EditorModel { get; set; } = new();
 
     /// <summary>
-    /// Get the editor model to use for a given theme.
+    /// GetVoxel the editor model to use for a given theme.
     /// </summary>
     /// <param name="editorTheme">Editor theme to use. Null to use the default model.</param>
     /// <returns>The model, or null if the package dev messed up and no model was found.</returns>

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using System.Threading;
 
@@ -21,7 +22,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     public const int CHUNK_SIZE = 16;
 
     /// <summary>
-    /// Get the chunk position that a certian voxel belongs to.
+    /// GetVoxel the chunk position that a certian voxel belongs to.
     /// </summary>
     /// <param name="pos">World position to test.</param>
     /// <returns>Chunk position.</returns>
@@ -32,7 +33,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
     }
 
     /// <summary>
-    /// Get the local position within a voxel's chunk that a voxel resides at.
+    /// GetVoxel the local position within a voxel's chunk that a voxel resides at.
     /// </summary>
     /// <param name="pos">Voxel global position.</param>
     /// <returns>Position relative to chunk.</returns>
@@ -57,7 +58,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 
         if (_chunks.TryGetValue(chunkPos, out var chunk))
         {
-            return chunk.Get(localPos);
+            return chunk.GetVoxel(localPos);
         }
         else return default;
         
@@ -80,32 +81,12 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 
         Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
         var chunk = GetOrCreateChunk(chunkPos);
-        return chunk.Set(localX, localY, localZ, value);
+        return chunk.SetVoxel(localX, localY, localZ, value);
     }
 
     public T? SetVoxel(Vector3I pos, T value)
     {
         return SetVoxel(pos.X, pos.Y, pos.Z, value);
-    }
-
-    public void UpdateVoxel(int x, int y, int z, VoxelOperator<T> function)
-    {
-        int chunkX = x >> 4;
-        int chunkY = y >> 4;
-        int chunkZ = z >> 4;
-
-        int localX = x & 15;
-        int localY = y & 15;
-        int localZ = z & 15;
-        Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
-        var chunk = GetOrCreateChunk(chunkPos);
-
-        chunk.Update(localX, localY, localZ, function);
-    }
-
-    public void UpdateVoxel(Vector3I pos, VoxelOperator<T> function)
-    {
-        UpdateVoxel(pos.X, pos.Y, pos.Z, function);
     }
 
     public void UpdateVoxel(int x, int y, int z, Func<T, T> function)
@@ -120,7 +101,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
         Vector3I chunkPos = new Vector3I(chunkX, chunkY, chunkZ);
         var chunk = GetOrCreateChunk(chunkPos);
 
-        chunk.Update(localX, localY, localZ, function);
+        chunk.UpdateVoxel(localX, localY, localZ, function);
     }
 
     public void UpdateVoxel(Vector3I pos, Func<T, T> function)
@@ -177,7 +158,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
                         {
                             for (int z = minZ; z <= maxZ; z++)
                             {
-                                chunk.Update(x, y, z, val => function(new Vector3I(x, y, z), val));
+                                chunk.UpdateVoxel(x, y, z, val => function(new Vector3I(x, y, z), val));
                             }
                         }
                     }
@@ -248,7 +229,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
                     for (int z = 0; z < 16; z++)
                     {
                         Vector3I globalPos = chunkStart + new Vector3I(x, y, z);
-                        T val = chunk.Get(x, y, z);
+                        T val = chunk.GetVoxel(x, y, z);
                         yield return (globalPos, val);
                     }
                 }
@@ -305,7 +286,7 @@ public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
 /// A 16x16 array of blocks.
 /// </summary>
 /// <typeparam name="T">Block type</typeparam>
-public class VoxelChunk<T>
+public class VoxelChunk<T> : IVoxelView<T>
 {
     [JsonIgnore]
     private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
@@ -317,30 +298,27 @@ public class VoxelChunk<T>
     public T[] Data { get => _data; }
 
     /// <summary>
-    /// Get the value at a specific location.
+    /// GetVoxel the value at a specific location.
     /// </summary>
     /// <param name="x">Local X coordinate.</param>
     /// <param name="y">Local Y coordinate.</param>
     /// <param name="z">Local Z coordinate.</param>
     /// <returns>The value.</returns>
-    public T Get(int x, int y, int z)
+    public T GetVoxel(int x, int y, int z)
     {
         AssertValidIndex(x, y, z);
-        using (new RWLockHandle(_rwLock, false))
-        {
-            int index = x + (y * 16) + (z * 16 * 16);
-            return _data[index];
-        }
+        int index = x + (y * 16) + (z * 16 * 16);
+        return _data[index];
     }
     
     /// <summary>
-    /// Get the value at a specific location.
+    /// GetVoxel the value at a specific location.
     /// </summary>
     /// <param name="pos">Local position.</param>
     /// <returns>The value.</returns>
-    public T Get(Vector3I pos)
+    public T GetVoxel(Vector3I pos)
     {
-        return Get(pos.X, pos.Y, pos.Z);
+        return GetVoxel(pos.X, pos.Y, pos.Z);
     }
 
     /// <summary>
@@ -351,16 +329,13 @@ public class VoxelChunk<T>
     /// <param name="z">Local Z coordinate.</param>
     /// <param name="value">New value.</param>
     /// <returns>The previous value.</returns>
-    public T Set(int x, int y, int z, T value)
+    public T SetVoxel(int x, int y, int z, T value)
     {
         AssertValidIndex(x, y, z);
-        using (new RWLockHandle(_rwLock, true))
-        {
-            int index = x + (y * 16) + (z * 16 * 16);
-            T prev = _data[index];
-            _data[index] = value;
-            return prev;
-        }
+        int index = x + (y * 16) + (z * 16 * 16);
+        T prev = _data[index];
+        _data[index] = value;
+        return prev;
     }
 
     /// <summary>
@@ -369,31 +344,17 @@ public class VoxelChunk<T>
     /// <param name="pos">Local position.</param>
     /// <param name="value">New value.</param>
     /// <returns>The previous value.</returns>
-    public T Set(Vector3I pos, T value)
+    public T SetVoxel(Vector3I pos, T value)
     {
-        return Set(pos.X, pos.Y, pos.Z, value);
+        return SetVoxel(pos.X, pos.Y, pos.Z, value);
     }
 
-    public void Update(int x, int y, int z, VoxelOperator<T> function)
+    public void UpdateVoxel(int x, int y, int z, Func<T, T> function)
     {
         AssertValidIndex(x, y, z);
 
-        using (new RWLockHandle(_rwLock, true))
-        {
-            int index = x + (y * 16) + (z * 16 * 16);
-            function.Invoke(ref _data[index]);
-        }
-    }
-
-    public void Update(int x, int y, int z, Func<T, T> function)
-    {
-        AssertValidIndex(x, y, z);
-
-        using (new RWLockHandle(_rwLock, true))
-        {
-            int index = x + (y * 16) + (z * 16 * 16);
-            _data[index] = function(_data[index]);
-        }
+        int index = x + (y * 16) + (z * 16 * 16);
+        _data[index] = function(_data[index]);
     }
 
     private void AssertValidIndex(int x, int y, int z)
@@ -406,34 +367,69 @@ public class VoxelChunk<T>
             throw new ArgumentOutOfRangeException(nameof(z), z, "Z param out of range");
     }
 
+    private void AssertValidIndex(in Vector3I vec)
+    {
+        AssertValidIndex(vec.X, vec.Y, vec.Z);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int GetIndex(int x, int y, int z)
+    {
+        return x + (y * 16) + (z * 16 * 16);
+    }
+
     public void Fill(T value)
     {
-        using (new RWLockHandle(_rwLock, true))
-        {
-            Array.Fill(_data, value);
-        }
+        Array.Fill(_data, value);
     }
+
 
     public VoxelChunk<V> Transform<V>(Func<T, V> function)
     {
         VoxelChunk<V> result = new();
-        using (new RWLockHandle(_rwLock, false))
+        for (int i = 0; i < _data.Length; i++)
         {
-            for (int i = 0; i < _data.Length; i++)
-            {
-                result._data[i] = function.Invoke(_data[i]);
-            }
+            result._data[i] = function.Invoke(_data[i]);
         }
         return result;
     }
 
     public void CopyTo(VoxelChunk<T> other)
     {
-        using (new RWLockHandle(this._rwLock, false))
+        Array.Copy(_data, other._data, _data.Length);
+    }
+
+    public void Fill(Vector3I pos1, Vector3I pos2, T value)
+    {
+        AssertValidIndex(pos1);
+        AssertValidIndex(pos2);
+
+        for (int x = pos1.X; x <= pos2.X; x++)
         {
-            using (new RWLockHandle(other._rwLock, true))
+            for (int y = pos1.Y; y <= pos2.Y; y++)
             {
-                Array.Copy(_data, other._data, _data.Length);
+                for (int z = pos1.Z; z <= pos2.Z; z++)
+                {
+                    _data[GetIndex(x, y, z)] = value;
+                }
+            }
+        }
+    }
+
+    public void UpdateBox(Vector3I pos1, Vector3I pos2, Func<Vector3I, T, T> function, bool readOnly = false)
+    {
+        AssertValidIndex(pos1);
+        AssertValidIndex(pos2);
+
+        for (int x = pos1.X; x <= pos2.X; x++)
+        {
+            for (int y = pos1.Y; y <= pos2.Y; y++)
+            {
+                for (int z = pos1.Z; z <= pos2.Z; z++)
+                {
+                    int index = GetIndex(x, y, z);
+                    _data[index] = function(new Vector3I(x, y, z), _data[index]);
+                }
             }
         }
     }
@@ -444,38 +440,5 @@ internal static class Vector3IExtensions
     public static int SumComponents(this Vector3I vec)
     {
         return vec.X + vec.Y + vec.Z;
-    }
-}
-
-internal struct RWLockHandle : IDisposable
-{
-    private readonly bool _isWriteMode;
-    private readonly ReaderWriterLockSlim _rwLock;
-
-    public RWLockHandle(ReaderWriterLockSlim rwLock, bool isWriteMode)
-    {
-        _isWriteMode = isWriteMode;
-        _rwLock = rwLock;
-
-        if (isWriteMode)
-        {
-            rwLock.EnterWriteLock();
-        }
-        else
-        {
-            rwLock.EnterReadLock();
-        }
-    }
-
-    public void Dispose()
-    {
-        if (_isWriteMode)
-        {
-            _rwLock.ExitWriteLock();
-        }
-        else
-        {
-            _rwLock.ExitReadLock();
-        }
     }
 }
