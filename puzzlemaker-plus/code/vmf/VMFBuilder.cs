@@ -11,9 +11,17 @@ public class VMFBuilder
     private enum Axis { X, Y, Z }
 
     public IList<Solid> Solids { get; } = new List<Solid>();
+    public IList<Entity> Entities { get; } = new List<Entity>();
 
     private int _faceCount = 0;
     private int _solidCount = 0;
+
+    public VMFBuilder()
+    {
+        Entity entity = new Entity();
+        entity.ClassName = "info_player_start";
+        Entities.Add(entity);
+    }
 
     public void AddSolid(SolidBuilder solid)
     {
@@ -26,7 +34,12 @@ public class VMFBuilder
 
         World world = new World();
         world.Solids.AddRange(Solids);
-          writer.WriteClass(world);
+        writer.WriteClass(world);
+
+        foreach (var entity in Entities)
+        {
+            writer.WriteClass(entity);
+        }
     }
 
     public void WriteVMF(string path)

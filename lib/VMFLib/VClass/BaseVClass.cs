@@ -40,6 +40,14 @@ public abstract class BaseVClass
             Properties[name] = new VProperty(name, value);
     }
 
+    public void SetProperty(string name, object? value)
+    {
+        if (value == null)
+            Properties.Remove(name);
+        else
+            Properties[name] = new VProperty(name, value);
+    }
+
     public BaseVClass()
     {
         SubClasses = new List<BaseVClass>();

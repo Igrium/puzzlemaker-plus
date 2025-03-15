@@ -1,14 +1,32 @@
 extends Node3D
 class_name ItemRenderer
 
-const ITEM_RENDERER_SCENE := preload("res://scenes/item_renderer.tscn")
+signal set_selected(selected: bool)
 
+const ITEM_RENDERER_SCENE := preload("res://scenes/item_renderer.tscn")
 @export var placeholder_mesh := preload("res://assets/models/placeholder_cube.tscn")
 
 var _editor_model: Node
+var editor_model: Node:
+	get:
+		return _editor_model
 
 var _item: Item
+var item: Item:
+	get:
+		return _item
 
+var selected: bool = false:
+	get:
+		return selected
+	set(value):
+		selected = value
+		set_selected.emit(value)
+
+func _ready() -> void:
+	Editor.connect("UpdatedSelectedItems", _on_updated_item_selection)
+
+@warning_ignore("shadowed_variable")
 func set_item(item: Item):
 	if (is_instance_valid(_item)):
 		push_warning("Item renderer already has an item instance. Behavior may be unexpected.")
@@ -31,8 +49,11 @@ func update_model():
 	if (is_instance_valid(_editor_model)):
 		_editor_model.queue_free()
 		_editor_model = null
+	
+	for child in $Area3D.get_children():
+		child.queue_free()
 
-	var model_name: String = _item.GetEditorModel()
+	var model_name: String = item.GetEditorModel()
 
 	var model: PackedScene = null
 
@@ -43,5 +64,20 @@ func update_model():
 	if (model == null):
 		model = placeholder_mesh
 	
-	_editor_model = model.instantiate()
-	add_child(_editor_model)
+	_editor_model = model.instantiate()	
+	$Area3D.add_child(_editor_model)
+	# There's a weird issue where transforms from the scene aren't respected in the function it's instantiated.
+	# Call this deferred to let them initialize properly.
+	$CollisionGenerator.generate_collision.call_deferred()
+
+func _on_updated_item_selection(items: Array[Item]):
+	if _item == null:
+		return
+	
+	selected = items.has(_item)
+
+
+func _on_area_3d_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == 1:
+			print("Pressed the item!")

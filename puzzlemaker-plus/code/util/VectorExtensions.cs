@@ -66,5 +66,4 @@ internal static class VectorExtensions
     {
         return new Vector3I(vec.X & 15, vec.Y & 15, vec.Z & 15);
     }
-
 }

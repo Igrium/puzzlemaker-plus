@@ -144,7 +144,7 @@ public class Displacement : BaseVClass
     public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
 
     public int? Power => Properties["power"].Int();
-    public Vec3? StartPosition => Properties["startposition"].Vertex();
+    public Vec3? StartPosition => Properties["startposition"].Vec3();
     public float? Elevation => Properties["elevation"].Float();
     public bool? IsSubdivided => Properties["subdiv"].Bool();
     public DispRows Rows;

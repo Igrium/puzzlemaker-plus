@@ -1,6 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://ck1uhkqs73kxa"]
+[gd_scene load_steps=3 format=3 uid="uid://ck1uhkqs73kxa"]
 
 [ext_resource type="Script" uid="uid://c17h0y16qsy5d" path="res://scenes/item_renderer.gd" id="1_3knih"]
+[ext_resource type="Script" uid="uid://b5q7d6mbfqo6k" path="res://scripts/collision_generator.gd" id="2_fqgpw"]
 
 [node name="ItemRenderer" type="Node3D"]
 script = ExtResource("1_3knih")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionGenerator" type="Node" parent="." node_paths=PackedStringArray("base_node")]
+script = ExtResource("2_fqgpw")
+base_node = NodePath("../Area3D")
+metadata/_custom_type_script = "uid://b5q7d6mbfqo6k"
+
+[connection signal="input_event" from="Area3D" to="." method="_on_area_3d_input_event"]

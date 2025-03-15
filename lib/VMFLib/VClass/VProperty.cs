@@ -106,7 +106,7 @@ namespace VMFLib.VClass
             return new RGB(_property);
         }
 
-        public Vec3 Vertex()
+        public Vec3 Vec3()
         {
             if (_property == null)
                 return new Vec3();

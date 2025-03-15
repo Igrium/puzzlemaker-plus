@@ -60,7 +60,7 @@ public sealed class ItemVariant
     /// <summary>
     /// The wall that the item is "attached" to. If null, the item is considered floating.
     /// </summary>
-    public Direction? AttachDirection { get; set; } = Direction.Down;
+    public Direction? MountDirection { get; set; } = Direction.Down;
 
     public List<ItemVariantTheme> Themes { get; set; } = new();
 

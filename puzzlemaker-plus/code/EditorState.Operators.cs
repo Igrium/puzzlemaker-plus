@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Godot;
 using PuzzlemakerPlus.Commands;
+using PuzzlemakerPlus.Items;
 
 namespace PuzzlemakerPlus;
 
@@ -23,6 +20,8 @@ public partial class EditorState
     {
         if (project == Project) return;
         Project = project;
+        SetSelection(default);
+        SetSelectedItems(Array.Empty<Item>());
         EmitSignal(SignalName.OnOpenProject, project);
         EmitSignal(SignalName.OnChangeProjectName, project.FileName!);
         UnSaved = false;

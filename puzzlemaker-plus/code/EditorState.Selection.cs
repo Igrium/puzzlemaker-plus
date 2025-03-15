@@ -6,6 +6,8 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
+using Godot.Collections;
+using PuzzlemakerPlus.Items;
 
 namespace PuzzlemakerPlus;
 
@@ -17,6 +19,9 @@ public partial class EditorState
 
     [Signal]
     public delegate void OnUpdatedSelectionEventHandler(Aabb selection);
+
+    [Signal]
+    public delegate void UpdatedSelectedItemsEventHandler(Array<Item> selectedItems);
 
     private int _gridScale = 4;
 
@@ -70,33 +75,107 @@ public partial class EditorState
     /// </summary>
     public Vector3 SelectionNormal { get; private set; } = Vector3.Zero;
 
-    public void SetSelection(Aabb selection)
+    private HashSet<Item> _selectedItems = new();
+
+    public IReadOnlySet<Item> SelectedItems => _selectedItems;
+
+    private void EmitUpdatedSelectedItems()
+    {
+        Array<Item> selected = [.. SelectedItems];
+        EmitSignal(SignalName.UpdatedSelectedItems, selected);
+    }
+
+    public void SetSelection(Aabb selection, bool includeItems = false)
     {
         selection = SnapSelectionToGrid(selection, GridScale);
-        if (selection != _selection)
-        {
-            _selection = selection;
-            EmitSignal(SignalName.OnUpdatedSelection, selection);
-        }
+        if (selection == _selection)
+            return;
+
+        _selection = selection;
+
+        EmitSignal(SignalName.OnUpdatedSelection, selection);
+        if (includeItems)
+            SetSelectedItems(selection);
     }
 
-    public void ExpandSelection(Vector3 newPos)
+    public void ExpandSelection(Vector3 newPos, bool includeItems = false)
     {
         newPos = SnapVectorToGrid(newPos, GridScale);
-        SetSelection(Selection.Expand(newPos));
+        SetSelection(Selection.Expand(newPos), includeItems);
     }
 
-    public void SelectFace(VoxelFace face, bool expand = false)
+    public void SelectFace(VoxelFace face, bool expand = false, bool includeItems = false)
     {
         var selection = ExpandToGrid(face, GridScale, face.Direction.GetAxis());
-        SetSelection(expand ? Selection.Merge(selection) : selection);
+        SetSelection(expand ? Selection.Merge(selection) : selection, includeItems);
     }
 
-    public void SelectFace(Vector3I pos, int direction, bool expand = false)
+    public void SelectFace(Vector3I pos, int direction, bool expand = false, bool includeItems = false)
     {
-        SelectFace(new VoxelFace(pos, (Direction)direction), expand);
+        SelectFace(new VoxelFace(pos, (Direction)direction), expand, includeItems);
     }
 
+    public Array<Item> GetSelectedItems()
+    {
+        Array<Item> array = [.. SelectedItems];
+        return array;
+    }
+
+
+    /// <summary>
+    /// Select items based on a voxel selection. Items that are in or are attached to a selected voxel become selected.
+    /// </summary>
+    /// <param name="selection">The voxel selection.</param>
+    public void SetSelectedItems(Aabb selection)
+    {
+        _selectedItems.Clear();
+        foreach (var item in Project.Items.Values)
+        {
+            if (selection.HasPoint(item.Position))
+                _selectedItems.Add(item);
+        }
+        EmitUpdatedSelectedItems();
+    }
+
+    public void SetSelectedItems(Godot.Collections.Array<Item> items)
+    {
+        SetSelectedItems((IEnumerable<Item>)items);
+    }
+
+    public void SetSelectedItems(IEnumerable<Item> items)
+    {
+        _selectedItems.Clear();
+        foreach (var item in items)
+        {
+            _selectedItems.Add(item);
+        }
+        EmitUpdatedSelectedItems();
+    }
+
+    public bool IsItemSelected(Item item)
+    {
+        return _selectedItems.Contains(item);
+    }
+
+    /// <summary>
+    /// Set an item's selection state.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="selected"></param>
+    /// <returns></returns>
+    public bool SetItemSelected(Item item, bool selected)
+    {
+        bool result;
+        if (selected)
+            result = _selectedItems.Add(item);
+        else
+            result = _selectedItems.Remove(item);
+
+        if (result)
+            EmitUpdatedSelectedItems();
+
+        return result;
+    }
 
     /// <summary>
     /// Set the selection based on the result of a raycast.

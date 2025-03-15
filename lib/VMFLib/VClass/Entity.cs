@@ -11,10 +11,32 @@ public class Entity : BaseVClass
     public Hidden? Hidden;
     public Editor? Editor;
 
-    public int Id => Properties["id"].Int();
-    public string ClassName => Properties["classname"].Str();
-    public int SpawnFlags => Properties["spawnflags"].Int();
-    public Vec3 Origin => Properties["origin"].Vertex();
+    public int Id
+    {
+        get => Properties["id"].Int();
+        set => SetProperty("id", value);
+    }
+    public string ClassName
+    {
+        get => Properties["classname"].Str();
+        set => SetProperty("classname", value);
+    }
+    public int SpawnFlags
+    {
+        get => Properties["spawnflags"].Int();
+        set => SetProperty("spawnflags", value);
+    }
+    public Vec3 Origin
+    {
+        get => Properties["origin"].Vec3();
+        set => SetProperty("origin", value);
+    }
+
+    public string TargetName
+    {
+        get => Properties["targetname"].Str();
+        set => SetProperty("targetname", value);
+    }
 
     /// <summary>
     /// 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://b8sy5dxirv8x7"]
+[gd_scene load_steps=4 format=3 uid="uid://b8sy5dxirv8x7"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y7321"]
 albedo_color = Color(1, 0, 1, 1)
@@ -7,8 +7,17 @@ albedo_texture_force_srgb = true
 [sub_resource type="BoxMesh" id="BoxMesh_fgrf8"]
 material = SubResource("StandardMaterial3D_y7321")
 
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_r55xg"]
+points = PackedVector3Array(0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5)
+
 [node name="PlaceholderCube" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5)
+visible = false
 mesh = SubResource("BoxMesh_fgrf8")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5)
+visible = false
+shape = SubResource("ConvexPolygonShape3D_r55xg")
