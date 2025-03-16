@@ -150,7 +150,7 @@ var orbit_scale: float = 1
 var pan_offset = Vector3(0, 0, 0)
 var needs_update:bool = true
 
-var mouse_buttons = { "LEFT": MOUSE.ROTATE, "MIDDLE": MOUSE.DOLLY, "RIGHT": MOUSE.PAN }
+var mouse_buttons = { "LEFT": MOUSE.ROTATE, "MIDDLE": MOUSE.ROTATE, "RIGHT": MOUSE.PAN }
 var touches = { "ONE": TOUCH.ROTATE, "TWO": TOUCH.DOLLY_PAN }
 var state = STATE.NONE
 
@@ -457,7 +457,7 @@ func track_pointer(event):
 
 # "on_" functions define the first action after the input event
 
-func on_mouse_down(event):	
+func on_mouse_down(event: InputEventMouseButton):	
 	var mouse_action = null
 	
 	match event.button_index:
@@ -478,16 +478,16 @@ func on_mouse_down(event):
 			
 			state = STATE.DOLLY
 		MOUSE.ROTATE:
-			#if event.ctrlKey or event.metaKey or event.shiftkey
-				#if not enable pan: return
-				#handle_mouse_down_pan(event)
-				#state = STATE.PAN
-			#else
-			if not enable_rotate: return
+			if (event.shift_pressed) and enable_pan:
+
+				handle_mouse_down_pan(event)
+				state = STATE.PAN
+			else:
+				if not enable_rotate: return
 			
-			handle_mouse_down_rotate(event)
+				handle_mouse_down_rotate(event)
 			
-			state = STATE.ROTATE
+				state = STATE.ROTATE
 		
 		MOUSE.PAN: 
 			#if event.ctrlKey or event.metaKey or event.shiftkey
@@ -680,7 +680,7 @@ func handle_mouse_move_pan(event: InputEventMouseMotion) -> void:
 	
 	pan_delta = (pan_end - pan_start) * pan_speed * 20.0
 	
-	pan(pan_delta.x, pan_delta.y)
+	pan(-pan_delta.x, -pan_delta.y)
 	
 	pan_start = pan_end
 	

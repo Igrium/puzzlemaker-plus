@@ -13,83 +13,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ubv51")
 
-[node name="MenuBar" type="MenuBar" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-grow_horizontal = 2
-
-[node name="File" type="PopupMenu" parent="MenuBar"]
-
-[node name="NewProject" type="Node" parent="MenuBar/File"]
-script = ExtResource("2_hlo7n")
-text = "New"
-accelerator = &"new_project"
-
-[node name="OpenProject" type="Node" parent="MenuBar/File"]
-script = ExtResource("2_hlo7n")
-text = "Open"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="Save" type="Node" parent="MenuBar/File"]
-script = ExtResource("2_hlo7n")
-text = "Save"
-accelerator = &"save"
-separator = true
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="SaveAs" type="Node" parent="MenuBar/File"]
-script = ExtResource("2_hlo7n")
-text = "Save As"
-accelerator = &"save_as"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="ExportVMF" type="Node" parent="MenuBar/File"]
-script = ExtResource("2_hlo7n")
-text = "Export VMF"
-separator = true
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="Edit" type="PopupMenu" parent="MenuBar"]
-
-[node name="Undo" type="Node" parent="MenuBar/Edit"]
-script = ExtResource("2_hlo7n")
-text = "Undo"
-accelerator = &"ui_undo"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="Redo" type="Node" parent="MenuBar/Edit"]
-script = ExtResource("2_hlo7n")
-text = "Redo"
-accelerator = &"ui_redo"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="Selection" type="PopupMenu" parent="MenuBar"]
-
-[node name="SelectAll" type="Node" parent="MenuBar/Selection"]
-script = ExtResource("2_hlo7n")
-text = "Select All"
-accelerator = &"select_all"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="SelectNone" type="Node" parent="MenuBar/Selection"]
-script = ExtResource("2_hlo7n")
-text = "Select None"
-accelerator = &"select_none"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="Debug" type="PopupMenu" parent="MenuBar"]
-
-[node name="AddTestItem" type="Node" parent="MenuBar/Debug"]
-script = ExtResource("2_hlo7n")
-text = "Add Test Item"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
-[node name="ExportGLTF" type="Node" parent="MenuBar/Debug"]
-script = ExtResource("2_hlo7n")
-text = "Export Scene as glTF"
-metadata/_custom_type_script = "uid://drwyh52tujvls"
-
 [node name="FD_VMFExport" type="FileDialog" parent="."]
 title = "Export VMF File"
 access = 2
@@ -118,19 +41,110 @@ force_native = true
 dialog_text = "You have unsaved changes."
 script = ExtResource("4_x3h8h")
 
-[connection signal="pressed" from="MenuBar/File/NewProject" to="." method="_on_new_project_pressed"]
-[connection signal="pressed" from="MenuBar/File/OpenProject" to="." method="_on_open_project_pressed"]
-[connection signal="pressed" from="MenuBar/File/Save" to="." method="_on_save_pressed"]
-[connection signal="pressed" from="MenuBar/File/SaveAs" to="." method="_on_save_as_pressed"]
-[connection signal="pressed" from="MenuBar/File/ExportVMF" to="." method="_on_export_vmf_pressed"]
-[connection signal="index_pressed" from="MenuBar/Edit" to="." method="_on_edit_index_pressed"]
-[connection signal="pressed" from="MenuBar/Edit/Undo" to="." method="_on_undo_pressed"]
-[connection signal="pressed" from="MenuBar/Edit/Redo" to="." method="_on_redo_pressed"]
-[connection signal="pressed" from="MenuBar/Selection/SelectAll" to="." method="_on_select_all_pressed"]
-[connection signal="pressed" from="MenuBar/Selection/SelectNone" to="." method="_on_select_none_pressed"]
-[connection signal="index_pressed" from="MenuBar/Debug" to="." method="_on_debug_index_pressed"]
-[connection signal="pressed" from="MenuBar/Debug/AddTestItem" to="." method="_on_add_test_item_pressed"]
-[connection signal="pressed" from="MenuBar/Debug/ExportGLTF" to="." method="_on_export_gltf_pressed"]
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="MenuBar" type="MenuBar" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="File" type="PopupMenu" parent="MarginContainer/MenuBar"]
+
+[node name="NewProject" type="Node" parent="MarginContainer/MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "New"
+accelerator = &"new_project"
+
+[node name="OpenProject" type="Node" parent="MarginContainer/MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Open"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="Save" type="Node" parent="MarginContainer/MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Save"
+accelerator = &"save"
+separator = true
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="SaveAs" type="Node" parent="MarginContainer/MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Save As"
+accelerator = &"save_as"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="ExportVMF" type="Node" parent="MarginContainer/MenuBar/File"]
+script = ExtResource("2_hlo7n")
+text = "Export VMF"
+separator = true
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="Edit" type="PopupMenu" parent="MarginContainer/MenuBar"]
+
+[node name="Undo" type="Node" parent="MarginContainer/MenuBar/Edit"]
+script = ExtResource("2_hlo7n")
+text = "Undo"
+accelerator = &"ui_undo"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="Redo" type="Node" parent="MarginContainer/MenuBar/Edit"]
+script = ExtResource("2_hlo7n")
+text = "Redo"
+accelerator = &"ui_redo"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="Selection" type="PopupMenu" parent="MarginContainer/MenuBar"]
+
+[node name="SelectAll" type="Node" parent="MarginContainer/MenuBar/Selection"]
+script = ExtResource("2_hlo7n")
+text = "Select All"
+accelerator = &"select_all"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="SelectAllItems" type="Node" parent="MarginContainer/MenuBar/Selection"]
+script = ExtResource("2_hlo7n")
+text = "Select All Items"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="SelectNone" type="Node" parent="MarginContainer/MenuBar/Selection"]
+script = ExtResource("2_hlo7n")
+text = "Deselect All"
+accelerator = &"select_none"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="Debug" type="PopupMenu" parent="MarginContainer/MenuBar"]
+
+[node name="AddTestItem" type="Node" parent="MarginContainer/MenuBar/Debug"]
+script = ExtResource("2_hlo7n")
+text = "Add Test Item"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="ExportGLTF" type="Node" parent="MarginContainer/MenuBar/Debug"]
+script = ExtResource("2_hlo7n")
+text = "Export Scene as glTF"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
 [connection signal="file_selected" from="FD_VMFExport" to="." method="_on_fd_vmf_export_file_selected"]
 [connection signal="file_selected" from="FD_OpenProject" to="." method="_on_fd_open_project_file_selected"]
 [connection signal="file_selected" from="FD_SaveProject" to="." method="_on_fd_save_project_file_selected"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/NewProject" to="." method="_on_new_project_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/OpenProject" to="." method="_on_open_project_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/Save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/SaveAs" to="." method="_on_save_as_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/ExportVMF" to="." method="_on_export_vmf_pressed"]
+[connection signal="index_pressed" from="MarginContainer/MenuBar/Edit" to="." method="_on_edit_index_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Edit/Undo" to="." method="_on_undo_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Edit/Redo" to="." method="_on_redo_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAll" to="." method="_on_select_all_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAllItems" to="." method="_on_select_all_items_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectNone" to="." method="_on_select_none_pressed"]
+[connection signal="index_pressed" from="MarginContainer/MenuBar/Debug" to="." method="_on_debug_index_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Debug/AddTestItem" to="." method="_on_add_test_item_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Debug/ExportGLTF" to="." method="_on_export_gltf_pressed"]

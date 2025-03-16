@@ -74,5 +74,9 @@ func _on_select_all_pressed() -> void:
 	Editor.SelectAll()
 
 
+func _on_select_all_items_pressed() -> void:
+	Editor.SelectAllItems()
+
+
 func _on_select_none_pressed() -> void:
 	Editor.ClearSelection()
