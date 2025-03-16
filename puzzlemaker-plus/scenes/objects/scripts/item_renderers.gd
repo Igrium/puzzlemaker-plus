@@ -1,6 +1,6 @@
 extends Node3D
 
-@export var item_renderer_scene := preload("res://scenes/item_renderer.tscn")
+@export var item_renderer_scene := preload("res://scenes/objects/item_renderer.tscn")
 
 var items: Dictionary[Item, ItemRenderer] = {}
 

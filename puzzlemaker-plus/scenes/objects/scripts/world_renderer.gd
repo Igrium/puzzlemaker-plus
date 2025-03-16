@@ -1,6 +1,6 @@
 extends Node3D
 
-@export var chunk_scene := preload("res://scenes/world_chunk.tscn")
+@export var chunk_scene := preload("res://scenes/objects/world_chunk.tscn")
 
 var chunks: Dictionary[Vector3i, WorldChunk] = {}
 

@@ -1,19 +1,23 @@
-[gd_scene load_steps=8 format=3 uid="uid://c8opainusd88g"]
+[gd_scene load_steps=9 format=3 uid="uid://c8opainusd88g"]
 
 [ext_resource type="Script" uid="uid://cfslk1m0s33iy" path="res://addons/orbit-controls/orbit-controls.gd" id="1_mrhsp"]
 [ext_resource type="Script" uid="uid://bo1578tbgptjc" path="res://scenes/editor_scene.gd" id="1_npaab"]
 [ext_resource type="PackedScene" uid="uid://phi1s65mbgho" path="res://scenes/project_scene.tscn" id="2_njtwn"]
-[ext_resource type="Script" uid="uid://dikh45he3mcwp" path="res://scenes/scripts/selection_highlight.gd" id="3_5atrf"]
+[ext_resource type="Script" uid="uid://dikh45he3mcwp" path="res://scenes/objects/scripts/selection_highlight.gd" id="3_5atrf"]
+[ext_resource type="PackedScene" uid="uid://cpf7f54ayrjr6" path="res://scenes/outline_overlay.tscn" id="3_mrhsp"]
 [ext_resource type="PackedScene" uid="uid://bd3mbm0pemh78" path="res://ui/main_ui.tscn" id="5_4nlwk"]
-[ext_resource type="Script" uid="uid://dnmlwkuhc6thf" path="res://scenes/scripts/key_listener.gd" id="6_2xfd1"]
+[ext_resource type="Script" uid="uid://dnmlwkuhc6thf" path="res://scenes/objects/scripts/key_listener.gd" id="6_2xfd1"]
 [ext_resource type="Script" uid="uid://cv3rlgw4wpa47" path="res://code/editor/EditorOperations.cs" id="7_rvqb0"]
 
 [node name="EditorScene" type="Node3D"]
 script = ExtResource("1_npaab")
 project_packed_scene = ExtResource("2_njtwn")
 
+[node name="OutlineOverlay" parent="." instance=ExtResource("3_mrhsp")]
+
 [node name="MainCamera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.5971)
+fov = 20.0
 
 [node name="OrbitControls" type="Node3D" parent="."]
 script = ExtResource("1_mrhsp")

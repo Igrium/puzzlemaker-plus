@@ -1,14 +1,9 @@
 [gd_scene load_steps=5 format=3 uid="uid://ck1uhkqs73kxa"]
 
-[ext_resource type="Script" uid="uid://c17h0y16qsy5d" path="res://scenes/item_renderer.gd" id="1_3knih"]
+[ext_resource type="Script" uid="uid://c17h0y16qsy5d" path="res://scenes/objects/item_renderer.gd" id="1_3knih"]
 [ext_resource type="Script" uid="uid://b5q7d6mbfqo6k" path="res://scripts/collision_generator.gd" id="2_fqgpw"]
+[ext_resource type="Material" uid="uid://bcqcpwq3btue3" path="res://assets/materials/outline_mat.tres" id="4_34cp5"]
 [ext_resource type="Script" uid="uid://hikpc2cd34q2" path="res://scripts/outline_renderer.gd" id="7_erflv"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ma1uv"]
-blend_mode = 1
-albedo_color = Color(0, 0, 0, 0)
-emission_enabled = true
-emission = Color(0.24216, 0.24216, 9.62615e-08, 1)
 
 [node name="ItemRenderer" type="Node3D"]
 script = ExtResource("1_3knih")
@@ -23,6 +18,6 @@ metadata/_custom_type_script = "uid://b5q7d6mbfqo6k"
 [node name="OutlineRenderer" type="Node" parent="." node_paths=PackedStringArray("root_node")]
 script = ExtResource("7_erflv")
 root_node = NodePath("../Area3D")
-outline_material = SubResource("StandardMaterial3D_ma1uv")
+outline_material = ExtResource("4_34cp5")
 
 [connection signal="input_event" from="Area3D" to="." method="_on_area_3d_input_event"]

@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://phi1s65mbgho"]
 
 [ext_resource type="Script" uid="uid://bduqn4nntd23a" path="res://scenes/project_scene.gd" id="1_cwyhd"]
-[ext_resource type="Script" uid="uid://fie576e1k73d" path="res://scenes/scripts/world_renderer.gd" id="2_iml2j"]
-[ext_resource type="Script" uid="uid://cxg6q4fsg8jkj" path="res://scenes/scripts/item_renderers.gd" id="3_pr0ry"]
+[ext_resource type="Script" uid="uid://fie576e1k73d" path="res://scenes/objects/scripts/world_renderer.gd" id="2_iml2j"]
+[ext_resource type="Script" uid="uid://cxg6q4fsg8jkj" path="res://scenes/objects/scripts/item_renderers.gd" id="3_pr0ry"]
 
 [node name="ProjectScene" type="Node3D"]
 script = ExtResource("1_cwyhd")

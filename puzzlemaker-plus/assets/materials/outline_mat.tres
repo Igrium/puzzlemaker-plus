@@ -5,6 +5,6 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_fw8r4")
-shader_parameter/outline_color = Color(1, 1, 0, 1)
+shader_parameter/outline_color = Color(1, 1, 0, 0.47)
 shader_parameter/outline_width = 2.0
 shader_parameter/constant_width = true

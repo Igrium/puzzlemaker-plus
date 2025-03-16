@@ -26,9 +26,10 @@ func update_outline():
 
 func _enable_outline(node: Node):
 	if node is MeshInstance3D:
-		for i in node.mesh.get_surface_count():
-			var override = _get_or_create_surface_override(node, i)
-			override.next_pass = outline_material
+		node.set_layer_mask_value(6, true)
+		#for i in node.mesh.get_surface_count():
+			#var override = _get_or_create_surface_override(node, i)
+			#override.next_pass = outline_material
 	
 	for child in node.get_children():
 		_enable_outline(child)
@@ -36,10 +37,11 @@ func _enable_outline(node: Node):
 
 func _disable_outline(node: Node):
 	if node is MeshInstance3D:
-		for i in node.get_surface_override_material_count():
-			var override = node.get_surface_override_material(i)
-			if (override != null):
-				override.next_pass = null
+		node.set_layer_mask_value(6, false)
+		#for i in node.get_surface_override_material_count():
+			#var override = node.get_surface_override_material(i)
+			#if (override != null):
+				#override.next_pass = null
 	
 	for child in node.get_children():
 		_disable_outline(child)

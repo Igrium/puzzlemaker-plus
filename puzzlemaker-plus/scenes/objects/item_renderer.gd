@@ -3,7 +3,7 @@ class_name ItemRenderer
 
 signal set_selected(selected: bool)
 
-const ITEM_RENDERER_SCENE := preload("res://scenes/item_renderer.tscn")
+const ITEM_RENDERER_SCENE := preload("res://scenes/objects/item_renderer.tscn")
 @export var placeholder_mesh := preload("res://assets/models/placeholder_cube.tscn")
 
 var _editor_model: Node

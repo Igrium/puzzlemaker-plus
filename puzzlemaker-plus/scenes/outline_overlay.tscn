@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3 uid="uid://cpf7f54ayrjr6"]
+
+[ext_resource type="Script" uid="uid://dswi4fgyuvnpu" path="res://scenes/outline_overlay.gd" id="1_f8xws"]
+[ext_resource type="Shader" uid="uid://b7a3w2m1wyo6l" path="res://assets/shaders/outline_overlay.gdshader" id="2_b6dss"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b6dss"]
+shader = ExtResource("2_b6dss")
+shader_parameter/line_color = Color(1, 1, 0, 0.75)
+shader_parameter/line_thickness = 2.0
+
+[node name="OutlineOverlay" type="Node"]
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." node_paths=PackedStringArray("stencil_viewport", "stencil_camera")]
+material = SubResource("ShaderMaterial_b6dss")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_f8xws")
+stencil_viewport = NodePath("StencilViewport")
+stencil_camera = NodePath("StencilViewport/Camera3D")
+
+[node name="StencilViewport" type="SubViewport" parent="SubViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/StencilViewport"]
+cull_mask = 32
