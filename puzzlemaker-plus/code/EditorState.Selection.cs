@@ -106,7 +106,7 @@ public partial class EditorState
     public void SelectFace(VoxelFace face, bool expand = false)
     {
         var selection = ExpandToGrid(face, GridScale, face.Direction.GetAxis());
-        SetSelection(expand ? Selection.Merge(selection) : selection);
+        SetSelection(expand && Selection.HasSurface() ? Selection.Merge(selection) : selection);
     }
 
     public void SelectFace(Vector3I pos, int direction, bool expand = false)
@@ -135,6 +135,11 @@ public partial class EditorState
         Vector3I voxelPos = new Vector3I((int)MathF.Floor(pos.X), (int)MathF.Floor(pos.Y), (int)MathF.Floor(pos.Z));
         SelectFace(new VoxelFace(voxelPos, direction), expand);
         SelectionNormal = normal;
+
+        if (Selection.HasVolume())
+        {
+            SelectItems(Selection);
+        }
     }
 
     public void SelectAllWorld()
@@ -223,6 +228,22 @@ public partial class EditorState
         return result;
     }
 
+    /// <summary>
+    /// Add all items with their origin in this box to the selection.
+    /// </summary>
+    /// <param name="bounds">Bounding box (inclusive)</param>
+    public void SelectItems(Aabb bounds)
+    {
+        bool updated = false;
+        foreach (var item in Project.Items.Values)
+        {
+            if (bounds.HasPoint(item.Position) && _selectedItems.Add(item))
+                updated = true;
+        }
+
+        if (updated)
+            EmitUpdatedSelectedItems();
+    }
 
     /// <summary>
     /// Set the selection based on the result of a raycast that hit an item.
