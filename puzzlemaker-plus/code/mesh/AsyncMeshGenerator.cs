@@ -82,4 +82,9 @@ public partial class AsyncMeshGenerator : RefCounted
     {
         return new AsyncMeshGenerator(mesh, collision, world, chunkPos, invert);
     }
+
+    public static AsyncMeshGenerator Create(ArrayMesh? mesh, ConcavePolygonShape3D? collision, PuzzlemakerProject project, Vector3I chunkPos, bool invert = true)
+    {
+        return new AsyncMeshGenerator(mesh, collision, project.World, chunkPos, invert);
+    }
 }

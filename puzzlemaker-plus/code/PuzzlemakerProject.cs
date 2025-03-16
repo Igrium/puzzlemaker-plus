@@ -231,6 +231,14 @@ public partial class PuzzlemakerProject : RefCounted
     }
 
     /// <summary>
+    /// Shortcut for World.IsEmpty that's compatible with GDScript
+    /// </summary>
+    public bool IsWorldEmpty()
+    {
+        return World.IsEmpty();
+    }
+
+    /// <summary>
     /// Add an initial set of voxels to the world so editing can commence.
     /// </summary>
     public void AddInitialVoxels()

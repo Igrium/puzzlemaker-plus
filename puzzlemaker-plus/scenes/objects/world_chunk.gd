@@ -26,18 +26,13 @@ func render() -> void:
 	var a_mesh = ArrayMesh.new()
 	var shape = ConcavePolygonShape3D.new()
 	
-	var world: PuzzlemakerWorld = Editor.World
+	# world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
+	var generator := AsyncMeshGenerator.Create(a_mesh, shape, Editor.Project, pos, true)
+	generator.DoGreedyMeshAsync()
 	
-	if (world):
-		# world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
-		var generator := AsyncMeshGenerator.Create(a_mesh, shape, world, pos, true)
-		generator.DoGreedyMeshAsync()
-		await generator.GreedyMeshFinished
-		
-		self.mesh = a_mesh
-		_collision_shape.shape = shape
-	else:
-		push_warning("No world found")
+	await generator.GreedyMeshFinished
+	self.mesh = a_mesh
+	_collision_shape.shape = shape
 
 func _on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
 	on_input_event.emit(camera, event, event_position, normal, shape_idx)

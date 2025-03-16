@@ -17,7 +17,7 @@ namespace PuzzlemakerPlus;
 /// <param name="value">A reference to the voxel's value. Update this to update the voxel.</param>
 public delegate void VoxelOperator<T>(ref T value);
 
-public partial class VoxelWorld<T> : RefCounted, IVoxelView<T>
+public class VoxelWorld<T> : IVoxelView<T>
 {
     public const int CHUNK_SIZE = 16;
 

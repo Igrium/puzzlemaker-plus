@@ -6,6 +6,6 @@ class_name ProjectScene
 var project: PuzzlemakerProject
 
 func _ready() -> void:
-	if (project.World.IsEmpty()):
+	if (project.IsWorldEmpty()):
 		project.AddInitialVoxels()
 		pass

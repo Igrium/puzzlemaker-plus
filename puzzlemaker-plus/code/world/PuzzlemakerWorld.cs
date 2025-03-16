@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Godot;
 
 namespace PuzzlemakerPlus;
 
-[GlobalClass]
 [JsonConverter(typeof(PuzzlemakerWorldJsonConverter))]
-public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
+public class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
 {   
 
     /// <summary>
@@ -37,107 +32,13 @@ public partial class PuzzlemakerWorld : VoxelWorld<PuzzlemakerVoxel>
 
     public void PruneEmptyChunks()
     {
-        var toRemove = Chunks.Where(pair => IsChunkEmpty(pair.Value))
+        var toRemove = Chunks.Where(pair => pair.Value.IsEmpty())
             .Select(pair => pair.Key).ToList();
 
         foreach (var key in toRemove)
         {
             Chunks.Remove(key);
         }
-    }
-
-    /// <summary>
-    /// Get the bounding box of the filled blocks in the world.
-    /// </summary>
-    /// <returns>Bounding box, inclusive. If min > max, there were no blocks in the world.</returns>
-    /// <remarks>If the world is not pruned, empty chunks can contribute to the bounds.</remarks>
-    public (Vector3I, Vector3I) GetWorldBounds()
-    {
-        if (!Chunks.Any())
-            return (Vector3I.Zero, Vector3I.Zero);
-
-        // Identify min/max chunks first to avoid scanning middle chunks.
-        Vector3I minChunk = Vector3I.MaxValue;
-        Vector3I maxChunk = Vector3I.MinValue;
-
-        foreach (var pos in Chunks.Keys)
-        {
-            if (pos.X < minChunk.X) minChunk.X = pos.X;
-            if (pos.Y < minChunk.Y) minChunk.Y = pos.Y;
-            if (pos.Z < minChunk.Z) minChunk.Z = pos.Z;
-
-            if (pos.X > maxChunk.X) maxChunk.X = pos.X;
-            if (pos.Y > maxChunk.Y) maxChunk.Y = pos.Y;
-            if (pos.Z > maxChunk.Z) maxChunk.Z = pos.Z;
-        }
-
-        Vector3I min = Vector3I.MaxValue;
-        Vector3I max = Vector3I.MinValue;
-
-        foreach (var (pos, chunk) in Chunks)
-        {
-            if (pos.X == minChunk.X || pos.X == maxChunk.X
-                || pos.Y == minChunk.Y || pos.Y == maxChunk.Y
-                || pos.Z == minChunk.Z || pos.Z == maxChunk.Z)
-            {
-                var (chunkMin, chunkMax) = GetChunkBounds(chunk);
-
-                chunkMin += pos.ChunkStartPos();
-                chunkMax += pos.ChunkStartPos();
-
-                if (chunkMin.X < min.X) min.X = chunkMin.X;
-                if (chunkMin.Y < min.Y) min.Y = chunkMin.Y;
-                if (chunkMin.Z < min.Z) min.Z = chunkMin.Z;
-
-                if (chunkMax.X > max.X) max.X = chunkMax.X;
-                if (chunkMax.Y > max.Y) max.Y = chunkMax.Y;
-                if (chunkMax.Z > max.Z) max.Z = chunkMax.Z;
-            }
-        }
-
-        return (min, max);
-    }
-    
-    /// <summary>
-    /// Get the bounds of the filled portion of a pos.
-    /// </summary>
-    /// <param name="chunk">The pos in question.</param>
-    /// <returns>The pos bounds, inclusive. If no block was found, max will be -1, and min will be 16.</returns>
-    public static (Vector3I, Vector3I) GetChunkBounds(VoxelChunk<PuzzlemakerVoxel> chunk)
-    {
-        Vector3I max = new Vector3I(-1, -1, -1);
-        Vector3I min = new Vector3I(16, 16, 16);
-
-        for (int z = 0; z < 16; z++)
-        {
-            for (int y = 0; y <  16; y++)
-            {
-                for (int x = 0; x < 16; x++)
-                {
-                    if (chunk.GetVoxel(x, y, z).IsOpen)
-                    {
-                        if (x < min.X) min.X = x;
-                        if (y < min.Y) min.Y = y;
-                        if (z < min.Z) min.Z = z;
-
-                        if (x > max.X) max.X = x;
-                        if (y > max.Y) max.Y = y;
-                        if (z > max.Z) max.Z = z;
-                    }
-                }
-            }
-        }
-
-        return (min, max);
-    }
-
-    public bool IsChunkEmpty(VoxelChunk<PuzzlemakerVoxel> chunk)
-    {
-        foreach (var value in chunk.Data)
-        {
-            if (value.IsOpen) return false;
-        }
-        return true;
     }
 
     /// <summary>

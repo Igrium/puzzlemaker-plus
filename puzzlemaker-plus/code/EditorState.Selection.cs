@@ -144,7 +144,7 @@ public partial class EditorState
 
     public void SelectAllWorld()
     {
-        var (min, max) = Project.World.GetWorldBounds();
+        var (min, max) = Project.World.GetFilledBounds();
         if (min.X > max.X) return;
 
         max += new Vector3I(1, 1, 1); // Selection is exclusive.
