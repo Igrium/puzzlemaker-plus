@@ -53,6 +53,7 @@ public abstract class AbstractWorldCommand : ICommand
         }
 
         _updatedChunks = layer.AdjoiningChunks;
+        editor.World.PruneEmptyChunks();
         editor.EmitOnChunksUpdated(_updatedChunks);
         return true;
     }
@@ -68,6 +69,7 @@ public abstract class AbstractWorldCommand : ICommand
         {
             editor.SetSelection(_preSelection);
         }
+        editor.World.PruneEmptyChunks();
         editor.EmitOnChunksUpdated(_updatedChunks ?? throw new Exception("Dumbass code doesn't work"));
     }
 
@@ -82,7 +84,7 @@ public abstract class AbstractWorldCommand : ICommand
         {
             editor.SetSelection(_postSelection);
         }
-
+        editor.World.PruneEmptyChunks();
         editor.EmitOnChunksUpdated(_updatedChunks ?? throw new Exception("Dumbass code doesn't work"));
     }
 

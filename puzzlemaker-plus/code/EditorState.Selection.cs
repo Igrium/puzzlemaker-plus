@@ -85,7 +85,7 @@ public partial class EditorState
         EmitSignal(SignalName.UpdatedSelectedItems, selected);
     }
 
-    public void SetSelection(Aabb selection, bool includeItems = false)
+    public void SetSelection(Aabb selection)
     {
         selection = SnapSelectionToGrid(selection, GridScale);
         if (selection == _selection)
@@ -94,25 +94,86 @@ public partial class EditorState
         _selection = selection;
 
         EmitSignal(SignalName.OnUpdatedSelection, selection);
-        if (includeItems)
-            SetSelectedItems(selection);
+
     }
 
-    public void ExpandSelection(Vector3 newPos, bool includeItems = false)
+    public void ExpandSelection(Vector3 newPos)
     {
         newPos = SnapVectorToGrid(newPos, GridScale);
-        SetSelection(Selection.Expand(newPos), includeItems);
+        SetSelection(Selection.Expand(newPos));
     }
 
-    public void SelectFace(VoxelFace face, bool expand = false, bool includeItems = false)
+    public void SelectFace(VoxelFace face, bool expand = false)
     {
         var selection = ExpandToGrid(face, GridScale, face.Direction.GetAxis());
-        SetSelection(expand ? Selection.Merge(selection) : selection, includeItems);
+        SetSelection(expand ? Selection.Merge(selection) : selection);
     }
 
-    public void SelectFace(Vector3I pos, int direction, bool expand = false, bool includeItems = false)
+    public void SelectFace(Vector3I pos, int direction, bool expand = false)
     {
-        SelectFace(new VoxelFace(pos, (Direction)direction), expand, includeItems);
+        SelectFace(new VoxelFace(pos, (Direction)direction), expand);
+    }
+
+
+    /// <summary>
+    /// Set the selection based on the result of a raycast.
+    /// </summary>
+    /// <param name="pos">Raycast hit position.</param>
+    /// <param name="normal">Raycast hit normal.</param>
+    /// <param name="expand">Whether to expand the current selection.</param>
+    public void SelectRaycast(Vector3 pos, Vector3 normal, bool expand = false)
+    {
+        if (!expand)
+        {
+            ClearSelectedItems();
+        }
+
+        Direction direction = Directions.GetClosestDirection(normal);
+
+        // Subtract normal to avoid possible floating point errors.
+        pos -= normal * .25f;
+        Vector3I voxelPos = new Vector3I((int)MathF.Floor(pos.X), (int)MathF.Floor(pos.Y), (int)MathF.Floor(pos.Z));
+        SelectFace(new VoxelFace(voxelPos, direction), expand);
+        SelectionNormal = normal;
+    }
+
+    public void SelectAllWorld()
+    {
+        var (min, max) = Project.World.GetWorldBounds();
+        if (min.X > max.X) return;
+
+        max += new Vector3I(1, 1, 1); // Selection is exclusive.
+        SetSelection(new Aabb(min, max - min));
+    }
+
+    private static Aabb ExpandToGrid(VoxelFace face, int gridScale = 1, int ignoreAxis = -1)
+    {
+        var (vert1, vert2, vert3, vert4) = face.GetVertices();
+
+        // This could definately be optimized, but I don't really care tbh.
+
+        int vertXMin = MathUtils.Min(vert1.X, vert2.X, vert3.X, vert4.X);
+        int vertXMax = MathUtils.Max(vert1.X, vert2.X, vert3.X, vert4.X);
+
+        int vertYMin = MathUtils.Min(vert1.Y, vert2.Y, vert3.Y, vert4.Y);
+        int vertYMax = MathUtils.Max(vert1.Y, vert2.Y, vert3.Y, vert4.Y);
+
+        int vertZMin = MathUtils.Min(vert1.Z, vert2.Z, vert3.Z, vert4.Z);
+        int vertZMax = MathUtils.Max(vert1.Z, vert2.Z, vert3.Z, vert4.Z);
+
+        int xMin = ignoreAxis != 0 ? MathUtils.RoundDown(vertXMin, gridScale) : vertXMin;
+        int xMax = ignoreAxis != 0 ? MathUtils.RoundUp(vertXMax, gridScale) : vertXMax;
+
+        int yMin = ignoreAxis != 1 ? MathUtils.RoundDown(vertYMin, gridScale) : vertYMin;
+        int yMax = ignoreAxis != 1 ? MathUtils.RoundUp(vertYMax, gridScale) : vertYMax;
+
+        int zMin = ignoreAxis != 2 ? MathUtils.RoundDown(vertZMin, gridScale) : vertZMin;
+        int zMax = ignoreAxis != 2 ? MathUtils.RoundUp(vertZMax, gridScale) : vertZMax;
+
+        Vector3 min = new Vector3(xMin, yMin, zMin);
+        Vector3 max = new Vector3(xMax, yMax, zMax);
+
+        return new Aabb(min, max - min);
     }
 
     public Array<Item> GetSelectedItems()
@@ -121,21 +182,6 @@ public partial class EditorState
         return array;
     }
 
-
-    /// <summary>
-    /// Select items based on a voxel selection. Items that are in or are attached to a selected voxel become selected.
-    /// </summary>
-    /// <param name="selection">The voxel selection.</param>
-    public void SetSelectedItems(Aabb selection)
-    {
-        _selectedItems.Clear();
-        foreach (var item in Project.Items.Values)
-        {
-            if (selection.HasPoint(item.Position))
-                _selectedItems.Add(item);
-        }
-        EmitUpdatedSelectedItems();
-    }
 
     public void SetSelectedItems(Godot.Collections.Array<Item> items)
     {
@@ -177,56 +223,49 @@ public partial class EditorState
         return result;
     }
 
-    /// <summary>
-    /// Set the selection based on the result of a raycast.
-    /// </summary>
-    /// <param name="pos">Raycast hit position.</param>
-    /// <param name="normal">Raycast hit normal.</param>
-    /// <param name="expand">Whether to expand the current selection.</param>
-    public void SelectRaycast(Vector3 pos, Vector3 normal, bool expand = false)
-    {
-        Direction direction = Directions.GetClosestDirection(normal);
 
-        // Subtract normal to avoid possible floating point errors.
-        pos -= normal * .25f;
-        Vector3I voxelPos = new Vector3I((int)MathF.Floor(pos.X), (int)MathF.Floor(pos.Y), (int)MathF.Floor(pos.Z));
-        SelectFace(new VoxelFace(voxelPos, direction), expand);
-        SelectionNormal = normal;
+    /// <summary>
+    /// Set the selection based on the result of a raycast that hit an item.
+    /// </summary>
+    /// <param name="item">The item that was hit.</param>
+    /// <param name="expand">Whether to expand the current selection.</param>
+    public void SelectItem(Item item, bool expand = false)
+    {
+        if (!expand)
+        {
+            _selectedItems.Clear();
+            SetSelection(default);
+        }
+
+        _selectedItems.Add(item);
+        EmitUpdatedSelectedItems();
     }
 
-    private static Aabb ExpandToGrid(VoxelFace face, int gridScale = 1, int ignoreAxis = -1)
+    public void SelectAllItems()
     {
-        var (vert1, vert2, vert3, vert4) = face.GetVertices();
+        foreach (var item in Project.Items.Values)
+        {
+            _selectedItems.Add(item);
+        }
+        EmitUpdatedSelectedItems();
+    }
 
-        // This could definately be optimized, but I don't really care tbh.
-        
-        int vertXMin = MathUtils.Min(vert1.X, vert2.X, vert3.X, vert4.X);
-        int vertXMax = MathUtils.Max(vert1.X, vert2.X, vert3.X, vert4.X);
+    public void ClearSelectedItems()
+    {
+        _selectedItems.Clear();
+        EmitUpdatedSelectedItems();
+    }
 
-        int vertYMin = MathUtils.Min(vert1.Y, vert2.Y, vert3.Y, vert4.Y);
-        int vertYMax = MathUtils.Max(vert1.Y, vert2.Y, vert3.Y, vert4.Y);
-
-        int vertZMin = MathUtils.Min(vert1.Z, vert2.Z, vert3.Z, vert4.Z);
-        int vertZMax = MathUtils.Max(vert1.Z, vert2.Z, vert3.Z, vert4.Z);
-
-        int xMin = ignoreAxis != 0 ? MathUtils.RoundDown(vertXMin, gridScale) : vertXMin;
-        int xMax = ignoreAxis != 0 ? MathUtils.RoundUp(vertXMax, gridScale) : vertXMax;
-
-        int yMin = ignoreAxis != 1 ? MathUtils.RoundDown(vertYMin, gridScale) : vertYMin;
-        int yMax = ignoreAxis != 1 ? MathUtils.RoundUp(vertYMax, gridScale) : vertYMax;
-
-        int zMin = ignoreAxis != 2 ? MathUtils.RoundDown(vertZMin, gridScale) : vertZMin;
-        int zMax = ignoreAxis != 2 ? MathUtils.RoundUp(vertZMax, gridScale) : vertZMax;
-
-        Vector3 min = new Vector3(xMin, yMin, zMin);
-        Vector3 max = new Vector3(xMax, yMax, zMax);
-
-        return new Aabb(min, max - min);
+    public void SelectAll()
+    {
+        SelectAllWorld();
+        SelectAllItems();
     }
 
     public void ClearSelection()
     {
         SetSelection(default);
+        ClearSelectedItems();
     }
 
     /// <summary>

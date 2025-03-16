@@ -64,6 +64,20 @@ text = "Redo"
 accelerator = &"ui_redo"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
+[node name="Selection" type="PopupMenu" parent="MenuBar"]
+
+[node name="SelectAll" type="Node" parent="MenuBar/Selection"]
+script = ExtResource("2_hlo7n")
+text = "Select All"
+accelerator = &"select_all"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
+[node name="SelectNone" type="Node" parent="MenuBar/Selection"]
+script = ExtResource("2_hlo7n")
+text = "Select None"
+accelerator = &"select_none"
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
 [node name="Debug" type="PopupMenu" parent="MenuBar"]
 
 [node name="AddTestItem" type="Node" parent="MenuBar/Debug"]
@@ -112,6 +126,8 @@ script = ExtResource("4_x3h8h")
 [connection signal="index_pressed" from="MenuBar/Edit" to="." method="_on_edit_index_pressed"]
 [connection signal="pressed" from="MenuBar/Edit/Undo" to="." method="_on_undo_pressed"]
 [connection signal="pressed" from="MenuBar/Edit/Redo" to="." method="_on_redo_pressed"]
+[connection signal="pressed" from="MenuBar/Selection/SelectAll" to="." method="_on_select_all_pressed"]
+[connection signal="pressed" from="MenuBar/Selection/SelectNone" to="." method="_on_select_none_pressed"]
 [connection signal="index_pressed" from="MenuBar/Debug" to="." method="_on_debug_index_pressed"]
 [connection signal="pressed" from="MenuBar/Debug/AddTestItem" to="." method="_on_add_test_item_pressed"]
 [connection signal="pressed" from="MenuBar/Debug/ExportGLTF" to="." method="_on_export_gltf_pressed"]

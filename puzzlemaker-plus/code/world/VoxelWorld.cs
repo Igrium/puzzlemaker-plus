@@ -351,7 +351,7 @@ public class VoxelChunk<T> : IVoxelView<T>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int GetIndex(int x, int y, int z)
+    public int GetIndex(int x, int y, int z)
     {
         return x + (y * 16) + (z * 16 * 16);
     }

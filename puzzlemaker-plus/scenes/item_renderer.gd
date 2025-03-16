@@ -83,4 +83,4 @@ func _on_set_selected(selected: bool):
 func _on_area_3d_input_event(_camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == 1:
-			Editor.SetItemSelected(item, true)
+			Editor.SelectItem(item, event.shift_pressed)
