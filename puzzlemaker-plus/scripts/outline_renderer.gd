@@ -25,7 +25,6 @@ func update_outline():
 		_disable_outline(root_node)
 
 func _enable_outline(node: Node):
-	print("Enabling outline")
 	if node is MeshInstance3D:
 		for i in node.mesh.get_surface_count():
 			var override = _get_or_create_surface_override(node, i)

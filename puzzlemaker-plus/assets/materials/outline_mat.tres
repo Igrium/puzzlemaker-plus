@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bcqcpwq3btue3"]
 
-[ext_resource type="Shader" uid="uid://cqnyxx0nyomwj" path="res://assets/outline.gdshader" id="1_fw8r4"]
+[ext_resource type="Shader" uid="uid://cqnyxx0nyomwj" path="res://assets/shaders/outline.gdshader" id="1_fw8r4"]
 
 [resource]
 render_priority = 0

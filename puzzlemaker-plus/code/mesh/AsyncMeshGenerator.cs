@@ -30,19 +30,12 @@ public partial class AsyncMeshGenerator : RefCounted
         _invert = invert;
     }
 
-    public void DoGreedyMeshAsync()
+    public async void DoGreedyMeshAsync()
     {
-        Task.Run(() =>
-        {
-            try
-            {
-                DoGreedyMeshSync();
-            }
-            catch (Exception e)
-            {
-                GD.PushError(e);
-            }
-        });
+        Stopwatch sw = Stopwatch.StartNew();
+        await Task.Run(() => DoGreedyMeshSync());
+        EmitSignalGreedyMeshFinished(sw.ElapsedMilliseconds);
+
     }
 
     private long DoGreedyMeshSync()
@@ -82,8 +75,6 @@ public partial class AsyncMeshGenerator : RefCounted
         stopwatch.Stop();
 
         long time = stopwatch.ElapsedMilliseconds;
-        Callable.From(() => EmitSignal(SignalName.GreedyMeshFinished, time)).CallDeferred();
-
         return time;
     }
 

@@ -1,8 +1,8 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://cru0jqvvmp5ty"]
 
-[ext_resource type="Shader" path="res://assets/materials/editor_voxel.gdshader" id="1_a0b85"]
+[ext_resource type="Shader" uid="uid://dvavte5igyslf" path="res://assets/shaders/selection_highlight.gdshader" id="1_jw3qc"]
 
 [resource]
 render_priority = 0
-shader = ExtResource("1_a0b85")
+shader = ExtResource("1_jw3qc")
 shader_parameter/tint_color = Color(0.325796, 0.325796, 0, 1)

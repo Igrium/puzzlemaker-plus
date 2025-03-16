@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://dh0biv6vokff6"]
 
-[ext_resource type="Shader" path="res://assets/materials/editor_voxel.gdshader" id="1_o456b"]
+[ext_resource type="Shader" uid="uid://dvavte5igyslf" path="res://assets/shaders/selection_highlight.gdshader" id="1_o456b"]
 [ext_resource type="Texture2D" uid="uid://blrunstir4sjg" path="res://assets/materials/clean/grid0.png" id="2_rgmmv"]
 
 [resource]

@@ -1,38 +1,20 @@
-[gd_resource type="Resource" script_class="EditorTheme" load_steps=11 format=3 uid="uid://c5jjtxrs7ubgs"]
+[gd_resource type="Resource" script_class="EditorTheme" load_steps=7 format=3 uid="uid://c5jjtxrs7ubgs"]
 
 [ext_resource type="Script" uid="uid://cmwwy0evjnxl4" path="res://code/editor/EditorTheme.cs" id="1_bnrp4"]
-[ext_resource type="Shader" uid="uid://dvavte5igyslf" path="res://assets/materials/editor_voxel.gdshader" id="1_mlfhs"]
+[ext_resource type="Material" uid="uid://cru0jqvvmp5ty" path="res://assets/materials/selection_highlight.tres" id="2_uu27t"]
 [ext_resource type="Texture2D" uid="uid://blrunstir4sjg" path="res://assets/materials/clean/grid0.png" id="2_vmcqq"]
 [ext_resource type="Texture2D" uid="uid://n8q8jn4a0btb" path="res://assets/materials/clean/grid0b.png" id="3_uu27t"]
-[ext_resource type="Texture2D" uid="uid://bo5ok4t586cfq" path="res://assets/materials/clean/grid1.png" id="4_uu27t"]
-[ext_resource type="Texture2D" uid="uid://box1rt4h6syfw" path="res://assets/materials/clean/grid1b.png" id="5_nanxf"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_nanxf"]
-render_priority = 0
-shader = ExtResource("1_mlfhs")
-shader_parameter/albedo_texture = ExtResource("2_vmcqq")
-shader_parameter/tint_color = Color(0.384097, 0.384097, 1.92523e-07, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y64lf"]
+next_pass = ExtResource("2_uu27t")
+albedo_texture = ExtResource("2_vmcqq")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_yh2r6"]
-render_priority = 0
-shader = ExtResource("1_mlfhs")
-shader_parameter/albedo_texture = ExtResource("3_uu27t")
-shader_parameter/tint_color = Color(0.384097, 0.384097, 1.92523e-07, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_sv8fr"]
-render_priority = 0
-shader = ExtResource("1_mlfhs")
-shader_parameter/albedo_texture = ExtResource("4_uu27t")
-shader_parameter/tint_color = Color(0.384097, 0.384097, 1.92523e-07, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_okjrg"]
-render_priority = 0
-shader = ExtResource("1_mlfhs")
-shader_parameter/albedo_texture = ExtResource("5_nanxf")
-shader_parameter/tint_color = Color(0.384097, 0.384097, 1.92523e-07, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mlfhs"]
+next_pass = ExtResource("2_uu27t")
+albedo_texture = ExtResource("3_uu27t")
 
 [resource]
 script = ExtResource("1_bnrp4")
-WallTextures = Array[Material]([SubResource("ShaderMaterial_nanxf"), SubResource("ShaderMaterial_yh2r6"), SubResource("ShaderMaterial_sv8fr"), SubResource("ShaderMaterial_okjrg")])
+WallTextures = Array[Material]([SubResource("StandardMaterial3D_y64lf"), SubResource("StandardMaterial3D_mlfhs")])
 FloorTextures = Array[Material]([])
 CeilingTextures = Array[Material]([])
