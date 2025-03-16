@@ -21,7 +21,7 @@ var selected: bool = false:
 		return selected
 	set(value):
 		selected = value
-		set_selected.emit(value)
+		_on_set_selected(value)
 
 func _ready() -> void:
 	Editor.connect("UpdatedSelectedItems", _on_updated_item_selection)
@@ -76,8 +76,11 @@ func _on_updated_item_selection(items: Array[Item]):
 	
 	selected = items.has(_item)
 
-
-func _on_area_3d_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
+func _on_set_selected(selected: bool):
+	set_selected.emit(selected)
+	$OutlineRenderer.outline_enabled = selected
+	
+func _on_area_3d_input_event(_camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == 1:
-			print("Pressed the item!")
+			Editor.SetItemSelected(item, true)

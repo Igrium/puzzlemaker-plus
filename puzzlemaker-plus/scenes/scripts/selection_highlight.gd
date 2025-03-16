@@ -23,9 +23,10 @@ func update_selection(selection: AABB):
 	_draw_selection_highlight(i_mesh, _grow_box(selection, flatten * (-.01 * grid_scale)), material)
 	self.mesh = i_mesh
 
-@warning_ignore("shadowed_global_identifier", "shadowed_global_identifier")
 static func _draw_selection_highlight(m: ImmediateMesh, selection: AABB, mat: Material = null):
+	@warning_ignore("shadowed_global_identifier")
 	var min: Vector3 = selection.position
+	@warning_ignore("shadowed_global_identifier")
 	var max: Vector3 = selection.end
 	
 	m.surface_begin(Mesh.PRIMITIVE_LINES, mat)
