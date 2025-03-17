@@ -150,7 +150,10 @@ var orbit_scale: float = 1
 var pan_offset = Vector3(0, 0, 0)
 var needs_update:bool = true
 
-var mouse_buttons = { "LEFT": MOUSE.ROTATE, "MIDDLE": MOUSE.ROTATE, "RIGHT": MOUSE.PAN }
+var mouse_buttons = { 
+	"LEFT": MOUSE.ROTATE,
+ 	"MIDDLE": MOUSE.ROTATE,
+ 	"RIGHT": MOUSE.PAN }
 var touches = { "ONE": TOUCH.ROTATE, "TWO": TOUCH.DOLLY_PAN }
 var state = STATE.NONE
 
@@ -285,7 +288,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 		
 	# ON MOUSE DOWN (left, middle, right)
-	if event is InputEventMouseButton and (event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_RIGHT or event.button_index == MOUSE_BUTTON_MIDDLE) and event.pressed:
+	if event is InputEventMouseButton and (event.button_index == MOUSE_BUTTON_RIGHT or event.button_index == MOUSE_BUTTON_MIDDLE) and event.pressed:
 		on_mouse_down(event)
 	
 	# ON MOUSE UP

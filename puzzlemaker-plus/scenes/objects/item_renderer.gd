@@ -76,11 +76,16 @@ func _on_updated_item_selection(items: Array[Item]):
 	
 	selected = items.has(_item)
 
-func _on_set_selected(selected: bool):
-	set_selected.emit(selected)
-	$OutlineRenderer.outline_enabled = selected
+func _on_set_selected(is_selected: bool):
+	set_selected.emit(is_selected)
+	$OutlineRenderer.outline_enabled = is_selected
 	
-func _on_area_3d_input_event(_camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
+func _on_area_3d_input_event(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == 1:
 			Editor.SelectItem(item, event.shift_pressed)
+			$Draggable.StartDragging()
+
+
+func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3) -> void:
+	Editor.MoveItem(item, pos)

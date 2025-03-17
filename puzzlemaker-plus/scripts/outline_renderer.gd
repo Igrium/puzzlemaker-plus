@@ -6,11 +6,6 @@ extends Node
 
 @export var outline_material: Material
 
-# Meshes need to have their materials duplicated before an outline can be added.
-# keep track of meshes with duplicated materials here.
-var _processed_meshes: Dictionary[WeakRef, bool]
-
-
 var outline_enabled := false:
 	get:
 		return outline_enabled
