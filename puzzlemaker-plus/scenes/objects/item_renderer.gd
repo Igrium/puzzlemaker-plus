@@ -87,5 +87,5 @@ func _on_area_3d_input_event(_camera: Node, event: InputEvent, _event_position: 
 			$Draggable.StartDragging()
 
 
-func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3) -> void:
+func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3, _rot: Vector3) -> void:
 	Editor.MoveItem(item, pos)

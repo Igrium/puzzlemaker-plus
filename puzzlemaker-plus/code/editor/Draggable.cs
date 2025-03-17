@@ -31,12 +31,14 @@ internal struct RaycastResult
 }
 
 
+
 /// <summary>
 /// Makes the parent node able to be dragged around in the editor.
 /// </summary>
 [GlobalClass]
 public partial class Draggable : Node
 {
+
     private struct DragState
     {
         public Vector2 Offset;
@@ -50,7 +52,7 @@ public partial class Draggable : Node
     public delegate void DragStartedEventHandler(Node3D node);
 
     [Signal]
-    public delegate void DragDroppedEventHandler(Node3D node, Vector3 position);
+    public delegate void DragDroppedEventHandler(Node3D node, Vector3 position, Vector3 rotation);
 
     /// <summary>
     /// Automatically check for when a player releases M1 and drop the draggable.
@@ -69,6 +71,22 @@ public partial class Draggable : Node
     /// </summary>
     [Export(PropertyHint.Layers3DPhysics)]
     public uint RaycastMask { get; set; } = 0xFFFFFFFF;
+
+    /// <summary>
+    /// The sides on which the item is allowed to mount to a surface.
+    /// </summary>
+    [Export]  
+    public DirectionFlags MountDirections { get; set; } = DirectionFlags.All;
+
+    /// <summary>
+    /// If we try to mount on a wall with an unsupported mount direction, rotate so the base mount direction equals the wall direction.
+    /// </summary>
+    [ExportCategory("Mount Rotation")]
+    [Export]
+    public bool AllowMountRotate { get; set; } = false;
+
+    [Export]
+    public Direction BaseMountDirection { get; set; } = Direction.Down;
 
     public Node3D Parent
     {
@@ -128,7 +146,7 @@ public partial class Draggable : Node
         {
             var node = _dragState.Value.Node;
             _dragState = null;
-            EmitSignalDragDropped(node, node.GlobalPosition);
+            EmitSignalDragDropped(node, node.GlobalPosition, node.GlobalRotation);
         }
     }
 
@@ -139,10 +157,16 @@ public partial class Draggable : Node
 
         RaycastResult traceResult;
         Raycast(GetViewport().GetMousePosition() + _dragState.Value.Offset, out traceResult);
-        if (traceResult.Hit)
-        {
-            _dragState.Value.Node.GlobalPosition = traceResult.Position.Round(SnapIncrement);
-        }
+        if (!traceResult.Hit)
+            return;
+
+        Node3D node = _dragState.Value.Node;
+        Vector3 localNormal = node.Quaternion.Inverse() * -traceResult.Normal;
+        Direction localMountDir = Directions.GetClosestDirection(localNormal);
+
+        node.GlobalPosition = traceResult.Position.Round(SnapIncrement);
+        //DebugDraw3D.DrawArrow(traceResult.Position, node.ToGlobal(localNormal * -3));
+
     }
 
     private void Raycast(Vector2 screenPos, out RaycastResult result)
