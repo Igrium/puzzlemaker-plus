@@ -64,7 +64,7 @@ func update_model():
 	if (model == null):
 		model = placeholder_mesh
 	
-	_editor_model = model.instantiate()	
+	_editor_model = model.instantiate()
 	$Area3D.add_child(_editor_model)
 	# There's a weird issue where transforms from the scene aren't respected in the function it's instantiated.
 	# Call this deferred to let them initialize properly.
@@ -87,5 +87,5 @@ func _on_area_3d_input_event(_camera: Node, event: InputEvent, _event_position: 
 			$Draggable.StartDragging()
 
 
-func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3, _rot: Vector3) -> void:
-	Editor.MoveItem(item, pos)
+func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3, rot: Vector3) -> void:
+	Editor.MoveItem(item, pos, rot)

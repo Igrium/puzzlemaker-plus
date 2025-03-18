@@ -74,8 +74,8 @@ public partial class EditorState
         return CommandStack.Execute(new AddItemCommand(itemType, position));
     }
 
-    public bool MoveItem(Item item, Vector3 position)
+    public bool MoveItem(Item item, Vector3 position, Vector3 rotation)
     {
-        return CommandStack.Execute(new MoveItemCommand(item, position));
+        return CommandStack.Execute(new MoveItemCommand(item, position, rotation));
     }
 }

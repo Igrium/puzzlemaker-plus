@@ -41,7 +41,11 @@ public partial class Draggable : Node
 
     private struct DragState
     {
+        public Vector2 MouseStartPos;
+        public bool HasInitializedDrag;
         public Vector2 Offset;
+        public Quaternion StartRotation;
+        public Vector3 StartMountNormal;
         public PhysicsDirectSpaceState3D PhysicsSpace;
         public Node3D Node;
     }
@@ -66,27 +70,34 @@ public partial class Draggable : Node
     [Export]
     public float SnapIncrement { get; set; } = 0;
 
+    [Export]
+    public float DragStartThreshold { get; set; } = 5f;
+
     /// <summary>
     /// Physics layers to consider for traceResult.
     /// </summary>
     [Export(PropertyHint.Layers3DPhysics)]
     public uint RaycastMask { get; set; } = 0xFFFFFFFF;
 
-    /// <summary>
-    /// The sides on which the item is allowed to mount to a surface.
-    /// </summary>
-    [Export]  
-    public DirectionFlags MountDirections { get; set; } = DirectionFlags.All;
+    private Vector3 _baseMountNormal = Vector3.Down;
+
 
     /// <summary>
-    /// If we try to mount on a wall with an unsupported mount direction, rotate so the base mount direction equals the wall direction.
+    /// The normal of the item's mount direction in local space.
     /// </summary>
-    [ExportCategory("Mount Rotation")]
+    [ExportCategory("Mount")]
     [Export]
-    public bool AllowMountRotate { get; set; } = false;
+    public Vector3 BaseMountNormal
+    {
+        get => _baseMountNormal;
+        set => _baseMountNormal = value.Normalized();
+    }
 
+    /// <summary>
+    /// When snapping to the wall, if the wall's global orientation matches one of these, rotate the item so the mount direction matches its normal.
+    /// </summary>
     [Export]
-    public Direction BaseMountDirection { get; set; } = Direction.Down;
+    public DirectionFlags MountSnapOrientations { get; set; }
 
     public Node3D Parent
     {
@@ -126,14 +137,19 @@ public partial class Draggable : Node
     {
         if (IsDragging)
             StopDragging();
-
+        
         Node3D node = Parent;
         Vector2 nodePos = GetScreenPos(node.GlobalPosition);
         Vector2 mousePos = GetViewport().GetMousePosition();
 
+        Quaternion quat = node.GlobalBasis.GetRotationQuaternion();
+
         _dragState = new DragState
         {
+            MouseStartPos = mousePos,
             Offset = nodePos - mousePos,
+            StartRotation = quat,
+            StartMountNormal = quat * BaseMountNormal,
             PhysicsSpace = node.GetWorld3D().DirectSpaceState,
             Node = node
         };
@@ -145,8 +161,10 @@ public partial class Draggable : Node
         if (_dragState.HasValue)
         {
             var node = _dragState.Value.Node;
+            var didInit = _dragState.Value.HasInitializedDrag;
             _dragState = null;
-            EmitSignalDragDropped(node, node.GlobalPosition, node.GlobalRotation);
+            if (didInit)
+                EmitSignalDragDropped(node, node.GlobalPosition, node.GlobalRotation);
         }
     }
 
@@ -155,18 +173,40 @@ public partial class Draggable : Node
         if (!_dragState.HasValue)
             return;
 
+        Vector2 mousePos = GetViewport().GetMousePosition();
+
+        if (!_dragState.Value.HasInitializedDrag)
+        {
+            if (mousePos.DistanceSquaredTo(_dragState.Value.MouseStartPos) >= DragStartThreshold * DragStartThreshold)
+            {
+                _dragState = _dragState.Value with { HasInitializedDrag = true };
+            }
+            else return;
+        }
+
         RaycastResult traceResult;
-        Raycast(GetViewport().GetMousePosition() + _dragState.Value.Offset, out traceResult);
+        Raycast(mousePos + _dragState.Value.Offset, out traceResult);
         if (!traceResult.Hit)
             return;
 
+        traceResult.Normal *= -1;
         Node3D node = _dragState.Value.Node;
-        Vector3 localNormal = node.Quaternion.Inverse() * -traceResult.Normal;
-        Direction localMountDir = Directions.GetClosestDirection(localNormal);
-
         node.GlobalPosition = traceResult.Position.Round(SnapIncrement);
-        //DebugDraw3D.DrawArrow(traceResult.Position, node.ToGlobal(localNormal * -3));
-
+            
+        if (MountSnapOrientations != 0)
+        {
+            Direction wallDirection = Directions.GetClosestDirection(traceResult.Normal);
+            if (MountSnapOrientations.HasDirection(wallDirection) && !_dragState.Value.StartMountNormal.IsEqualApprox(traceResult.Normal))
+            {
+                Quaternion rotation = ComputeRotationBetween(BaseMountNormal, traceResult.Normal);
+                // TODO: figure out how to set global rotation more cleanly.
+                SetNodeGlobalRotation(node, rotation);
+            }
+            else
+            {
+                SetNodeGlobalRotation(node, _dragState.Value.StartRotation);
+            }
+        }
     }
 
     private void Raycast(Vector2 screenPos, out RaycastResult result)
@@ -210,5 +250,48 @@ public partial class Draggable : Node
         {
             GetChildRIDs(child, array);
         }
+    }
+
+    private static Quaternion ComputeRotationBetween(Vector3 from, Vector3 to)
+    {
+        // Ensure the vectors are normalized
+        from = from.Normalized();
+        to = to.Normalized();
+
+        // Calculate dot product
+        float dot = from.Dot(to);
+
+        // If vectors are already aligned, return the identity quaternion
+        if (Mathf.IsEqualApprox(dot, 1.0f))
+        {
+            return Quaternion.Identity;
+        }
+
+        // If vectors are opposite, return a 180 degree rotation quaternion
+        if (Mathf.IsEqualApprox(dot, -1.0f))
+        {
+            // Find an orthogonal vector to use as the rotation axis
+            Vector3 orthogonal = from.Cross(Vector3.Right).Length() < 0.1 ? from.Cross(Vector3.Up) : from.Cross(Vector3.Right);
+            orthogonal = orthogonal.Normalized();
+
+            return new Quaternion(orthogonal, Mathf.Pi);
+        }
+
+        // Calculate the rotation axis
+        Vector3 axis = from.Cross(to).Normalized();
+
+        // Calculate the angle of rotation
+        float angle = Mathf.Acos(dot);
+
+        // Create and return the quaternion representing the rotation
+        return new Quaternion(axis, angle).Normalized();
+    }
+
+    // I don't know why this isn't vanilla lol.
+    private static void SetNodeGlobalRotation(Node3D node, Quaternion rotation)
+    {
+        Transform3D transform = node.GlobalTransform;
+        transform.Basis = new Basis(rotation) * Basis.FromScale(transform.Basis.Scale);
+        node.GlobalTransform = transform;
     }
 }
