@@ -192,15 +192,16 @@ public partial class Draggable : Node
         traceResult.Normal *= -1;
         Node3D node = _dragState.Value.Node;
         node.GlobalPosition = traceResult.Position.Round(SnapIncrement);
-            
+        
         if (MountSnapOrientations != 0)
         {
             Direction wallDirection = Directions.GetClosestDirection(traceResult.Normal);
             if (MountSnapOrientations.HasDirection(wallDirection) && !_dragState.Value.StartMountNormal.IsEqualApprox(traceResult.Normal))
             {
-                Quaternion rotation = ComputeRotationBetween(BaseMountNormal, traceResult.Normal);
-                // TODO: figure out how to set global rotation more cleanly.
-                SetNodeGlobalRotation(node, rotation);
+                
+                Quaternion deltaRot = ComputeRotationBetween(_dragState.Value.StartMountNormal, traceResult.Normal);
+
+                SetNodeGlobalRotation(node, deltaRot * _dragState.Value.StartRotation);
             }
             else
             {
