@@ -1,9 +1,12 @@
 {
-	"Variants": {
-		"Standard": {
-			"EditorModel": {
-				"default": "res://package/assets/models/Television_01_2k.gltf"
-			}
+	"variants": {
+		"standard": {
+			"editor_model": "res://package/assets/models/Television_01_2k.gltf",
+			"themes": [
+				{
+					"instance": "instances/p2editor/turret.vmf"
+				}
+			]
 		}
 	}
 }

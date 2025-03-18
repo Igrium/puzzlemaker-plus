@@ -50,9 +50,9 @@ public partial class PuzzlemakerProject : RefCounted
 
     private PuzzlemakerProject(JsonObject json)
     {
-        World = JsonSerializer.Deserialize<PuzzlemakerWorld>(json["World"], JsonUtils.JsonOptions) ?? new();
+        World = JsonSerializer.Deserialize<PuzzlemakerWorld>(json["world"], JsonUtils.JsonOptions) ?? new();
         
-        JsonObject? items = json["Items"]?.AsObject();
+        JsonObject? items = json["items"]?.AsObject();
         if (items != null)
         {
             foreach (var (id, v) in items)
@@ -75,7 +75,7 @@ public partial class PuzzlemakerProject : RefCounted
     private JsonObject WriteJson()
     {
         JsonObject json = new JsonObject();
-        json["World"] = JsonSerializer.SerializeToNode(World, JsonUtils.JsonOptions);
+        json["world"] = JsonSerializer.SerializeToNode(World, JsonUtils.JsonOptions);
 
         JsonObject items = new JsonObject();
 
@@ -91,13 +91,13 @@ public partial class PuzzlemakerProject : RefCounted
             }
         }
 
-        json["Items"] = items;
+        json["items"] = items;
         return json;
     }
 
     protected Item LoadItem(string id, JsonObject json, JsonSerializerOptions options)
     {
-        string typeStr = json["Type"]?.AsValue()?.GetValue<string>() ?? throw new JsonException("Missing item type");
+        string typeStr = json["type"]?.AsValue()?.GetValue<string>() ?? throw new JsonException("Missing item type");
 
         if (PackageManager.Instance.ItemTypes.TryGetValue(typeStr, out var itemType))
         {
@@ -115,7 +115,7 @@ public partial class PuzzlemakerProject : RefCounted
         JsonObject json = new JsonObject();
 
         item.WriteJson(json, options);
-        json["Type"] = item.Type.ID;
+        json["type"] = item.Type.ID;
         return json;
     }
 

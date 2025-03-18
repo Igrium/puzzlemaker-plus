@@ -35,7 +35,9 @@ public partial class ItemPropHolder : RefCounted
             if (itemProp == null)
                 continue;
 
-            if (json.TryGetPropertyValue(prop.Name, out var node))
+            string name = options.PropertyNamingPolicy?.ConvertName(prop.Name) ?? prop.Name;
+
+            if (json.TryGetPropertyValue(name, out var node))
             {
                 JsonSerializerOptions localOptions = options;
                 JsonConverterAttribute? jsonConverter = prop.GetCustomAttribute<JsonConverterAttribute>();
@@ -77,7 +79,9 @@ public partial class ItemPropHolder : RefCounted
 
             JsonNode? node = JsonSerializer.SerializeToNode(prop.GetValue(this), localOptions);
 
-            json[prop.Name] = node;
+            string name = options.PropertyNamingPolicy?.ConvertName(prop.Name) ?? prop.Name;
+
+            json[name] = node;
         }
     }
 

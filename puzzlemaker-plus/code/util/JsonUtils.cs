@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Godot;
 
 namespace PuzzlemakerPlus;
@@ -20,6 +17,8 @@ public static class JsonUtils
     {
         JsonOptions.Converters.Add(new Vector3JsonConverter());
         JsonOptions.Converters.Add(new Vector3IJsonConverter());
+        JsonOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        JsonOptions.PropertyNameCaseInsensitive = true;
     }
 
     public static JsonConverter<T> GetConverter<T>(this JsonSerializerOptions options)
@@ -28,125 +27,30 @@ public static class JsonUtils
     }
 }
 
-/// <summary>
-/// Serializes a json array of values, but if a single value is provided instead, it returns a list with one value.
-/// Doesn't work if value is serialized as json array!
-/// </summary>
-/// <typeparam name="T">Value type.</typeparam>
-public class ListOrValueConverter<T> : JsonConverter<IList<T>>
+public class DictOrValueJsonConverter<T> : JsonConverter<Dictionary<string, T>>
 {
-    public override IList<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public string DefaultName { get; set; } = "default";
+
+    public override Dictionary<string, T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var valueConverter = options.GetConverter<T>();
-
-        if (reader.TokenType == JsonTokenType.StartArray)
-        {
-            var list = new List<T>();
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonTokenType.EndArray)
-                    break;
-
-                // TODO: is throwing on null the correct approach?
-                list.Add(valueConverter.Read(ref reader, typeof(T), options) ?? throw new JsonException());
-            }
-            return list;
-        }
-        else
-        {
-            var list = new List<T>();
-            list.Add(valueConverter.Read(ref reader, typeof(T), options) ?? throw new JsonException());
-            return list;
-        }
-    }
-
-    public override void Write(Utf8JsonWriter writer, IList<T> value, JsonSerializerOptions options)
-    {
-        var valueConverter = options.GetConverter<T>();
-        if (value.Count == 1)
-        {
-            valueConverter.Write(writer, value[0], options);
-        }
-        else
-        {
-            writer.WriteStartArray();
-            foreach (var item in value)
-            {
-                valueConverter.Write(writer, item, options);
-            }
-            writer.WriteEndArray();
-        }
-    }
-}
-
-/// <summary>
-/// Serializes a dictionary of string keys, with the special stipulation that a dict with a single value "default" can pe represented as the value on its own.
-/// Doesn't work if value is serialized as json object!
-/// </summary>
-/// <typeparam name="T"></typeparam>
-public class DictOrValueConverter<T> : JsonConverter<IDictionary<string, T>>
-{
-    private readonly string _defaultName;
-
-    public DictOrValueConverter(string defaultName)
-    {
-        _defaultName = defaultName;
-    }
-
-    public DictOrValueConverter()
-    {
-        _defaultName = "default";
-    }
-
-    public override IDictionary<string, T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        var valueConverter = options.GetConverter<T>();
-        Dictionary<string, T> dict = new();
-
         if (reader.TokenType == JsonTokenType.StartObject)
         {
-            while (reader.Read())
-            {
-                if (reader.TokenType == JsonTokenType.EndObject)
-                    break;
-
-                // Key
-                if (reader.TokenType != JsonTokenType.PropertyName)
-                    throw new JsonException();
-
-                string propName = reader.GetString() ?? throw new JsonException();
-
-                reader.Read();
-                T val = valueConverter.Read(ref reader, typeof(T), options)!;
-
-                dict[propName] = val;
-            }
-            return dict;
+            return options.GetConverter<Dictionary<string, T>>().Read(ref reader, typeToConvert, options);
         }
         else
         {
-            dict[_defaultName] = valueConverter.Read(ref reader, typeof(T), options)!;
+            var converter = options.GetConverter<T>();
+            Dictionary<string, T> dict = new();
+            var val = converter.Read(ref reader, typeof(T), options);
+            if (val != null)
+                dict[DefaultName] = val;
             return dict;
         }
     }
 
-    public override void Write(Utf8JsonWriter writer, IDictionary<string, T> value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Dictionary<string, T> value, JsonSerializerOptions options)
     {
-        var valueConverter = options.GetConverter<T>();
-        if (value.Count() == 1 && value.TryGetValue(_defaultName, out T? single))
-        {
-            valueConverter.Write(writer, single, options);
-        }
-        else
-        {
-            writer.WriteStartObject();
-            foreach (var (k, v) in value)
-            {
-                writer.WritePropertyName(k);
-                valueConverter.Write(writer, v, options);
-            }
-            writer.WriteEndObject();
-        }
+        options.GetConverter<Dictionary<string, T>>().Write(writer, value, options);
     }
 }
 

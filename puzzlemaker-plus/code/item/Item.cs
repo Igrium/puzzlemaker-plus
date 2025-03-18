@@ -94,7 +94,7 @@ public partial class Item : ItemPropHolder
         set => Rotation = value.GetEuler();
     }
 
-    private string _variant = "Standard";
+    private string _variant = "standard";
 
     /// <summary>
     /// The name of the current item variant.

@@ -64,6 +64,7 @@ public sealed class ItemVariant
 
     public List<ItemVariantTheme> Themes { get; set; } = new();
 
+    [JsonConverter(typeof(DictOrValueJsonConverter<string>))]
     public Dictionary<string, string> EditorModel { get; set; } = new();
 
     /// <summary>
@@ -91,9 +92,7 @@ public sealed class ItemVariant
     /// <returns>The variant theme, or null if the package dev messed up and didn't specify any theme entries.</returns>
     public ItemVariantTheme? GetVariantTheme(string levelTheme)
     {
-        if (Themes.Count == 0)
-            return null;
-        var theme = Themes.Where(theme => theme.Names.Contains(levelTheme)).OrderBy(theme => theme.Names.Count()).First();
+        var theme = Themes.Where(theme => theme.Names.Contains(levelTheme)).OrderBy(theme => theme.Names.Count()).FirstOrDefault();
         return theme ?? Themes.FirstOrDefault();
     }
 }
