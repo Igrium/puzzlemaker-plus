@@ -56,7 +56,9 @@ public sealed partial class EditorState : Node
     public PuzzlemakerWorld World => Project.World;
 
     public LevelTheme? Theme { get; private set; }
-    public string ThemeName { get; private set; } = "res://assets/editor_themes/clean.json";
+
+    [Obsolete("Use Theme.Name instead")]
+    public string ThemeName => Theme?.Name ?? "";
 
     /// <summary>
     /// Load a level theme from a file path.
@@ -68,10 +70,13 @@ public sealed partial class EditorState : Node
         GD.Print("Loading theme " + filepath);
         LevelTheme? newTheme = LevelTheme.Load(filepath);
         if (newTheme == null)
+        {
+            GD.PushWarning("Unable to load theme.");
             return false;
+        }
 
         Theme = newTheme;
-        ThemeName = System.IO.Path.GetFileNameWithoutExtension(filepath);
+        GD.Print("Loaded " + Theme.Name);
         return true;
     }
 
@@ -144,7 +149,7 @@ public sealed partial class EditorState : Node
     public override void _Ready()
     {
         base._Ready();
-        LoadTheme(ThemeName);
+        LoadTheme("res://assets/editor_themes/clean.json");
     }
 
     public void EmitOnChunksUpdated(params Vector3[] chunks)

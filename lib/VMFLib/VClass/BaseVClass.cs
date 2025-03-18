@@ -9,7 +9,7 @@ public abstract class BaseVClass
     /// <summary>
     /// This classes properties
     /// </summary>
-    public abstract Dictionary<string, VProperty> Properties { get; set; }
+    public abstract IDictionary<string, VProperty> Properties { get; }
     
     /// <summary>
     /// Classes that are inside of this class
@@ -22,7 +22,7 @@ public abstract class BaseVClass
     /// <param name="property"></param>
     public void AddProperty(VProperty property)
     {
-        if (Properties.Keys.Contains(property.Name) || property.Name == null)
+        if (property.Name == null || Properties.Keys.Contains(property.Name))
             return;
         Properties.Add(property.Name, property);
     }
@@ -65,7 +65,7 @@ public abstract class BaseVClass
 public class GenericVClass : BaseVClass
 {
     public override string ClassHeader { get; }
-    public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
+    public override IDictionary<string, VProperty> Properties { get; } = new Dictionary<string, VProperty>();
 
     public GenericVClass(string classHeader)
     {

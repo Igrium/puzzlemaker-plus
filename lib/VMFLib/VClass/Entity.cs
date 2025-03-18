@@ -5,7 +5,7 @@ namespace VMFLib.VClass;
 public class Entity : BaseVClass
 {
     public override string ClassHeader => "entity";
-    public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
+    public override IDictionary<string, VProperty> Properties { get; } = new Dictionary<string, VProperty>();
     public List<Connection> Connections = new List<Connection>();
     public List<Solid> Solids = new List<Solid>();
     public Hidden? Hidden;

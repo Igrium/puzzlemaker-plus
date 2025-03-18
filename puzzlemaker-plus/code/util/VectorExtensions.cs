@@ -4,11 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
+using VMFLib.Objects;
 
 namespace PuzzlemakerPlus;
 
 internal static class VectorExtensions
 {
+
+    public static Vec3 AsVec3(this Vector3 vec)
+    {
+        return new Vec3(vec.X, vec.Y, vec.Z);
+    }
+
     public static Vector3I RoundInt(this Vector3 vec)
     {
         vec = vec.Round();

@@ -6,6 +6,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Godot;
+using PuzzlemakerPlus.VMF;
+using VMFLib.VClass;
 
 namespace PuzzlemakerPlus.Items;
 
@@ -114,6 +116,33 @@ public partial class Item : ItemPropHolder
     /// </summary>
     public ItemVariant? ItemVariant => Type.Variants.GetValueOrDefault(_variant);
 
+    /// <summary>
+    /// Compile this item into a VMF.
+    /// </summary>
+    /// <param name="vmf"></param>
+    public virtual void Compile(VMFBuilder vmf, LevelTheme theme)
+    {
+        var variant = ItemVariant;
+        if (variant == null)
+        {
+            GD.PushError($"Unable to compile item {ID}: invalid variant '{_variant}'");
+            return;
+        }
+
+        ItemVariantTheme? itemTheme = variant.GetVariantTheme(theme.Name);
+        if (itemTheme == null)
+        {
+            GD.PushError($"Unable to compile item {ID}: variant does not have any theme instances.");
+            return;
+        }
+
+        FuncInstance ent = new FuncInstance();
+        ent.Origin = Position.ToSourceVector().AsVec3();
+        ent.VMFFile = itemTheme.Instance;
+
+        vmf.Entities.Add(ent);
+    }
+
     /* GDScript Utility Functions */
 
     public string[] GetVariants()
@@ -156,7 +185,7 @@ public partial class Item : ItemPropHolder
     /// <returns></returns>
     public string? GetEditorModel()
     {
-        return GetEditorModel(Variant, EditorState.Instance.ThemeName);
+        return GetEditorModel(Variant, EditorState.Instance.Theme?.Name);
     }
 
     public virtual Direction? GetMountDirection(string variant)

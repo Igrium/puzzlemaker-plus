@@ -1,11 +1,12 @@
 ﻿using VMFLib.Objects;
+using VMFLib.Util;
 
 namespace VMFLib.VClass;
 
 public class VersionInfo : BaseVClass
 {
     public override string ClassHeader => "versioninfo";
-    public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
+    public override IDictionary<string, VProperty> Properties { get; } = new Dictionary<string, VProperty>();
 
     public bool? Prefab => Properties["prefab"].Bool();
     public int? EditorVersion => Properties["editorversion"].Int();
@@ -24,7 +25,7 @@ public class World : BaseVClass
     }
 
     public override string ClassHeader => "world";
-    public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
+    public override IDictionary<string, VProperty> Properties { get; } = new Dictionary<string, VProperty>();
     public List<Solid> Solids { get; set; } = new List<Solid>();
     public List<Group> Groups { get; set; } = new List<Group>();
     public List<Hidden> HiddenClasses { get; set; } = new List<Hidden>();
@@ -47,7 +48,13 @@ public class World : BaseVClass
     public string? SkyName
     {
         //get => Properties["skyname"].Str();
-        get => Properties.GetValueOrDefault("skyname")?.Str();
+        //get => Properties.GetValueOrDefault("skyname")?.Str();
+        get
+        {
+            if (Properties.TryGetValue("skyname", out var value))
+                return value.Str();
+            else return null;
+        }
         set
         {
             if (value != null)
@@ -61,7 +68,7 @@ public class World : BaseVClass
 public class Solid : BaseVClass
 {
     public override string ClassHeader => "solid";
-    public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
+    public override IDictionary<string, VProperty> Properties { get; } = new Dictionary<string, VProperty>();
     
     public int Id
     {
@@ -81,7 +88,7 @@ public class Side : BaseVClass
     }
 
     public override string ClassHeader => "side";
-    public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
+    public override IDictionary<string, VProperty> Properties { get; } = new Dictionary<string, VProperty>();
 
     //public int? Id => Properties["id"].Int();
     public int Id
@@ -141,7 +148,7 @@ public class Side : BaseVClass
 public class Displacement : BaseVClass
 {
     public override string ClassHeader => "dispinfo";
-    public override Dictionary<string, VProperty> Properties { get; set; } = new Dictionary<string, VProperty>();
+    public override IDictionary<string, VProperty> Properties { get; } = new Dictionary<string, VProperty>();
 
     public int? Power => Properties["power"].Int();
     public Vec3? StartPosition => Properties["startposition"].Vec3();

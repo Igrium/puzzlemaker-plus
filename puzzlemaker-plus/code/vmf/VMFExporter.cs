@@ -25,6 +25,18 @@ public partial class VMFExporter : RefCounted
         WorldExporter exporter = new WorldExporter(theme);
         exporter.ExportWorld(builder, EditorState.Instance.World);
 
+        foreach (var (key, item) in EditorState.Instance.Project.Items)
+        {
+            try
+            {
+                item.Compile(builder, theme);
+            }
+            catch (Exception ex)
+            {
+                GD.PushError($"Error compiling {key}: ", ex);
+            }
+        }
+
         GD.Print("Saving VMF to " + path);
         builder.WriteVMF(path);
     }

@@ -21,5 +21,5 @@ void fragment() {
 			ALPHA = 1.0;
 		}
 	}
-	
+
 }

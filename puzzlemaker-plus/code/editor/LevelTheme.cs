@@ -32,6 +32,8 @@ public sealed partial class LevelTheme : RefCounted
         _internal = @internal;
     }
 
+    public string Name { get; set; } = "";
+
     /// <summary>
     /// Path to the editor theme to use. If null, use default editor theme.
     /// </summary>
@@ -107,7 +109,10 @@ public sealed partial class LevelTheme : RefCounted
         {
             using (FileAccessStream stream = new FileAccessStream(path))
             {
-                return JsonSerializer.Deserialize<LevelTheme>(stream, JsonUtils.JsonOptions);
+                var theme = JsonSerializer.Deserialize<LevelTheme>(stream, JsonUtils.JsonOptions);
+                if (theme != null)
+                    theme.Name = Path.GetFileNameWithoutExtension(path);
+                return theme;
             }
         }
         catch (JsonException e)
