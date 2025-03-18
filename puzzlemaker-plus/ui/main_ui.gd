@@ -58,7 +58,7 @@ func _on_redo_pressed() -> void:
 
 
 func _on_add_test_item_pressed() -> void:
-	Editor.AddItem("testitem", Vector3(0, 0, 6))
+	Editor.AddItem("floor_button", Vector3(0, 0, 0))
 
 
 func _on_export_gltf_pressed() -> void:

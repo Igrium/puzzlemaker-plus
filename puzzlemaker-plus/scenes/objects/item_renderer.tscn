@@ -14,6 +14,7 @@ script = ExtResource("1_3knih")
 [node name="CollisionGenerator" type="Node" parent="." node_paths=PackedStringArray("base_node")]
 script = ExtResource("2_fqgpw")
 base_node = NodePath("../Area3D")
+allow_yoink = true
 metadata/_custom_type_script = "uid://b5q7d6mbfqo6k"
 
 [node name="OutlineRenderer" type="Node" parent="." node_paths=PackedStringArray("root_node")]
@@ -24,6 +25,7 @@ outline_material = ExtResource("4_34cp5")
 [node name="Draggable" type="Node" parent="."]
 script = ExtResource("5_13vp2")
 AutoDrop = true
+SnapIncrement = 1.0
 MountSnapOrientations = 63
 metadata/_custom_type_script = "uid://bweyhdxea83yj"
 

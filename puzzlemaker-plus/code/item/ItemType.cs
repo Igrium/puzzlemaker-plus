@@ -114,4 +114,15 @@ public sealed class ItemVariantTheme
     /// The face of the voxel in question corrisponds to the attachment direction of the item.
     /// </summary>
     public List<Vector3I> AntlineConnections { get; } = new();
+
+    /// <summary>
+    /// A list of custom assets that need to be packed for this item.
+    /// Will be searched in the editor's mounted resources, prepended with "res://package/game/"
+    /// </summary>
+    public List<string> Assets { get; } = new();
+
+    /// <summary>
+    /// A list of transitive instance dependencies that the instance relies on.
+    /// </summary>
+    public List<string> Dependencies { get; } = new();
 }

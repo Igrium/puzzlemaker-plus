@@ -1,0 +1,12 @@
+{
+	"variants": {
+		"standard": {
+			"editor_model": "res://package/assets/models/buttonweight.gltf",
+			"themes": [
+				{
+					"instance": "instances/pplus/floor_button_black.vmf"
+				}
+			]
+		}
+	}
+}
