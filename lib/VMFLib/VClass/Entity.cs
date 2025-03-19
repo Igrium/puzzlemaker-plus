@@ -32,6 +32,12 @@ public class Entity : BaseVClass
         set => SetProperty("origin", value);
     }
 
+    public Vec3 Angles
+    {
+        get => Properties["angles"].Vec3();
+        set => SetProperty("angles", value);
+    }
+
     public string TargetName
     {
         get => Properties["targetname"].Str();

@@ -18,7 +18,7 @@ public static class CoordConverter
         return new Vector3I(vec.X, -vec.Z, vec.Y) * 32;
     }
 
-    private static Vector3 ToSourceNoScale(this Vector3 vec)
+    public static Vector3 ToSourceNoScale(this Vector3 vec)
     {
         return new Vector3(vec.X, -vec.Z, vec.Y);
     }
@@ -53,5 +53,15 @@ public static class CoordConverter
 
         result.MaterialIndex = quad.MaterialIndex;
         return result;
+    }
+
+    public static Vector3 ToSourceEuler(this Vector3 eulerAngles)
+    {
+        return new Vector3(-eulerAngles.Z, eulerAngles.Y, eulerAngles.X);
+    }
+
+    public static Vector3 ToDegrees(this Vector3 eulerRadians)
+    {
+        return new Vector3(Mathf.RadToDeg(eulerRadians.X), Mathf.RadToDeg(eulerRadians.Y), Mathf.RadToDeg(eulerRadians.Z));
     }
 }

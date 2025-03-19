@@ -117,10 +117,10 @@ public partial class Item : ItemPropHolder
     public ItemVariant? ItemVariant => Type.Variants.GetValueOrDefault(_variant);
 
     /// <summary>
-    /// Compile this item into a VMF.
+    /// Export this item into a VMF.
     /// </summary>
     /// <param name="vmf"></param>
-    public virtual void Compile(VMFBuilder vmf, LevelTheme theme)
+    public virtual void Export(VMFBuilder vmf, LevelTheme theme)
     {
         var variant = ItemVariant;
         if (variant == null)
@@ -138,6 +138,8 @@ public partial class Item : ItemPropHolder
 
         FuncInstance ent = new FuncInstance();
         ent.Origin = Position.ToSourceVector().AsVec3();
+        ent.Angles = Rotation.ToDegrees().ToSourceEuler().AsVec3();
+
         ent.VMFFile = itemTheme.Instance;
 
         vmf.Entities.Add(ent);

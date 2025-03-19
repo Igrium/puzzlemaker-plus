@@ -29,7 +29,7 @@ public partial class VMFExporter : RefCounted
         {
             try
             {
-                item.Compile(builder, theme);
+                item.Export(builder, theme);
             }
             catch (Exception ex)
             {
