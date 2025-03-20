@@ -1,0 +1,24 @@
+[gd_scene load_steps=6 format=3 uid="uid://dnbdhyqs06nck"]
+
+[ext_resource type="Script" uid="uid://dj8nsxdm1n2yp" path="res://code/editor/RotationGizmo.cs" id="1_okbjt"]
+[ext_resource type="PackedScene" uid="uid://b44hishjhhgta" path="res://assets/models/handles/rotation.glb" id="1_qef7o"]
+[ext_resource type="PackedScene" uid="uid://cblscg2xwejos" path="res://assets/models/handles/rotation_grip.glb" id="2_okbjt"]
+[ext_resource type="Script" uid="uid://cfmiw1wdnna0v" path="res://scenes/rotation_handle_fine.gd" id="4_ot35k"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_qef7o"]
+points = PackedVector3Array(-0.451011, 0.60649, -3.72736, -0.634988, 0.564037, -3.66108, -1.69847, 1.18583, -3.40668, -1.24699, 0.597374, -2.34939, 1.66874, 0.596423, -3.38949, 1.47913, 1.18583, -3.51629, -1.26013, 1.18583, -2.31111, 1.20571, 0.5557, -2.42292, -1.60761, 0.5557, -3.32689, 0.401103, 1.10766, -3.72741, 1.26013, 1.18583, -2.31111, 0.634988, 0.564037, -3.66108, 1.69847, 1.18583, -3.18745, 1.24699, 0.597374, -2.34939, -1.47913, 1.18583, -3.51629, -1.6787, 0.594867, -3.23416, -1.20571, 0.5557, -2.42292, -0.455906, 1.05971, -3.7347, -1.31592, 0.604084, -3.53135, 0.756356, 0.605003, -3.68087, 1.60761, 0.5557, -3.32689, -1.69847, 1.18583, -3.18745, 1.6787, 0.594867, -3.23416, 1.69847, 1.18583, -3.40668, -1.66874, 0.596423, -3.38949, 0.451011, 0.60649, -3.72736, -0.756356, 0.605003, -3.68087, 1.16371, 0.604156, -3.58176, 0.455906, 1.05971, -3.7347, -0.526824, 1.14457, -3.64944, 0.146165, 0.56426, -3.7095, -0.401103, 1.10766, -3.72741)
+
+[node name="RotationHandle" type="Node3D"]
+script = ExtResource("1_okbjt")
+
+[node name="rotation2" parent="." instance=ExtResource("1_qef7o")]
+
+[node name="rotation_grip2" parent="." instance=ExtResource("2_okbjt")]
+
+[node name="Area3D" type="Area3D" parent="."]
+script = ExtResource("4_ot35k")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("ConvexPolygonShape3D_qef7o")
+
+[connection signal="input_event" from="Area3D" to="Area3D" method="_on_input_event"]

@@ -89,3 +89,7 @@ func _on_area_3d_input_event(_camera: Node, event: InputEvent, _event_position: 
 
 func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3, rot: Vector3) -> void:
 	Editor.MoveItem(item, pos, rot)
+
+
+func _on_rotation_handle_drag_dropped(node: Node3D, rotation: Basis) -> void:
+	Editor.MoveItem(item, global_position, rotation.get_euler())
