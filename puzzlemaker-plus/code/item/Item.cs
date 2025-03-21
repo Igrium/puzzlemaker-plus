@@ -187,17 +187,18 @@ public partial class Item : ItemPropHolder
         return GetEditorModel(Variant, EditorState.Instance.Theme?.Name);
     }
 
-    public virtual Direction? GetMountDirection(string variant)
+    public Direction GetMountDirection()
     {
-        if (Type.Variants.TryGetValue(variant, out var value))
-        {
-            return value.MountDirection;
-        }
-        else return Direction.Down;
+        return Type.MountDirection;
     }
 
-    public Direction? GetMountDirection()
+    public Vector3 GetMountNormal()
     {
-        return GetMountDirection(Variant);
+        return Type.MountDirection.GetNormal();
+    }
+
+    public RotationMode GetRotationMode()
+    {
+        return Type.RotationMode;
     }
 }

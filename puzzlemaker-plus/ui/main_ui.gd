@@ -1,15 +1,10 @@
 extends Control
 
-# signal on_open_test_vmf(path: String)
-
-# signal on_undo
-# signal on_redo
-
 func _export_scene_gltf() -> void:
 	var gltf_document_save := GLTFDocument.new()
 	var gltf_state_save := GLTFState.new()
 	gltf_document_save.append_from_scene(get_tree().current_scene, gltf_state_save)
-
+	
 	gltf_document_save.write_to_filesystem(gltf_state_save, "user://scene.gltf")
 	print("Wrote gltf to " + ProjectSettings.globalize_path("user://scene.gltf"))
 

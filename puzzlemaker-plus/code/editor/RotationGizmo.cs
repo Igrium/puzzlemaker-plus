@@ -3,6 +3,7 @@ using Godot;
 
 namespace PuzzlemakerPlus.Editor;
 
+[GlobalClass]
 public partial class RotationGizmo : Node3D
 {
     [Signal]

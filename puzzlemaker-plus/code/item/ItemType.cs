@@ -1,14 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Godot;
 
 namespace PuzzlemakerPlus.Items;
+
+/// <summary>
+/// The rotation mode of the item. Rotations are always done on the axis of the mount direction.
+/// </summary>
+public enum RotationMode
+{
+    /// <summary>
+    /// This item can't rotate.
+    /// </summary>
+    Fixed,
+    /// <summary>
+    /// This item can rotate in 90-degree increments.
+    /// </summary>
+    Quarter,
+    /// <summary>
+    /// This item can rotate any amount.
+    /// </summary>
+    Full
+}
 
 /// <summary>
 /// A single item type such as a cube or a button.
@@ -22,6 +37,13 @@ public sealed class ItemType
     public string ID { get; internal set; } = "";
 
     public Dictionary<string, ItemVariant> Variants { get; set; } = new Dictionary<string, ItemVariant>();
+
+    /// <summary>
+    /// The direction from which the item mounts to the wall or floor. Defaults to Direction.Down
+    /// </summary>
+    public Direction MountDirection { get; set; } = Direction.Down;
+
+    public RotationMode RotationMode { get; set; } = RotationMode.Fixed;
 
     /// <summary>
     /// GetVoxel the editor model to use for a given variant and theme.
@@ -56,11 +78,6 @@ public sealed class ItemVariant
     /// The display name of the variant. If unset, fallback to the variant ID.
     /// </summary>
     public string? DisplayName { get; set; }
-
-    /// <summary>
-    /// The wall that the item is "attached" to. If null, the item is considered floating.
-    /// </summary>
-    public Direction? MountDirection { get; set; } = Direction.Down;
 
     public List<ItemVariantTheme> Themes { get; set; } = new();
 

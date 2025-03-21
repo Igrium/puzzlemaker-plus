@@ -1,11 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://ck1uhkqs73kxa"]
+[gd_scene load_steps=8 format=3 uid="uid://ck1uhkqs73kxa"]
 
 [ext_resource type="Script" uid="uid://c17h0y16qsy5d" path="res://scenes/objects/item_renderer.gd" id="1_3knih"]
 [ext_resource type="Script" uid="uid://b5q7d6mbfqo6k" path="res://scripts/collision_generator.gd" id="2_fqgpw"]
 [ext_resource type="Material" uid="uid://bcqcpwq3btue3" path="res://assets/materials/outline_mat.tres" id="4_34cp5"]
 [ext_resource type="Script" uid="uid://bweyhdxea83yj" path="res://code/editor/Draggable.cs" id="5_13vp2"]
-[ext_resource type="PackedScene" uid="uid://dnbdhyqs06nck" path="res://scenes/objects/rotation_handle_fine.tscn" id="6_kh24r"]
+[ext_resource type="Script" uid="uid://cormgb3dm4ugl" path="res://scenes/objects/rotation_handle_container.gd" id="6_kh24r"]
 [ext_resource type="Script" uid="uid://hikpc2cd34q2" path="res://scripts/outline_renderer.gd" id="7_erflv"]
+[ext_resource type="PackedScene" uid="uid://dnbdhyqs06nck" path="res://scenes/objects/rotation_handle.tscn" id="7_opllf"]
 
 [node name="ItemRenderer" type="Node3D"]
 script = ExtResource("1_3knih")
@@ -30,9 +31,12 @@ SnapIncrement = 1.0
 MountSnapOrientations = 63
 metadata/_custom_type_script = "uid://bweyhdxea83yj"
 
-[node name="RotationHandle" parent="." instance=ExtResource("6_kh24r")]
+[node name="RotationHandleContainer" type="Node3D" parent="."]
 visible = false
+script = ExtResource("6_kh24r")
+rotation_handle_scene = ExtResource("7_opllf")
+rotation_handle_90_scene = ExtResource("7_opllf")
 
+[connection signal="set_selected" from="." to="RotationHandleContainer" method="_on_item_renderer_set_selected"]
 [connection signal="input_event" from="Area3D" to="." method="_on_area_3d_input_event"]
 [connection signal="DragDropped" from="Draggable" to="." method="_on_draggable_drag_dropped"]
-[connection signal="DragDropped" from="RotationHandle" to="." method="_on_rotation_handle_drag_dropped"]
