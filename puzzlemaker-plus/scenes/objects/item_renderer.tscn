@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://b5q7d6mbfqo6k" path="res://scripts/collision_generator.gd" id="2_fqgpw"]
 [ext_resource type="Material" uid="uid://bcqcpwq3btue3" path="res://assets/materials/outline_mat.tres" id="4_34cp5"]
 [ext_resource type="Script" uid="uid://bweyhdxea83yj" path="res://code/editor/Draggable.cs" id="5_13vp2"]
-[ext_resource type="PackedScene" uid="uid://dnbdhyqs06nck" path="res://scenes/rotation_handle_fine.tscn" id="6_kh24r"]
+[ext_resource type="PackedScene" uid="uid://dnbdhyqs06nck" path="res://scenes/objects/rotation_handle_fine.tscn" id="6_kh24r"]
 [ext_resource type="Script" uid="uid://hikpc2cd34q2" path="res://scripts/outline_renderer.gd" id="7_erflv"]
 
 [node name="ItemRenderer" type="Node3D"]
@@ -31,7 +31,7 @@ MountSnapOrientations = 63
 metadata/_custom_type_script = "uid://bweyhdxea83yj"
 
 [node name="RotationHandle" parent="." instance=ExtResource("6_kh24r")]
-AutoDrop = true
+visible = false
 
 [connection signal="input_event" from="Area3D" to="." method="_on_area_3d_input_event"]
 [connection signal="DragDropped" from="Draggable" to="." method="_on_draggable_drag_dropped"]

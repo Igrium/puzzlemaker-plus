@@ -80,6 +80,11 @@ func _on_set_selected(is_selected: bool):
 	set_selected.emit(is_selected)
 	$OutlineRenderer.outline_enabled = is_selected
 	
+	if is_selected:
+		$RotationHandle.visible = true
+	else:
+		$RotationHandle.visible = false
+	
 func _on_area_3d_input_event(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == 1:
@@ -91,5 +96,5 @@ func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3, rot: Vector3) -> vo
 	Editor.MoveItem(item, pos, rot)
 
 
-func _on_rotation_handle_drag_dropped(node: Node3D, rotation: Basis) -> void:
-	Editor.MoveItem(item, global_position, rotation.get_euler())
+func _on_rotation_handle_drag_dropped(_node: Node3D, _angle: float, rot: Basis) -> void:
+	Editor.MoveItem(item, global_position, rot.get_euler())
