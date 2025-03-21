@@ -57,9 +57,19 @@ public static class CoordConverter
 
     public static Vector3 ToSourceEuler(this Vector3 eulerAngles)
     {
-        return new Vector3(-eulerAngles.Z, eulerAngles.Y, eulerAngles.X);
+        return Quaternion.FromEuler(eulerAngles).ToSourceEuler();
     }
 
+    // This math was a pain of trial and error to figure out lol.
+    public static Quaternion ToSourceRotation(this Quaternion quat)
+    {
+        return new Quaternion(new Vector3(0, -1, 0), Mathf.Pi / 2) * quat * new Quaternion(new Vector3(0, 1, 0), Mathf.Pi);
+    }
+
+    public static Vector3 ToSourceEuler(this Quaternion quat)
+    {
+        return quat.ToSourceRotation().GetEuler(EulerOrder.Yxz);
+    }
     public static Vector3 ToDegrees(this Vector3 eulerRadians)
     {
         return new Vector3(Mathf.RadToDeg(eulerRadians.X), Mathf.RadToDeg(eulerRadians.Y), Mathf.RadToDeg(eulerRadians.Z));

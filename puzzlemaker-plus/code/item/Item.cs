@@ -135,7 +135,7 @@ public partial class Item : ItemPropHolder
 
         FuncInstance ent = new FuncInstance();
         ent.Origin = Position.ToSourceVector().AsVec3();
-        ent.Angles = Rotation.ToDegrees().ToSourceEuler().AsVec3();
+        ent.Angles = Rotation.ToSourceEuler().ToDegrees().AsVec3();
 
         ent.VMFFile = itemTheme.Instance;
 
@@ -168,7 +168,7 @@ public partial class Item : ItemPropHolder
         return Type.GetEditorModel(variant, editorTheme);
     }
 
-    /// <summary>
+    /// <summary> 
     /// Get the current editor model. Make sure to call after changes to variant or theme.
     /// </summary>
     /// <param name="editorTheme">Theme to get the model for.</param>
