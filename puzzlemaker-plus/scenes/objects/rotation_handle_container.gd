@@ -25,6 +25,10 @@ func _init_handle():
 	
 	if node != null:
 		node.Target = $".."
+		node.DragDropped.connect(_on_complete_rotation)
 		add_child(node)
 
 	_has_init = true
+
+func _on_complete_rotation(node: Node3D, _angle: float, rot: Basis):
+	Editor.MoveItem($"..".item, node.global_position, rot.get_euler())

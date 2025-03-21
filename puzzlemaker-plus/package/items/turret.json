@@ -1,0 +1,13 @@
+{
+	"variants": {
+		"standard": {
+			"editor_model": "res://package/assets/models/turret.gltf",
+			"themes": [
+				{
+					"instance": "instances/pplus/turret.vmf"
+				}
+			]
+		}
+	},
+	"rotation_mode": 2
+}
