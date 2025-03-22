@@ -9,6 +9,12 @@ public partial class RotationGizmo : Node3D
     [Signal]
     public delegate void DragStartedEventHandler(Node3D node);
 
+    /// <summary>
+    /// Called when the drag is ended, regardless of whether it hit its initialization threshold.
+    /// </summary>
+    [Signal]
+    public delegate void DragEndedEventHandler(Node3D node, float angle, Basis rotation);
+
     [Signal]
     public delegate void DragUpdatedEventHandler(Node3D node, float angle, Basis rotation);
 
@@ -130,6 +136,7 @@ public partial class RotationGizmo : Node3D
         DragState state = _dragState;
         _dragState = default;
 
+        EmitSignalDragEnded(node, state.Angle, node.GlobalBasis);
         if (state.IsInitialized)
             EmitSignalDragDropped(node, state.Angle, node.GlobalBasis);
     }

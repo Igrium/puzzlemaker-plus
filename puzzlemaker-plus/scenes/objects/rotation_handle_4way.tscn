@@ -1,0 +1,29 @@
+[gd_scene load_steps=6 format=3 uid="uid://d2tfa8chuoqbe"]
+
+[ext_resource type="Script" uid="uid://dj8nsxdm1n2yp" path="res://code/editor/RotationGizmo.cs" id="1_rimlq"]
+[ext_resource type="PackedScene" uid="uid://q48vky404qst" path="res://assets/models/handles/rotation_4way_grip.gltf" id="2_k83sn"]
+[ext_resource type="PackedScene" uid="uid://c8lpxs77i8u08" path="res://assets/models/handles/rotation_4way.gltf" id="3_funum"]
+[ext_resource type="Script" uid="uid://01jpy0kwkvyd" path="res://scenes/objects/rotation_handle_4way.gd" id="4_funum"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_k83sn"]
+points = PackedVector3Array(-0.328087, 0.756348, -2.59974, -0.331546, 0.897736, -2.60518, -1.32122, 0.958794, -1.50257, 1.58547, 1.01167, -2.1367, -1.63845, 0.641671, -1.92544, 1.3742, 0.641671, -2.24245, -1.58547, 1.01167, -2.1367, 1.3742, 1.01167, -1.55561, -1.32122, 0.641671, -1.55561, -0.951346, 0.641671, -2.45394, 1.53282, 0.641671, -1.76699, 0.362899, 0.98544, -2.53746, 0.951346, 0.641671, -2.45394, 1.32122, 0.694549, -1.50257, -1.3742, 1.01167, -1.55561, -1.63845, 0.694549, -2.1367, 0.331546, 0.897736, -2.60518, -1.32122, 0.694549, -1.50257, 1.63845, 0.694549, -2.1367, 1.32122, 0.958794, -1.50257, -0.704723, 0.944125, -2.50687, 0.904387, 0.898086, -2.46471, 1.32122, 0.641671, -1.55561, 1.58625, 0.950578, -1.88587, 0.135556, 0.713519, -2.58195, -0.362899, 0.98544, -2.53746, -1.58625, 0.950578, -1.88587, -0.904387, 0.898086, -2.46471, 1.63845, 0.641671, -1.92544, 0.328087, 0.756348, -2.59974, 0.704723, 0.944125, -2.50687, -1.53282, 0.641671, -2.1367)
+
+[node name="RotationHandle4Way" type="Node3D"]
+script = ExtResource("1_rimlq")
+SnapIncrement = 90.0
+UpdateThreshold = 80.0
+
+[node name="Handle" parent="." instance=ExtResource("2_k83sn")]
+
+[node name="Gizmo" parent="." instance=ExtResource("3_funum")]
+visible = false
+
+[node name="RotationHandle4Way" type="Area3D" parent="."]
+script = ExtResource("4_funum")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RotationHandle4Way"]
+shape = SubResource("ConvexPolygonShape3D_k83sn")
+
+[connection signal="DragEnded" from="." to="RotationHandle4Way" method="_on_rotation_handle_4_way_drag_dropped"]
+[connection signal="DragStarted" from="." to="RotationHandle4Way" method="_on_rotation_handle_4_way_drag_started"]
+[connection signal="input_event" from="RotationHandle4Way" to="RotationHandle4Way" method="_on_input_event"]

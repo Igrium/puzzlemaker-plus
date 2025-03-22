@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://ck1uhkqs73kxa"]
+[gd_scene load_steps=9 format=3 uid="uid://ck1uhkqs73kxa"]
 
 [ext_resource type="Script" uid="uid://c17h0y16qsy5d" path="res://scenes/objects/item_renderer.gd" id="1_3knih"]
 [ext_resource type="Script" uid="uid://b5q7d6mbfqo6k" path="res://scripts/collision_generator.gd" id="2_fqgpw"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://cormgb3dm4ugl" path="res://scenes/objects/rotation_handle_container.gd" id="6_kh24r"]
 [ext_resource type="Script" uid="uid://hikpc2cd34q2" path="res://scripts/outline_renderer.gd" id="7_erflv"]
 [ext_resource type="PackedScene" uid="uid://dnbdhyqs06nck" path="res://scenes/objects/rotation_handle.tscn" id="7_opllf"]
+[ext_resource type="PackedScene" uid="uid://d2tfa8chuoqbe" path="res://scenes/objects/rotation_handle_4way.tscn" id="8_swxuq"]
 
 [node name="ItemRenderer" type="Node3D"]
 script = ExtResource("1_3knih")
@@ -35,7 +36,7 @@ metadata/_custom_type_script = "uid://bweyhdxea83yj"
 visible = false
 script = ExtResource("6_kh24r")
 rotation_handle_scene = ExtResource("7_opllf")
-rotation_handle_90_scene = ExtResource("7_opllf")
+rotation_handle_90_scene = ExtResource("8_swxuq")
 
 [connection signal="set_selected" from="." to="RotationHandleContainer" method="_on_item_renderer_set_selected"]
 [connection signal="input_event" from="Area3D" to="." method="_on_area_3d_input_event"]

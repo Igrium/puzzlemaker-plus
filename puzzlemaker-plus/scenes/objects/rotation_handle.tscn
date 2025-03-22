@@ -23,6 +23,6 @@ script = ExtResource("4_rorxc")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RotationHandle"]
 shape = SubResource("ConvexPolygonShape3D_qef7o")
 
-[connection signal="DragDropped" from="." to="RotationHandle" method="_on_rotation_handle_drag_dropped"]
+[connection signal="DragEnded" from="." to="RotationHandle" method="_on_rotation_handle_drag_dropped"]
 [connection signal="DragStarted" from="." to="RotationHandle" method="_on_rotation_handle_drag_started"]
 [connection signal="input_event" from="RotationHandle" to="RotationHandle" method="_on_input_event"]
