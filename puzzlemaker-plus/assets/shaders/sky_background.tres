@@ -1,0 +1,60 @@
+[gd_resource type="VisualShader" load_steps=6 format=3 uid="uid://dequxy0iwp4ke"]
+
+[sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_adpr1"]
+output_port_for_preview = 0
+input_name = "sky_coords"
+
+[sub_resource type="VisualShaderNodeVectorDecompose" id="VisualShaderNodeVectorDecompose_adpr1"]
+
+[sub_resource type="Gradient" id="Gradient_adpr1"]
+interpolation_mode = 2
+colors = PackedColorArray(0.581464, 0.581464, 0.581464, 1, 0.771546, 0.771546, 0.771546, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_p45i1"]
+gradient = SubResource("Gradient_adpr1")
+width = 512
+
+[sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_giw18"]
+texture = SubResource("GradientTexture1D_p45i1")
+
+[resource]
+code = "shader_type sky;
+uniform sampler2D tex_sky_4;
+
+
+
+void sky() {
+// Input:2
+	vec2 n_out2p0 = SKY_COORDS;
+
+
+// VectorDecompose:3
+	float n_out3p0 = vec3(n_out2p0, 0.0).x;
+	float n_out3p1 = vec3(n_out2p0, 0.0).y;
+	float n_out3p2 = vec3(n_out2p0, 0.0).z;
+
+
+// Texture2D:4
+	vec4 n_out4p0 = texture(tex_sky_4, vec2(n_out3p1));
+
+
+// Output:0
+	COLOR = vec3(n_out4p0.xyz);
+
+
+}
+"
+graph_offset = Vector2(-257, 44)
+mode = 3
+flags/use_half_res_pass = false
+flags/use_quarter_res_pass = false
+flags/disable_fog = false
+flags/use_debanding = false
+nodes/sky/0/position = Vector2(580, 180)
+nodes/sky/2/node = SubResource("VisualShaderNodeInput_adpr1")
+nodes/sky/2/position = Vector2(-160, 160)
+nodes/sky/3/node = SubResource("VisualShaderNodeVectorDecompose_adpr1")
+nodes/sky/3/position = Vector2(140, 160)
+nodes/sky/4/node = SubResource("VisualShaderNodeTexture_giw18")
+nodes/sky/4/position = Vector2(360, 120)
+nodes/sky/connections = PackedInt32Array(2, 0, 3, 0, 3, 1, 4, 0, 4, 0, 0, 0)

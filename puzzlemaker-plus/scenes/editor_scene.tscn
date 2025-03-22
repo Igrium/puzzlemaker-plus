@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://c8opainusd88g"]
+[gd_scene load_steps=10 format=3 uid="uid://c8opainusd88g"]
 
 [ext_resource type="Script" uid="uid://cfslk1m0s33iy" path="res://addons/orbit-controls/orbit-controls.gd" id="1_mrhsp"]
 [ext_resource type="Script" uid="uid://bo1578tbgptjc" path="res://scenes/editor_scene.gd" id="1_npaab"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bd3mbm0pemh78" path="res://ui/main_ui.tscn" id="5_4nlwk"]
 [ext_resource type="Script" uid="uid://dnmlwkuhc6thf" path="res://scenes/objects/scripts/key_listener.gd" id="6_2xfd1"]
 [ext_resource type="Script" uid="uid://cv3rlgw4wpa47" path="res://code/editor/EditorOperations.cs" id="7_rvqb0"]
+[ext_resource type="Environment" uid="uid://bjoeovmqgcnnn" path="res://assets/default_env.tres" id="9_ew6pk"]
 
 [node name="EditorScene" type="Node3D"]
 script = ExtResource("1_npaab")
@@ -22,9 +23,6 @@ fov = 20.0
 [node name="OrbitControls" type="Node3D" parent="."]
 script = ExtResource("1_mrhsp")
 _camera = NodePath("../MainCamera")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.231442, -0.6878, 0.688016, 0, 0.707218, 0.706996, -0.972849, -0.163629, 0.16368, 0, 0, 0)
 
 [node name="SelectionHighlight" type="MeshInstance3D" parent="."]
 script = ExtResource("3_5atrf")
@@ -41,3 +39,13 @@ script = ExtResource("6_2xfd1")
 
 [node name="Operations" type="Node" parent="KeyListener"]
 script = ExtResource("7_rvqb0")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("9_ew6pk")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.479191, 0.675153, -0.560842, -0.562295, 0.72678, 0.394481, 0.673944, 0.126327, 0.727902, 0, 0, 0)
+light_energy = 0.5
+light_indirect_energy = 0.0
+light_volumetric_fog_energy = 0.0
+light_bake_mode = 0

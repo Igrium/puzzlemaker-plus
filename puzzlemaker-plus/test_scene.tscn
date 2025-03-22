@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dv7fn7ipy175r"]
+[gd_scene load_steps=9 format=3 uid="uid://d2t24euso4edc"]
 
 [ext_resource type="Script" uid="uid://cfslk1m0s33iy" path="res://addons/orbit-controls/orbit-controls.gd" id="3_honq3"]
 [ext_resource type="Script" uid="uid://dikh45he3mcwp" path="res://scenes/objects/scripts/selection_highlight.gd" id="3_vny2r"]

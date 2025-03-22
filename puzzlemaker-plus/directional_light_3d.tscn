@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bqtvdehrjivfm"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D"]
+transform = Transform3D(0.479191, 0.675153, -0.560842, -0.562295, 0.72678, 0.394481, 0.673944, 0.126327, 0.727902, 0, 0, 0)
+light_energy = 0.5
+light_indirect_energy = 0.0
+light_volumetric_fog_energy = 0.0
+light_bake_mode = 0
