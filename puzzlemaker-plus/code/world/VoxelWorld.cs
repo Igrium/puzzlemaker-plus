@@ -258,6 +258,53 @@ public class VoxelWorld<T> : IVoxelView<T>
 
         return maxChunk * 16 + new Vector3I(16, 16, 16);
     }
+
+    /// <summary>
+    /// Perform a crude ray cast against voxels in a given direction.
+    /// </summary>
+    /// <param name="start">Position to start cast.</param>
+    /// <param name="direction">Direction to cast in.</param>
+    /// <param name="predicate">Predicate to test voxels against.</param>
+    /// <returns>Position of the first voxel in that direction to satisfy the predicate. Null if it didn't hit anything.</returns>
+    /// <remarks>Assumes that the predicate will return false on the default voxel.</remarks>
+    public Vector3I? Trace(Vector3I start, Direction direction, Predicate<T> predicate)
+    {
+        Vector3I pos = start;
+        Vector3I minPos = GetMinPos();
+        Vector3I maxPos = GetMaxPos();
+
+        if (!start.IsInBounds(minPos, maxPos))
+        {
+            var hit = MathUtils.IntersectAxisAlignedRay(start, direction, minPos, maxPos);
+            if (hit.HasValue)
+                pos = hit.Value;
+            else
+                return null;
+        }
+
+        Vector3I normal = direction.GetNormal();
+
+        while (pos.IsInBounds(minPos, maxPos))
+        {
+            Vector3I chunkPos = pos.GetChunk();
+            if (_chunks.TryGetValue(chunkPos, out var chunk))
+            {
+                while (pos.GetChunk() == chunkPos)
+                {
+                    if (predicate(chunk.GetVoxel(pos.GetChunkLocalPos())))
+                        return pos;
+                    else
+                        pos += normal;
+                }
+            }
+            else
+            {
+                pos += normal * CHUNK_SIZE;
+            }
+        }
+
+        return null;
+    }
 }
 
 /// <summary>

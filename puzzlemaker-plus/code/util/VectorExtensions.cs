@@ -91,4 +91,17 @@ internal static class VectorExtensions
     {
         return new Vector3I(vec.X & 15, vec.Y & 15, vec.Z & 15);
     }
+
+    public static bool IsInBounds(this Vector3I vec, Vector3I min, Vector3I max, bool exclusive = false)
+    {
+        if (exclusive)
+        {
+            min += new Vector3I(1, 1, 1);
+            max -= new Vector3I(1, 1, 1);
+        }
+
+        return min.X <= vec.X && vec.X <= max.X
+            && min.Y <= vec.Y && vec.Y <= max.Y
+            && min.Z <= vec.Z && vec.Z <= max.Z;
+    }
 }
