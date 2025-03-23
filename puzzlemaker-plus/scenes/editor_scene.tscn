@@ -23,6 +23,7 @@ fov = 20.0
 [node name="OrbitControls" type="Node3D" parent="."]
 script = ExtResource("1_mrhsp")
 _camera = NodePath("../MainCamera")
+max_distance = 500.0
 
 [node name="SelectionHighlight" type="MeshInstance3D" parent="."]
 script = ExtResource("3_5atrf")

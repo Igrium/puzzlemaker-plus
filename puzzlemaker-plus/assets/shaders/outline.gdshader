@@ -1,6 +1,7 @@
 // https://godotshaders.com/shader/clean-pixel-perfect-outline-via-material-3/
 shader_type spatial;
 render_mode unshaded;
+render_mode blend_mul;
 
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture;
 uniform vec4 outline_color : source_color;

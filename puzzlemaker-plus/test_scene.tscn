@@ -21,6 +21,8 @@ _camera = NodePath("../MainCamera")
 [node name="WorldRenderer" type="Node3D" parent="."]
 script = ExtResource("5_4w6vq")
 
+[node name="ShadowPlane" type="MeshInstance3D" parent="WorldRenderer"]
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.231442, -0.6878, 0.688016, 0, 0.707218, 0.706996, -0.972849, -0.163629, 0.16368, 0, 0, 0)
 
@@ -45,3 +47,5 @@ script = ExtResource("6_3ygax")
 
 [node name="ItemRenderers" type="Node3D" parent="."]
 script = ExtResource("8_buypi")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]

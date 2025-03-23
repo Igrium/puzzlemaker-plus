@@ -82,6 +82,12 @@ public sealed partial class EditorState : Node
 
     public string EditorThemeName => Theme?.EditorTheme ?? EditorTheme.DEFAULT;
 
+    public Aabb GetWorldBounds()
+    {
+        var (min, max) = World.GetFilledBounds();
+        return new Aabb(min, max - min);
+    }
+
     /// <summary>
     /// Load the current editor theme from the level theme and return it.
     /// </summary>

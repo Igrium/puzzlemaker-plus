@@ -17,7 +17,7 @@ func _on_chunks_updated(updated_chunks: PackedVector3Array):
 	for pos in updated_chunks:
 		var chunk_pos := Vector3i(pos)
 		var chunk = _get_chunk(chunk_pos)
-		chunk.render()
+		chunk.render()	
 
 func _get_chunk(pos: Vector3i) -> WorldChunk:
 	var chunk: WorldChunk

@@ -73,7 +73,7 @@ var rotate_speed: float = 1.0
 @export_group("Dolly")
 @export_range(0.001, 100.0)
 var min_distance: float = 0.001
-@export_range(0.001, 100.0)
+@export_range(0.001, 1000.0)
 var max_distance: float = 100.0
 
 # ZOOM (Orthographic Camera only)
