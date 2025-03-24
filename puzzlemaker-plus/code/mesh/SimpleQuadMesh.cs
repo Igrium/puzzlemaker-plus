@@ -10,7 +10,8 @@ namespace PuzzlemakerPlus;
 /// <summary>
 /// A mesh made out of quads that keeps around various caches for quick analysis
 /// </summary>
-public class SimpleQuadMesh : IEnumerable<Quad>
+[GlobalClass]
+public partial class SimpleQuadMesh : RefCounted, IEnumerable<Quad>
 {
     /// <summary>
     /// A reference to a vertex within a mesh.
@@ -40,12 +41,41 @@ public class SimpleQuadMesh : IEnumerable<Quad>
         }
     }
 
+    public record struct EdgeRef
+    {
+        public ushort FaceIndex { get; set; }
+
+        public byte EdgeIndex { get; set; }
+
+        public EdgeRef(ushort faceIndex, byte edgeIndex)
+        {
+            FaceIndex = faceIndex;
+            EdgeIndex = edgeIndex;
+        }
+
+        public EdgeRef(int faceIndex, int edgeIndex)
+        {
+            FaceIndex = (ushort)faceIndex;
+            EdgeIndex = (byte)edgeIndex;
+        }
+    }
+
     private Quad[] _quads;
     public Quad[] Quads => _quads;
 
     private Dictionary<Vector3, IReadOnlyList<VertexRef>> _vertexRefCache = new();
+
+    /// <summary>
+    /// A mapping of vertex positions to all the face corners that are at that position.
+    /// </summary>
     public IReadOnlyDictionary<Vector3, IReadOnlyList<VertexRef>> VertexRefCache => _vertexRefCache;
 
+    private Dictionary<Edge, IReadOnlyList<EdgeRef>> _edgeRefCache = new();
+
+    /// <summary>
+    /// A mapping of vertex positions to all the edges that adjoin that vertex.
+    /// </summary>
+    public IReadOnlyDictionary<Edge, IReadOnlyList<EdgeRef>> EdgeRefCache => _edgeRefCache;
 
     public SimpleQuadMesh(Quad[] quads)
     {
@@ -66,6 +96,7 @@ public class SimpleQuadMesh : IEnumerable<Quad>
 
         // We can shallow copy because the list values are never updated after ComputeVertexCache returns.
         _vertexRefCache = new(other.VertexRefCache);
+        _edgeRefCache = new(other.EdgeRefCache);
     }
 
     public SimpleQuadMesh(IEnumerable<Quad> quads)
@@ -108,6 +139,32 @@ public class SimpleQuadMesh : IEnumerable<Quad>
         }
     }
 
+    public void ComputeEdgeCache()
+    {
+        _edgeRefCache.Clear();
+
+        for (ushort faceIndex = 0; faceIndex < _quads.Length; faceIndex++)
+        {
+            ref Quad quad = ref _quads[faceIndex];
+            for (byte edgeIndex = 0; edgeIndex < 4; edgeIndex++)
+            {
+                Edge edge = quad.GetEdge(edgeIndex);
+                List<EdgeRef> list;
+                if (_edgeRefCache.TryGetValue(edge, out var l))
+                {
+                    list = (List<EdgeRef>)l;
+                }
+                else
+                {
+                    list = new List<EdgeRef>();
+                    _edgeRefCache.Add(edge, list);
+                }
+
+                list.Add(new EdgeRef(faceIndex, edgeIndex));
+            }
+        }
+    }
+
     public Vector3 GetVertex(VertexRef vert)
     {
         return _quads[vert.FaceIndex][vert.VertexIndex];
@@ -133,10 +190,16 @@ public class SimpleQuadMesh : IEnumerable<Quad>
         _quads[vert.FaceIndex].SetUV(vert.VertexIndex, value);
     }
 
+    public Edge GetEdge(EdgeRef edgeRef)
+    {
+        return _quads[edgeRef.FaceIndex].GetEdge(edgeRef.EdgeIndex);
+    }
+
     /// <summary>
     /// Iterate through all the vertices in the mesh, and set their normals to the average of all other vertices sharing that position.
     /// Basically "smoothens" the mesh. Requires the vertex cache to have been computed.
     /// </summary>
+    /// <remarks>Requires that the vertex cache has been computed.</remarks>
     public void AverageNormals()
     {
         foreach (var refList in _vertexRefCache.Values)
@@ -167,6 +230,70 @@ public class SimpleQuadMesh : IEnumerable<Quad>
         {
             _quads[i].ResetNormals();
         }
+    }
+
+    public IEnumerable<ushort> GetAdjoiningFaceIndices(Vector3 vertex)
+    {
+        if (_vertexRefCache.TryGetValue(vertex, out var refs))
+        {
+            return refs.Select(r => r.FaceIndex);
+        }
+        else return Enumerable.Empty<ushort>();
+    }
+
+    /// <summary>
+    /// Get an enumerable of all the quads that contain this vertex.
+    /// </summary>
+    /// <param name="vertex">The vertex.</param>
+    /// <returns>All quads with the vertex.</returns>
+    /// <remarks>Requires that the vertex cache has been computed.</remarks>
+    public IEnumerable<Quad> GetAdjoiningFaces(Vector3 vertex)
+    {
+        return GetAdjoiningFaceIndices(vertex).Select(s => _quads[s]);
+    }
+
+    public IEnumerable<ushort> GetAdjoiningFaceIndices(Edge edge)
+    {
+        if (_edgeRefCache.TryGetValue(edge, out var refs))
+        {
+            return refs.Select(r => r.FaceIndex);
+        }
+        else return Enumerable.Empty<ushort>();
+    }
+
+    /// <summary>
+    /// Get an enumerable of all the quads that contain this edge.
+    /// </summary>
+    /// <param name="edge">The edge.</param>
+    /// <returns>All quads with the edge.</returns>
+    /// <remarks>Requires that the edge cache has been computed.</remarks>
+    public IEnumerable<Quad> GetAdjoiningFaces(Edge edge)
+    {
+        return GetAdjoiningFaceIndices(edge).Select(s => _quads[s]);
+    }
+
+    public IEnumerable<EdgeRef> GetAdjoiningEdgeRefs(Vector3 vertex)
+    {
+        foreach (int faceIndex in GetAdjoiningFaceIndices(vertex))
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (_quads[faceIndex].GetEdge(i).Contains(vertex))
+                    yield return new EdgeRef(faceIndex, i);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Get an enumerable of all the edges that contain this vertex.
+    /// </summary>
+    /// <param name="vertex">The vertex.</param>
+    /// <returns>All edges with that vertex.</returns>
+    /// <remarks>There will likely be duplicate edges if multiple faces share an edge.
+    /// Requires that the edge cache has been computed.</remarks>
+    public IEnumerable<Edge> GetAdjoiningEdges(Vector3 vertex)
+    {
+        return GetAdjoiningEdgeRefs(vertex).Select(GetEdge);
     }
 
     public IEnumerator<Quad> GetEnumerator()

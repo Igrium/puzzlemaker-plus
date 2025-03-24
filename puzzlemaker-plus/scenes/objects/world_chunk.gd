@@ -16,6 +16,9 @@ signal on_input_event(camera: Node, event: InputEvent, event_position: Vector3, 
 @onready
 var _collision_shape: CollisionShape3D = $Area3D/CollisionShape3D
 
+var _quad_mesh: SimpleQuadMesh
+
+# var _quad_mesh: QuadMesh
 
 func _ready() -> void:
 	Editor.connect("OnUpdatedSelection", _on_updated_selection)
@@ -27,10 +30,11 @@ func render() -> void:
 	var shape = ConcavePolygonShape3D.new()
 	
 	# world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
-	var generator := AsyncMeshGenerator.Create(a_mesh, shape, Editor.Project, pos, true)
+	# var generator := AsyncMeshGenerator.Create(a_mesh, shape, Editor.Project, pos, true)
+	var generator := WorldMeshGenerator.Create(a_mesh, shape, pos, true)
 	generator.DoGreedyMeshAsync()
 	
-	await generator.GreedyMeshFinished
+	_quad_mesh = await generator.GreedyMeshFinished
 	self.mesh = a_mesh
 	_collision_shape.shape = shape
 

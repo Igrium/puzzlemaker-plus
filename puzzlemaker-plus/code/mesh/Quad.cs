@@ -195,6 +195,18 @@ public record struct Quad
         edge4 = new Edge(Vert4, Vert1);
     }
 
+    public Edge GetEdge(int index)
+    {
+        switch (index)
+        {
+            case 0: return new Edge(Vert1, Vert2);
+            case 1: return new Edge(Vert2, Vert3);
+            case 2: return new Edge(Vert3, Vert4);
+            case 3: return new Edge(Vert4, Vert1);
+            default: throw new IndexOutOfRangeException("invalid edge " + index);
+        }
+    }
+
     public Vector3 this[int i]
     {
         get => GetVertex(i);

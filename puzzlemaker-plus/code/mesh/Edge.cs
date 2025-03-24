@@ -34,6 +34,11 @@ public struct Edge
         return Vert1.GetHashCode() + Vert2.GetHashCode(); // Commutitive property
     }
 
+    public bool Contains(Vector3 vertex)
+    {
+        return vertex == Vert1 || vertex == Vert2;
+    }
+
     public static bool operator ==(Edge left, Edge right) => left.Equals(right);
 
     public static bool operator !=(Edge left, Edge right) => !left.Equals(right);

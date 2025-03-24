@@ -9,6 +9,7 @@ using Godot;
 namespace PuzzlemakerPlus;
 
 [GlobalClass]
+[Obsolete("Use WorldMeshGenerator instead.")]
 public partial class AsyncMeshGenerator : RefCounted
 {
     [Signal]
@@ -53,7 +54,7 @@ public partial class AsyncMeshGenerator : RefCounted
             GD.PushError(e);
         }
 
-        SimpleQuadMesh quadMesh = new SimpleQuadMesh(quads.ToArray());
+        SimpleQuadMesh quadMesh = new SimpleQuadMesh(quads);
         quadMesh.ComputeVertexCache();
 
         if (_mesh != null)
