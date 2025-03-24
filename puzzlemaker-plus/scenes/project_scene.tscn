@@ -1,28 +1,14 @@
-[gd_scene load_steps=8 format=3 uid="uid://phi1s65mbgho"]
+[gd_scene load_steps=4 format=3 uid="uid://phi1s65mbgho"]
 
 [ext_resource type="Script" uid="uid://bduqn4nntd23a" path="res://scenes/project_scene.gd" id="1_cwyhd"]
 [ext_resource type="Script" uid="uid://fie576e1k73d" path="res://scenes/objects/scripts/world_renderer.gd" id="2_iml2j"]
-[ext_resource type="Script" uid="uid://bhyeyouf0qdq0" path="res://scenes/shadow_plane.gd" id="3_3i2yl"]
 [ext_resource type="Script" uid="uid://cxg6q4fsg8jkj" path="res://scenes/objects/scripts/item_renderers.gd" id="3_pr0ry"]
-[ext_resource type="Shader" uid="uid://duwory5t4g1of" path="res://assets/shaders/voxel_shadow.gdshader" id="4_j5hrr"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_j5hrr"]
-render_priority = 0
-shader = ExtResource("4_j5hrr")
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_c8cg7"]
-material = SubResource("ShaderMaterial_j5hrr")
 
 [node name="ProjectScene" type="Node3D"]
 script = ExtResource("1_cwyhd")
 
 [node name="WorldRenderer" type="Node3D" parent="."]
 script = ExtResource("2_iml2j")
-
-[node name="ShadowPlane" type="MeshInstance3D" parent="WorldRenderer"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.56597, 0)
-mesh = SubResource("PlaneMesh_c8cg7")
-script = ExtResource("3_3i2yl")
 
 [node name="ItemRenderers" type="Node3D" parent="."]
 script = ExtResource("3_pr0ry")

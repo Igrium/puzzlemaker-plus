@@ -53,13 +53,20 @@ public partial class AsyncMeshGenerator : RefCounted
             GD.PushError(e);
         }
 
+        SimpleQuadMesh quadMesh = new SimpleQuadMesh(quads.ToArray());
+        quadMesh.ComputeVertexCache();
+
         if (_mesh != null)
         {
             MultiMeshBuilder builder = new();
-            for (int i = 0; i < quads.Count; i++)
+            foreach (var quad in quadMesh)
             {
-                builder.AddQuad(quads[i]);
+                builder.AddQuad(quad);
             }
+            //for (int i = 0; i < quads.Count; i++)
+            //{
+            //    builder.AddQuad(quads[i]);
+            //}
             builder.ToMesh(_mesh, EditorState.Instance.GetEditorTheme().WallTextures.ToArray());
         }
 

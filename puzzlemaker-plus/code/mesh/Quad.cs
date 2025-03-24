@@ -139,7 +139,7 @@ public record struct Quad
         return result;
     }
 
-    private readonly Vector3 ComputeFaceNormal()
+    public readonly Vector3 ComputeFaceNormal()
     {
         // Calculate two edge vectors
         Vector3 edge1 = Vert2 - Vert1;
@@ -171,6 +171,106 @@ public record struct Quad
         result.UV4 = UV1;
 
         return result;
+    }
+
+    /// <summary>
+    /// Construct an array with all these quad's edges.
+    /// </summary>
+    /// <returns>Array with all edges.</returns>
+    public Edge[] GetEdges()
+    {
+        Edge[] array = new Edge[4];
+        array[0] = new Edge(Vert1, Vert2);
+        array[1] = new Edge(Vert2, Vert3);
+        array[2] = new Edge(Vert3, Vert4);
+        array[3] = new Edge(Vert4, Vert1);
+        return array;
+    }
+
+    public void GetEdges(out Edge edge1, out Edge edge2, out Edge edge3, out Edge edge4)
+    {
+        edge1 = new Edge(Vert1, Vert2);
+        edge2 = new Edge(Vert2, Vert3);
+        edge3 = new Edge(Vert3, Vert4);
+        edge4 = new Edge(Vert4, Vert1);
+    }
+
+    public Vector3 this[int i]
+    {
+        get => GetVertex(i);
+        set => SetVertex(i, in value);
+    }
+
+    public Vector3 GetVertex(int index)
+    {
+        switch (index)
+        {
+            case 0: return Vert1;
+            case 1: return Vert2;
+            case 2: return Vert3;
+            case 3: return Vert4;
+            default: throw new IndexOutOfRangeException("invalid vertex " + index);
+        }
+    }
+
+    public void SetVertex(int index, in Vector3 value)
+    {
+        switch (index)
+        {
+            case 0: Vert1 = value; break;
+            case 1: Vert2 = value; break;
+            case 2: Vert3 = value; break;
+            case 3: Vert4 = value; break;
+            default: throw new IndexOutOfRangeException("invalid vertex " + index);
+        }
+    }
+
+    public Vector3 GetNormal(int index)
+    {
+        switch (index)
+        {
+            case 0: return Normal1;
+            case 1: return Normal2;
+            case 2: return Normal3;
+            case 3: return Normal4;
+            default: throw new IndexOutOfRangeException("invalid vertex " + index);
+        }
+    }
+
+    public void SetNormal(int index, in Vector3 value)
+    {
+        switch (index)
+        {
+            case 0: Normal1 = value; break;
+            case 1: Normal2 = value; break;
+            case 2: Normal3 = value; break;
+            case 3: Normal4 = value; break;
+            default: throw new IndexOutOfRangeException("invalid vertex " + index);
+        }
+    }
+
+    public Vector2 GetUV(int index)
+    {
+        switch (index)
+        {
+            case 0: return UV1;
+            case 1: return UV2;
+            case 2: return UV3;
+            case 3: return UV4;
+            default: throw new IndexOutOfRangeException("invalid vertex " + index);
+        }
+    }
+
+    public void SetUV(int index, Vector2 value)
+    {
+        switch (index)
+        {
+            case 0: UV1 = value; break;
+            case 1: UV2 = value; break;
+            case 2: UV3 = value; break;
+            case 3: UV4 = value; break;
+            default: throw new IndexOutOfRangeException("invalid vertex " + index);
+        }
     }
 
     public static Quad operator +(Quad quad, in Vector3 vec)

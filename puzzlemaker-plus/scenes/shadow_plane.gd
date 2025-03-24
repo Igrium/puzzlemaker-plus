@@ -12,9 +12,9 @@ func _on_chunks_updated(_updated_chunks: PackedVector3Array):
 	var origin = Vector3(bounds.position.x + bounds.size.x / 2, bounds.position.y - 4, bounds.position.z + bounds.size.z / 2)
 	self.position = origin
 
-	var tex_gen = ShadowTextureGenerator.new()
-	tex_gen.connect("GenerationComplete", _on_generation_complete)
-	tex_gen.GenerateShadowMaskAsync(int(origin.y))
+	#var tex_gen = ShadowTextureGenerator.new()
+	#tex_gen.connect("GenerationComplete", _on_generation_complete)
+	#tex_gen.GenerateShadowMaskAsync(int(origin.y))
 
 	if mesh is PlaneMesh:
 		mesh.size = Vector2(bounds.size.x, bounds.size.z)

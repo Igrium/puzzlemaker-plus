@@ -59,19 +59,20 @@ public partial class ShadowTextureGenerator : RefCounted
         {
             for (int u = 0; u < width; u++)
             {
-                    // Perform raycast and add result to mask.
-                    Vector3I? traceResult = world.Trace(new Vector3I(u, startY, v), Direction.Up, vox => vox.IsOpen);
-                    int index = v * width + u;
-                    if (traceResult.HasValue)
-                    {
-                        // Trace should never return a value less than startY.
-                        int deltaY = traceResult.Value.Y - startY;
-                        mask[index] = (byte)Math.Min(deltaY, byte.MaxValue);
-                    }
-                    else
-                    {
-                        mask[index] = byte.MaxValue;
-                    }
+                Vector3I startPos = new Vector3I(u - worldMin.X, startY, v - worldMin.Z);
+                // Perform raycast and add result to mask.
+                Vector3I? traceResult = world.Trace(new Vector3I(u, startY, v), Direction.Up, vox => vox.IsOpen);
+                int index = v * width + u;
+                if (traceResult.HasValue)
+                {
+                    // Trace should never return a value less than startY.
+                    int deltaY = traceResult.Value.Y - startY;
+                    mask[index] = (byte)Math.Min(deltaY, byte.MaxValue);
+                }
+                else
+                {
+                    mask[index] = byte.MaxValue;
+                }
             }
         }
         return new ShadowMask(width, height, mask);
