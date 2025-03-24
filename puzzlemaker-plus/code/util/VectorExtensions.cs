@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
@@ -103,5 +104,15 @@ internal static class VectorExtensions
         return min.X <= vec.X && vec.X <= max.X
             && min.Y <= vec.Y && vec.Y <= max.Y
             && min.Z <= vec.Z && vec.Z <= max.Z;
+    }
+
+    public static float[] ToFloatArray(ReadOnlySpan<Vector3> vectors)
+    {
+        return MemoryMarshal.Cast<Vector3, float>(vectors).ToArray();
+    }
+
+    public static Vector3[] ToVectorArray(ReadOnlySpan<float> floats)
+    {
+        return MemoryMarshal.Cast<float, Vector3>(floats).ToArray();
     }
 }

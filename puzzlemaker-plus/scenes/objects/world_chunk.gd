@@ -10,6 +10,9 @@ var pos := Vector3i(0, 0, 0)
 @export
 var material : Material
 
+@export
+var edge_mesh_instace: MeshInstance3D
+
 ## Called when the user clicks on the geometry in this chunk.
 signal on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int)
 
@@ -29,14 +32,22 @@ func render() -> void:
 	var a_mesh = ArrayMesh.new()
 	var shape = ConcavePolygonShape3D.new()
 	
-	# world.RenderChunkAndCollision(a_mesh, shape, pos * 16, 16, true)
-	# var generator := AsyncMeshGenerator.Create(a_mesh, shape, Editor.Project, pos, true)
 	var generator := WorldMeshGenerator.Create(a_mesh, shape, pos, true)
-	generator.DoGreedyMeshAsync()
+
+	var edge_mesh: ArrayMesh
+	if edge_mesh_instace != null:
+		edge_mesh = ArrayMesh.new()
+		generator.EdgeMesh = edge_mesh
+
+	generator.DoGreedyMeshThreaded()
 	
-	_quad_mesh = await generator.GreedyMeshFinished
+	_quad_mesh = await generator.QuadsComputed
 	self.mesh = a_mesh
 	_collision_shape.shape = shape
+	
+	if edge_mesh_instace != null:
+		await generator.EdgeModelGenerated
+		edge_mesh_instace.mesh = edge_mesh
 
 func _on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
 	on_input_event.emit(camera, event, event_position, normal, shape_idx)

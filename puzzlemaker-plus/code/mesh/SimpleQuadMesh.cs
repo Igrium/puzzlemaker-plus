@@ -58,6 +58,24 @@ public partial class SimpleQuadMesh : RefCounted, IEnumerable<Quad>
             FaceIndex = (ushort)faceIndex;
             EdgeIndex = (byte)edgeIndex;
         }
+
+        public (byte, byte) GetVertexIndices()
+        {
+            switch(EdgeIndex)
+            {
+                case 0: return (0, 1);
+                case 1: return (1, 2);
+                case 2: return (2, 3);
+                case 3: return (3, 0);
+                default: throw new IndexOutOfRangeException("invalid edge: " + EdgeIndex);
+            }
+        }
+
+        public (VertexRef, VertexRef) GetVertices()
+        {
+            var (vert1, vert2) = GetVertexIndices();
+            return (new VertexRef(FaceIndex, vert1), new VertexRef(EdgeIndex, vert2));
+        }
     }
 
     private Quad[] _quads;
