@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Godot;
 
 namespace PuzzlemakerPlus;
 
@@ -17,4 +18,6 @@ public interface IMeshBuilder
             AddQuad(in quad);
         }
     }
+
+    public void ToMesh(ArrayMesh mesh, params Material[] materials);
 }

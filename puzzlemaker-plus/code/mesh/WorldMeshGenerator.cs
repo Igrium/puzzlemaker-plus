@@ -14,43 +14,40 @@ public partial class WorldMeshGenerator : RefCounted
     /// <summary>
     /// Called after the primary geometry of the world has been generated.
     /// </summary>
-    /// <param name="mesh">The quad mesh. Caches may still be being computed!</param>
+    /// <param name="mesh">The quad mesh with no caches computed.</param>
+    /// <remarks>May continue to be updated as caches are computed!</remarks>
     [Signal]
     public delegate void QuadsComputedEventHandler(SimpleQuadMesh mesh);
 
     /// <summary>
-    /// Called after all caches have finished computing.
+    /// Called when the edge model has finished generating.
     /// </summary>
-    /// <param name="mesh"></param>
+    /// <param name="mesh">The edge model.</param>
     [Signal]
-    public delegate void CachesComputedEventHandler(SimpleQuadMesh mesh);
-    
-    /// <summary>
-    /// Called once the edge model has been generated.
-    /// </summary>
-    /// <param name="edgeMesh">The edge model.</param>
-    [Signal]
-    public delegate void EdgeModelGeneratedEventHandler(ArrayMesh edgeMesh);
+    public delegate void EdgeModelCreatedEventHandler(SimpleQuadMesh mesh);
 
     /// <summary>
-    /// Called once all generation has completed. It's only safe to modify instance variables after this signal has been emit.
+    /// Called after all processing has completed.
     /// </summary>
+    /// <param name="mesh">The model.</param>
     [Signal]
-    public delegate void GenerationCompleteEventHandler();
+    public delegate void ModelCompletedEventHandler(SimpleQuadMesh mesh);
 
     public ArrayMesh? Mesh { get; set; }
     public ConcavePolygonShape3D? Collision { get; set; }
+
+    public bool GenerateEdgeModel = true;
+
+    public ArrayMesh? EdgeMesh;
+
     /// <summary>
-    ///  If set, and edge model will be generated and placed in this mesh.
+    /// Edge model generation requires that normals are smoothened. If set, do this operation on a temporary copy of the mesh.
     /// </summary>
-    public ArrayMesh? EdgeMesh { get; set; }
+    public bool DuplicateMeshForEdges { get; set; } = false;
+
     public PuzzlemakerWorld World { get; set; }
     public Vector3I ChunkPos { get; set; }
-    public bool Invert { get; set; }
-
-    public bool ComputeVertexCache { get; set; } = true;
-    public bool ComputeEdgeCache { get; set; } = true;
-    public bool DuplicateMeshForEdges { get; set; } = false;
+    public bool Invert { get; set; } = true;
 
     public Array<Material>? WallTextureOverride { get; set; }
 
@@ -63,87 +60,75 @@ public partial class WorldMeshGenerator : RefCounted
         Invert = invert;
     }
 
-    public WorldMeshGenerator(PuzzlemakerWorld world)
-    {
-        World = world;
-    }
-
-    public WorldMeshGenerator()
-    {
-        World = EditorState.Instance.World;
-    }
-
-    /// <summary>
-    /// Intended to be called from GDScript. Use Task.Run(DoGreedyMesh) for C#.
-    /// </summary>
     public async void DoGreedyMeshThreaded()
     {
         await Task.Run(DoGreedyMesh);
     }
 
     /// <summary>
-    /// Perform the greedy mesh process synchronously.
+    /// Perform the greedy mesh on this thread.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The generated mesh.</returns>
     public SimpleQuadMesh DoGreedyMesh()
     {
-        // Base greedy mesh
+        // Initial greedymesh.
         List<Quad> quads = new List<Quad>();
         ChunkView<PuzzlemakerVoxel> view = new(World, ChunkPos);
         GreedyMesh.DoGreedyMesh(view, quads.Add, uvScale: .25f);
 
-        SimpleQuadMesh quadMesh = new SimpleQuadMesh(quads);
-
-        // Add to arraymesh
-        if (Mesh != null)
-        {
-            MultiMeshBuilder builder = new();
-            foreach (var quad in quadMesh)
-            {
-                builder.AddQuad(quad);
-            }
-            Material[] texutres = 
-                WallTextureOverride != null ? WallTextureOverride.ToArray() : 
-                EditorState.Instance.GetEditorTheme().WallTextures.ToArray();
-
-            builder.ToMesh(Mesh, texutres);
-        }
-
+        SimpleQuadMesh quadMesh = new SimpleQuadMesh(quads.ToArray());
+        
         // Collision
-        if (Collision != null)
+        PolygonShapeBuilder polygonBuilder = new PolygonShapeBuilder();
+        foreach (var quad in quadMesh)
         {
-            PolygonShapeBuilder builder = new PolygonShapeBuilder();
-            foreach (var quad in quadMesh)
-            {
-                builder.AddQuad(quad);
-            }
-            builder.ToShape(Collision);
+            polygonBuilder.AddQuad(quad);
         }
-
-        RunOnMainThread(() => EmitSignalQuadsComputed(quadMesh));
+        SimpleQuadMesh quadMesh2 = new SimpleQuadMesh(quadMesh); // Duplicate for thread safety
+        RunOnMainThread(() => OnQuadsComputed(quadMesh2, polygonBuilder));
 
         // Compute caches
-        if (ComputeVertexCache || EdgeMesh != null)
-            quadMesh.ComputeVertexCache();
-        if (ComputeEdgeCache || EdgeMesh != null)
-            quadMesh.ComputeEdgeCache();
+        quadMesh.ComputeVertexCache();
+        quadMesh.ComputeEdgeCache();
 
-        RunOnMainThread(() => EmitSignalCachesComputed(quadMesh));
-
-        // Edge mesh
-        if (EdgeMesh != null)
+        if (GenerateEdgeModel)
         {
             SimpleQuadMesh edgeQuadMesh = DuplicateMeshForEdges ? new SimpleQuadMesh(quadMesh) : quadMesh;
             edgeQuadMesh.AverageNormals();
+
             List<Quad> edgeQuads = new(edgeQuadMesh.Quads.Length);
             EdgeModelGenerator.GenerateEdgeModel(edgeQuadMesh, edgeQuads.Add);
-            EdgeModelGenerator.BuildEdgeMesh(edgeQuads, EdgeMesh);
 
-            RunOnMainThread(() => EmitSignalEdgeModelGenerated(EdgeMesh));
+            SimpleQuadMesh edgeModel = new SimpleQuadMesh(edgeQuads.ToArray());
+            RunOnMainThread(() => OnEdgeModelCompleted(edgeModel));
         }
-
-        RunOnMainThread(EmitSignalGenerationComplete);
+        RunOnMainThread(() => EmitSignalModelCompleted(quadMesh));
         return quadMesh;
+    }
+
+    private void OnQuadsComputed(SimpleQuadMesh quadMesh, PolygonShapeBuilder polygonBuilder)
+    {
+        if (Mesh != null)
+        {
+            Material[] textures =
+                WallTextureOverride != null ? WallTextureOverride.ToArray() :
+                EditorState.Instance.GetEditorTheme().WallTextures.ToArray();
+            quadMesh.ToArrayMesh(Mesh, true, textures);
+        }
+        if (Collision != null)
+        {
+            polygonBuilder.ToShape(Collision);
+        }
+        EmitSignalQuadsComputed(quadMesh);
+    }
+
+    private void OnEdgeModelCompleted(SimpleQuadMesh edgeModel)
+    {
+        if (EdgeMesh != null)
+        {
+            edgeModel.ToArrayMesh(EdgeMesh);
+        }
+        EmitSignalEdgeModelCreated(edgeModel);
     }
 
     // Factory method for GDScript

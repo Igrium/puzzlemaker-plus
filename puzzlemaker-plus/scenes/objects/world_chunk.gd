@@ -19,8 +19,6 @@ signal on_input_event(camera: Node, event: InputEvent, event_position: Vector3, 
 @onready
 var _collision_shape: CollisionShape3D = $Area3D/CollisionShape3D
 
-var _quad_mesh: SimpleQuadMesh
-
 # var _quad_mesh: QuadMesh
 
 func _ready() -> void:
@@ -29,25 +27,39 @@ func _ready() -> void:
 	pass
 
 func render() -> void:
-	var a_mesh = ArrayMesh.new()
 	var shape = ConcavePolygonShape3D.new()
 	
-	var generator := WorldMeshGenerator.Create(a_mesh, shape, pos, true)
-
 	var edge_mesh: ArrayMesh
 	if edge_mesh_instace != null:
-		edge_mesh = ArrayMesh.new()
-		generator.EdgeMesh = edge_mesh
+		edge_mesh = edge_mesh_instace.mesh
+		if edge_mesh == null:
+			edge_mesh = ArrayMesh.new()
+			edge_mesh_instace.mesh = edge_mesh
+	
+	if mesh == null:
+		mesh = ArrayMesh.new()
+
+	var generator: WorldMeshGenerator = WorldMeshGenerator.Create(mesh, shape, pos, true)
+	generator.EdgeMesh = edge_mesh
 
 	generator.DoGreedyMeshThreaded()
-	
-	_quad_mesh = await generator.QuadsComputed
-	self.mesh = a_mesh
+	await generator.QuadsComputed
 	_collision_shape.shape = shape
+
+	# var edge_mesh: ArrayMesh
+	# if edge_mesh_instace != null:
+	# 	edge_mesh = ArrayMesh.new()
+	# 	generator.EdgeMesh = edge_mesh
+
+	# generator.DoGreedyMeshThreaded()
 	
-	if edge_mesh_instace != null:
-		await generator.EdgeModelGenerated
-		edge_mesh_instace.mesh = edge_mesh
+	# _quad_mesh = await generator.QuadsComputed
+	# self.mesh = a_mesh
+	# _collision_shape.shape = shape
+	
+	# if edge_mesh_instace != null:
+	# 	await generator.EdgeModelGenerated
+	# 	edge_mesh_instace.mesh = edge_mesh
 
 func _on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
 	on_input_event.emit(camera, event, event_position, normal, shape_idx)

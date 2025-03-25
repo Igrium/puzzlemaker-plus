@@ -65,4 +65,9 @@ public class MeshBuilder : IMeshBuilder
             }
         }
     }
+
+    public void ToMesh(ArrayMesh mesh, params Material[] materials)
+    {
+        ToMesh(mesh, materials.Length > 0 ? materials[0] : null);
+    }
 }

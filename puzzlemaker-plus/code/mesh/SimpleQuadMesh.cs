@@ -8,7 +8,7 @@ using Godot;
 namespace PuzzlemakerPlus;
 
 /// <summary>
-/// A mesh made out of quads that keeps around various caches for quick analysis
+/// A mesh made out of quads that keeps around various caches for quick analysis.
 /// </summary>
 [GlobalClass]
 public partial class SimpleQuadMesh : RefCounted, IEnumerable<Quad>
@@ -322,5 +322,22 @@ public partial class SimpleQuadMesh : RefCounted, IEnumerable<Quad>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return _quads.GetEnumerator();
+    }
+
+    /// <summary>
+    /// Export this quad mesh into an ArrayMesh.
+    /// </summary>
+    /// <param name="mesh">Mesh to export into.</param>
+    /// <param name="splitMaterials">If set, create multiple surfaces based on quad material index.</param>
+    /// <param name="materials">Materials to add, if any.</param>
+    public void ToArrayMesh(ArrayMesh mesh, bool splitMaterials = false, params Material[] materials)
+    {
+        mesh.ClearSurfaces();
+        IMeshBuilder builder = splitMaterials ? new MultiMeshBuilder() : new MeshBuilder();
+        foreach (var quad in _quads)
+        {
+            builder.AddQuad(quad);
+        }
+        builder.ToMesh(mesh, materials);
     }
 }
