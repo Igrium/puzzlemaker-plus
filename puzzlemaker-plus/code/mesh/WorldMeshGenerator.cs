@@ -96,10 +96,16 @@ public partial class WorldMeshGenerator : RefCounted
             SimpleQuadMesh edgeQuadMesh = DuplicateMeshForEdges ? new SimpleQuadMesh(quadMesh) : quadMesh;
             edgeQuadMesh.AverageNormals();
 
-            List<Quad> edgeQuads = new(edgeQuadMesh.Quads.Length);
-            EdgeModelGenerator.GenerateEdgeModel(edgeQuadMesh, edgeQuads.Add);
+            List<Edge> edges = new(edgeQuadMesh.Quads.Length);
+            EdgeModelGenerator.IdentifyEdges(edgeQuadMesh, edges.Add);
 
-            SimpleQuadMesh edgeModel = new SimpleQuadMesh(edgeQuads.ToArray());
+            foreach (var edge in edges)
+            {
+                DebugDrawEdge(edge, duration: 2);
+            }
+            GD.Print($"Found {edges.Count} edges");
+
+            SimpleQuadMesh edgeModel = new SimpleQuadMesh(new Quad[0]);
             RunOnMainThread(() => OnEdgeModelCompleted(edgeModel));
         }
         RunOnMainThread(() => EmitSignalModelCompleted(quadMesh));
@@ -135,6 +141,11 @@ public partial class WorldMeshGenerator : RefCounted
     public static WorldMeshGenerator Create(ArrayMesh? mesh, ConcavePolygonShape3D? collision, Vector3I chunkPos, bool invert = true)
     {
         return new WorldMeshGenerator(mesh, collision, EditorState.Instance.World, chunkPos, invert);
+    }
+
+    private static void DebugDrawEdge(Edge edge, Color? color = null, float duration = 0)
+    {
+        RunOnMainThread(() => DebugDraw3D.DrawLine(edge.Vert1, edge.Vert2, color, duration));
     }
 
     private static void RunOnMainThread(Action action)

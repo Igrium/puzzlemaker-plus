@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Godot;
 
 namespace PuzzlemakerPlus;
@@ -110,4 +112,134 @@ public static class QuadMeshExtensions
         }
         return (array, i);
     }
+
+    /// <summary>
+    /// Configures TraverseEdgeLine.
+    /// </summary>
+    public struct EdgeTraversalConfig
+    {
+        /// <summary>
+        /// The mesh to use.
+        /// </summary>
+        public SimpleQuadMesh Mesh;
+
+        /// <summary>
+        /// Direction to traverse line in.
+        /// </summary>
+        public Vector3 Tangent;
+
+        /// <summary>
+        /// Returns true if we should stop traversing down the line.
+        /// </summary>
+        public Predicate<Vector3> EndCondition;
+
+        /// <summary>
+        /// Called when the end condition returns true for any vertex.
+        /// </summary>
+        public Action<Vector3> OnConditionMet;
+
+        /// <summary>
+        /// The maximum amount we can deviate from the supplied tangent.
+        /// </summary>
+        public float MaxDeviation;
+
+        public bool DrawDebug;
+        public Color? DebugColor;
+    }
+
+    /// <summary>
+    /// Traverse a straight line of edges, possibly branching if colinear edges are found, until an end condition is met.
+    /// </summary>
+    /// <param name="config">Method arguments.</param>
+    /// <param name="vertex">The vertex to start on.</param>
+    /// <remarks>Requires that the edge cache has been generated.</remarks>
+    public static void TraverseEdgeLine(ref EdgeTraversalConfig config, Vector3 vertex)
+    {
+        TraverseEdgeLine(ref config, vertex, new HashSet<Vector3>());
+    }
+
+    public static void TraverseEdgeLine(ref EdgeTraversalConfig config, Vector3 vertex, ISet<Vector3> saturatedVerts)
+    {
+        if (config.MaxDeviation == 0)
+            config.MaxDeviation = .05f;
+
+        saturatedVerts.Add(vertex);
+        if (config.EndCondition(vertex))
+        {
+            config.OnConditionMet(vertex);
+        }
+        else
+        {
+            foreach (Edge edge in config.Mesh.GetAdjoiningEdges(vertex))
+            {
+                Vector3 otherVert = vertex == edge.Vert1 ? edge.Vert2 : edge.Vert1;
+                Vector3 edgeTan = (otherVert - vertex).Normalized();
+                float dot = config.Tangent.Dot(edgeTan);
+
+                if (1 - dot < config.MaxDeviation && !saturatedVerts.Contains(otherVert))
+                {
+                    if (config.DrawDebug)
+                        DebugDrawEdge(edge, config.DebugColor, 2);
+
+                    TraverseEdgeLine(ref config, otherVert, saturatedVerts);
+                }
+                //else
+                //{
+                //    if (config.DrawDebug)
+                //        DebugDrawEdge(edge, Colors.OrangeRed, .5f);
+                //}
+            }
+        }
+    }
+
+    internal static void DebugDrawEdge(Edge edge, Color? color = null, float duration = 0)
+    {
+        RunOnMainThread(() => DebugDraw3D.DrawLine(edge.Vert1, edge.Vert2, color, duration));
+    }
+
+    internal static void DebugDrawPoints(IEnumerable<Vector3> points, float size = .2f, Color? color = null, float duration = 0)
+    {
+        Vector3[] pointArray = points.ToArray();
+        RunOnMainThread(() => DebugDraw3D.DrawPoints(pointArray, size: size, color: color, duration: duration));
+    }
+
+    private static void RunOnMainThread(Action action)
+    {
+        RunOnMainThread(Callable.From(action));
+    }
+
+    private static void RunOnMainThread(Callable callable, params Variant[] args)
+    {
+        if (Thread.CurrentThread.ManagedThreadId == 1)
+        {
+            callable.Call(args);
+        }
+        else
+        {
+            callable.CallDeferred(args);
+        }
+    }
+
+    //private static void TraverseEdgeLineInternal(this SimpleQuadMesh mesh, Vector3 vertex, Vector3 tangent, Predicate<Vector3> endCondition, Action<Vector3> onConditionMet, HashSet<Vector3> saturatedVerts)
+    //{
+    //    saturatedVerts.Add(vertex);
+    //    if (endCondition(vertex))
+    //    {
+    //        onConditionMet(vertex);
+    //    }
+    //    else
+    //    {
+    //        foreach (Edge edge in mesh.GetAdjoiningEdges(vertex))
+    //        {
+    //            Vector3 otherVert = vertex == edge.Vert1 ? edge.Vert2 : edge.Vert1;
+    //            Vector3 edgeTan = (otherVert - vertex).Normalized();
+    //            float dot = tangent.Dot(edgeTan);
+
+    //            if (1 - dot < .05f && !saturatedVerts.Contains(otherVert))
+    //            {
+    //                TraverseEdgeLineInternal(mesh, otherVert, tangent, endCondition, onConditionMet, saturatedVerts);
+    //            }
+    //        }
+    //    }
+    //}
 }

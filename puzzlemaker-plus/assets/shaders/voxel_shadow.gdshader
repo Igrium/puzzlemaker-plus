@@ -6,4 +6,3 @@ uniform sampler2D shadow_mask;
 void fragment() {
 	ALBEDO = texture(shadow_mask, UV).rgb;
 }
-
