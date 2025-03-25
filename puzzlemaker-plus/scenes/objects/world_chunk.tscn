@@ -1,10 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://1hw75nbgk46w"]
+[gd_scene load_steps=6 format=3 uid="uid://1hw75nbgk46w"]
 
 [ext_resource type="Script" uid="uid://uyhs32ly8yyl" path="res://scenes/objects/world_chunk.gd" id="1_y567v"]
 [ext_resource type="Material" uid="uid://dyvgr7q35fcid" path="res://assets/materials/clean/grid_light.tres" id="2_fx1e0"]
 [ext_resource type="Script" uid="uid://c6e5j18f4xk3d" path="res://scripts/debug_visualizer.gd" id="3_te8ta"]
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ca28r"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ieh8h"]
+cull_mode = 2
 
 [node name="WorldChunk" type="MeshInstance3D" node_paths=PackedStringArray("edge_mesh_instace")]
 script = ExtResource("1_y567v")
@@ -22,5 +25,6 @@ shape = SubResource("ConcavePolygonShape3D_ca28r")
 script = ExtResource("3_te8ta")
 
 [node name="EdgeModel" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_ieh8h")
 
 [connection signal="input_event" from="Area3D" to="." method="_on_input_event"]

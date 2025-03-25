@@ -96,16 +96,10 @@ public partial class WorldMeshGenerator : RefCounted
             SimpleQuadMesh edgeQuadMesh = DuplicateMeshForEdges ? new SimpleQuadMesh(quadMesh) : quadMesh;
             edgeQuadMesh.AverageNormals();
 
-            List<Edge> edges = new(edgeQuadMesh.Quads.Length);
-            EdgeModelGenerator.IdentifyEdges(edgeQuadMesh, edges.Add);
+            List<Quad> edgeQuads = new(edgeQuadMesh.Quads.Length);
+            EdgeModelGenerator.CreateEdgeModel(edgeQuadMesh, edgeQuads.Add);
 
-            foreach (var edge in edges)
-            {
-                DebugDrawEdge(edge, duration: 2);
-            }
-            GD.Print($"Found {edges.Count} edges");
-
-            SimpleQuadMesh edgeModel = new SimpleQuadMesh(new Quad[0]);
+            SimpleQuadMesh edgeModel = new SimpleQuadMesh(edgeQuads);
             RunOnMainThread(() => OnEdgeModelCompleted(edgeModel));
         }
         RunOnMainThread(() => EmitSignalModelCompleted(quadMesh));

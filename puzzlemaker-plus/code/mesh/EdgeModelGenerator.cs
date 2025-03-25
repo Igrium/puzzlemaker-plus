@@ -12,6 +12,11 @@ namespace PuzzlemakerPlus;
 /// </summary>
 public static class EdgeModelGenerator
 {
+    private enum CornerType
+    {
+        None, Corner, MeshEdge
+    }
+
     /// <summary>
     /// Identify every edge in the mesh that's visually connected to two corners.
     /// </summary>
@@ -20,20 +25,32 @@ public static class EdgeModelGenerator
     public static void IdentifyEdges(SimpleQuadMesh mesh, Action<Edge> edgeConsumer, bool drawDebug = false)
     {
 
-        bool isCorner(Vector3 vertex)
+        CornerType getCornerType(Vector3 vertex)
         {
-            ushort[] faceIndices = mesh.GetAdjoiningFaceIndices(vertex).ToArray();
-            if (faceIndices.Length == 3)
+            ushort[] indices = mesh.GetAdjoiningFaceIndices(vertex).ToArray();
+            if (indices.Length == 3)
             {
-                return true;
+                Quad[] quads = mesh.Quads;
+
+                Vector3 normal1 = quads[indices[0]].ComputeFaceNormal();
+                Vector3 normal2 = quads[indices[1]].ComputeFaceNormal();
+                Vector3 normal3 = quads[indices[2]].ComputeFaceNormal();
+
+                float maxAngle = Mathf.Pi * .75f;
+
+                if (normal1.AngleTo(-normal2) < maxAngle &&
+                    normal1.AngleTo(-normal3) < maxAngle &&
+                    normal2.AngleTo(-normal3) < maxAngle)
+                    return CornerType.Corner;
             }
-            else if (faceIndices.Length == 2)
+            else if (indices.Length == 2)
             {
-                Vector3 normal1 = mesh.Quads[faceIndices[0]].ComputeFaceNormal();
-                Vector3 normal2 = mesh.Quads[faceIndices[1]].ComputeFaceNormal();
-                return normal1.Dot(normal2) < .5f;
+                Vector3 normal1 = mesh.Quads[indices[0]].ComputeFaceNormal();
+                Vector3 normal2 = mesh.Quads[indices[1]].ComputeFaceNormal();
+                if (normal1.AngleTo(-normal2) < Mathf.Pi * .75f)
+                    return CornerType.MeshEdge;
             }
-            else return false;
+            return CornerType.None;
         }
 
         Dictionary<Vector3, HashSet<Vector3>> exaustedTangentsMap = new();
@@ -42,7 +59,7 @@ public static class EdgeModelGenerator
 
         foreach (var vertex in mesh.VertexRefCache.Keys)
         {
-            if (!isCorner(vertex)) continue;
+            if (getCornerType(vertex) != CornerType.Corner) continue;
 
             HashSet<Vector3> exaustedTangents = exaustedTangentsMap.GetOrAdd(vertex, k => new());
 
@@ -59,7 +76,7 @@ public static class EdgeModelGenerator
                 {
                     Mesh = mesh,
                     Tangent = tangent,
-                    EndCondition = isCorner,
+                    EndCondition = vert => getCornerType(vert) != CornerType.None,
                     OnConditionMet = v => cornerCache.AddLast(v)
                 };
 
@@ -87,6 +104,50 @@ public static class EdgeModelGenerator
                 exaustedTangentsMap.GetOrAdd(lineEnd, k => new()).Add(-tangent);
                 edgeConsumer(new Edge(vertex, lineEnd));
             }
+        }
+    }
+
+    // Very crude implementation doesn't check if the shared verts are actually an edge.
+    private static bool SharesAnEdge(in Quad quad, in Quad other)
+    {
+        int shared = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            Vector3 vert = quad[i];
+            for (int x = 0; x < 4; x++)
+            {
+                if (other[x] == vert)
+                {
+                    shared++;
+                    break;
+                }
+            }
+            if (shared >= 2)
+                return true;
+        }
+        return false;
+    }
+
+    public static void CreateEdgeModel(SimpleQuadMesh mesh, Action<Quad> quadComsumer, float length = 1)
+    {
+        List<Edge> edges = new List<Edge>(mesh.Quads.Length);
+        IdentifyEdges(mesh, edges.Add);
+
+        foreach (Edge edge in edges)
+        {
+            SimpleQuadMesh.VertexRef vert1Ref = mesh.VertexRefCache[edge.Vert1][0];
+            SimpleQuadMesh.VertexRef vert2Ref = mesh.VertexRefCache[edge.Vert2][0];
+
+            Vector3 normal1 = -mesh.GetNormal(vert1Ref);
+            Vector3 normal2 = -mesh.GetNormal(vert2Ref);
+
+            Quad quad = new Quad(edge.Vert1, edge.Vert2, edge.Vert2 + normal2 * length, edge.Vert1 + normal1 * length);
+            quad.Normal1 = normal1;
+            quad.Normal2 = normal2;
+            quad.Normal3 = normal2;
+            quad.Normal4 = normal1;
+
+            quadComsumer(quad);
         }
     }
 
