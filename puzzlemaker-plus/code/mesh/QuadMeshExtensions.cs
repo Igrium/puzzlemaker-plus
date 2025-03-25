@@ -63,6 +63,37 @@ public static class QuadMeshExtensions
         }
     }
 
+    /// <summary>
+    /// Find the edge of a given vertex that closest matches a given tangent.
+    /// </summary>
+    /// <param name="quadMesh">Target mesh.</param>
+    /// <param name="vertex">The vertex to search.</param>
+    /// <param name="tangent">The tangent to compare to.</param>
+    /// <returns>The closest edge; <c>Edge.default</c> if the vertex was not in the mesh.</returns>
+    public static Edge GetClosestEdge(this SimpleQuadMesh quadMesh, Vector3 vertex, Vector3 tangent)
+    {
+        bool init = false;
+        Edge closestEdge = default;
+        float closestDot = 0;
+        tangent = tangent.Normalized();
+
+        foreach (var edge in quadMesh.GetAdjoiningEdges(vertex))
+        {
+            Vector3 edgeTangent = edge.GetTangent(vertex);
+            edgeTangent = edgeTangent.Normalized();
+
+            float dot = edgeTangent.Dot(tangent);
+            if (!init || dot > closestDot)
+            {
+                closestEdge = edge;
+                closestDot = dot;
+                init = true;
+            }
+        }
+
+        return closestEdge;
+    }
+
     private static (T[], int) GetElements<T>(this IEnumerable<T> enumerable, int amount)
     {
         return enumerable.GetEnumerator().GetElements(amount);
