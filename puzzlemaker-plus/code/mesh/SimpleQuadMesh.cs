@@ -74,7 +74,7 @@ public partial class SimpleQuadMesh : RefCounted, IEnumerable<Quad>
         public (VertexRef, VertexRef) GetVertices()
         {
             var (vert1, vert2) = GetVertexIndices();
-            return (new VertexRef(FaceIndex, vert1), new VertexRef(EdgeIndex, vert2));
+            return (new VertexRef(FaceIndex, vert1), new VertexRef(FaceIndex, vert2));
         }
     }
 
