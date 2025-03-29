@@ -97,7 +97,7 @@ public partial class WorldMeshGenerator : RefCounted
             edgeQuadMesh.AverageNormals();
 
             List<Quad> edgeQuads = new(edgeQuadMesh.Quads.Length);
-            EdgeModelGenerator.CreateEdgeModel(edgeQuadMesh, edgeQuads.Add);
+            EdgeModelGenerator.CreateEdgeModel(edgeQuadMesh, view, edgeQuads.Add, drawDebug: true);
 
             SimpleQuadMesh edgeModel = new SimpleQuadMesh(edgeQuads);
             RunOnMainThread(() => OnEdgeModelCompleted(edgeModel));

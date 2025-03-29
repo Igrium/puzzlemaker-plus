@@ -115,4 +115,20 @@ internal static class VectorExtensions
     {
         return MemoryMarshal.Cast<float, Vector3>(floats).ToArray();
     }
+
+    /// <summary>
+    /// Determine if a given vector faces in exactly one of the 6 cardinal directions.
+    /// </summary>
+    /// <param name="vec">The vector.</param>
+    public static bool IsCardinal(this in Vector3 vec)
+    {
+        return (vec.X.eqApprox(0) && vec.Y.eqApprox(0))
+            || (vec.X.eqApprox(0) && vec.Z.eqApprox(0))
+            || (vec.Y.eqApprox(0) && vec.Z.eqApprox(0));
+    }
+
+    private static bool eqApprox(this float a, float b)
+    {
+        return Mathf.IsEqualApprox(a, b);
+    }
 }
