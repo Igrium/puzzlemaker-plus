@@ -74,4 +74,17 @@ public static class DirectionFlagsExtensions
         if (flags.HasFlag(DirectionFlags.Back))
             yield return Direction.Back;
     }
+
+    public static bool[] AsArray(this DirectionFlags flags)
+    {
+        return
+        [
+            flags.HasFlag(DirectionFlags.Up),
+            flags.HasFlag(DirectionFlags.Down),
+            flags.HasFlag(DirectionFlags.Left),
+            flags.HasFlag(DirectionFlags.Right),
+            flags.HasFlag(DirectionFlags.Forward),
+            flags.HasFlag(DirectionFlags.Back)
+        ];
+    }
 }

@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Godot;
 
 namespace PuzzlemakerPlus;
@@ -11,7 +7,7 @@ namespace PuzzlemakerPlus;
 /// <summary>
 /// Can identify the normals for any given corner in the voxel mesh.
 /// </summary>
-public static class VoxelCornerNormals
+public static class VoxelCorners
 {
 
     private enum VoxelCorner : byte
@@ -72,27 +68,37 @@ public static class VoxelCornerNormals
             return false;
     }
 
-    private static Vector3[] _lut;
+    private static Vector3[] _normalLut;
+    private static DirectionFlags[] _visibleEdgesLut;
 
-    static VoxelCornerNormals()
+    static VoxelCorners()
     {
-        _lut = new Vector3[byte.MaxValue];
+        _normalLut = new Vector3[byte.MaxValue];
+        _visibleEdgesLut = new DirectionFlags[byte.MaxValue];
+
+        List<Quad> quadCache = new List<Quad>(12);
         for (byte i = 0; i < byte.MaxValue; i++)
         {
+            quadCache.Clear();
             VoxelCorner corner = (VoxelCorner)i;
-            _lut[i] = ComputeCornerNormal(corner);
+            (_normalLut[i], _visibleEdgesLut[i]) = ComputeCornerData(corner);
         }
     }
 
-    private static Vector3 ComputeCornerNormal(VoxelCorner corner)
+    private static (Vector3, DirectionFlags) ComputeCornerData(VoxelCorner corner)
     {
         Vector3 result = Vector3.Zero;
         if (corner == VoxelCorner.None || corner == VoxelCorner.All)
-            return result;
+            return (result, default);
+
+        byte[] mask = new byte[4];
+
+        DirectionFlags edgeDirections = default;
 
         // Exteremly simplified meshing algorithm to approximate desired normal
         for (int axis = 0; axis < 3; axis++)
         {
+            Array.Fill(mask, default);
             int uAxis = (axis + 1) % 3;
             int vAxis = (axis + 2) % 3;
             Vector3I pos = Vector3I.Zero;
@@ -100,6 +106,13 @@ public static class VoxelCornerNormals
             Vector3I normal = Vector3I.Zero;
             normal[axis] = -1;
 
+            Vector3I du = Vector3I.Zero;
+            du[uAxis] = 1;
+
+            Vector3I dv = Vector3I.Zero;
+            dv[vAxis] = 1;
+
+            int index = 0;
             for (pos[vAxis] = -1; pos[vAxis] < 1; pos[vAxis]++)
             {
                 for (pos[uAxis] = -1; pos[uAxis] < 1; pos[uAxis]++)
@@ -110,21 +123,52 @@ public static class VoxelCornerNormals
                     if (current && !compare)
                     {
                         result += normal;
+                        mask[index] = 1;
                     }
                     else if (!current && compare)
                     {
                         result -= normal;
+                        mask[index] = 1;
                     }
+                    index++;
                 }
             }
+
+            if (mask[0] != mask[1])
+            {
+                edgeDirections |= DirectionFlagsExtensions.AsFlag(Directions.FromAxis(vAxis, true));
+            }
+            if (mask[0] != mask[2])
+            {
+                edgeDirections |= DirectionFlagsExtensions.AsFlag(Directions.FromAxis(uAxis, true));
+            }
+            if (mask[2] != mask[3])
+            {
+                edgeDirections |= DirectionFlagsExtensions.AsFlag(Directions.FromAxis(vAxis, false));
+            }
+            if (mask[1] != mask[3])
+            {
+                edgeDirections |= DirectionFlagsExtensions.AsFlag(Directions.FromAxis(uAxis, false));
+            }
         }
-
-        return result.Normalized();
+        return (result.Normalized(), edgeDirections);
     }
 
-    public static Vector3 ComputeCornerNormal(IVoxelView<PuzzlemakerVoxel> world, Vector3I vertex)
+    public static Vector3 GetCornerNormal(IVoxelView<PuzzlemakerVoxel> world, Vector3I vertex)
     {
-        return _lut[(byte)GetCorner(world, vertex)];
+        return _normalLut[(byte)GetCorner(world, vertex)];
     }
 
+    /// <summary>
+    /// Given a vertex, figure out which directions will have a "visible edge"
+    /// </summary>
+    /// <param name="world">The voxel world.</param>
+    /// <param name="vertex">Vertex to use.</param>
+    /// <returns>Which directions have a visible edge.</returns>
+    /// <remarks>A "visible edge" is defined as an edge creates a visible change in geometry at this vertex.
+    /// If you would to turn off textures, you would be able to see it.</remarks>
+    public static DirectionFlags GetVisibleEdges(IVoxelView<PuzzlemakerVoxel> world, Vector3I vertex)
+    {
+        return _visibleEdgesLut[(byte)GetCorner(world, vertex)];
+    }
 }

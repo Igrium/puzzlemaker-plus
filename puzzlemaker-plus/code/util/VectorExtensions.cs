@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -120,13 +121,60 @@ internal static class VectorExtensions
     /// Determine if a given vector faces in exactly one of the 6 cardinal directions.
     /// </summary>
     /// <param name="vec">The vector.</param>
-    public static bool IsCardinal(this in Vector3 vec)
+    public static bool IsCardinal(this Vector3 vec)
     {
         return (vec.X.eqApprox(0) && vec.Y.eqApprox(0))
             || (vec.X.eqApprox(0) && vec.Z.eqApprox(0))
             || (vec.Y.eqApprox(0) && vec.Z.eqApprox(0));
     }
 
+    /// <summary>
+    /// Check if this vector shares an axis with another vector.
+    /// </summary>
+    /// <param name="vec">This vector.</param>
+    /// <param name="other">The other vector.</param>
+    /// <returns>If this vector shares any elements with the other vector.</returns>
+    public static bool IsInLine(this Vector3 vec, Vector3 other)
+    {
+        return vec.X.eqApprox(other.X) || vec.Y.eqApprox(other.Y) || vec.Z.eqApprox(other.Z);
+    }
+
+    /// <summary>
+    /// Check if this vector shares an axis with another vector.
+    /// </summary>
+    /// <param name="vec">This vector.</param>
+    /// <param name="other">The other vector.</param>
+    /// <returns>If this vector shares any elements with the other vector.</returns>
+    public static bool IsInLine(this Vector3I vec, Vector3I other)
+    {
+        return vec.X == other.X || vec.Y == other.Y || vec.Z == other.Z;
+    }
+
+    public static bool GetSharedAxis(this Vector3I vec, Vector3I other, out int axis)
+    {
+        if (vec.X == other.X)
+        {
+            axis = 0;
+            return true;
+        }
+        else if (vec.Y == other.Y)
+        {
+            axis = 1;
+            return true;
+        }
+        else if (vec.Z == other.Z)
+        {
+            axis = 2;
+            return true;
+        }
+        else
+        {
+            axis = default;
+            return false;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool eqApprox(this float a, float b)
     {
         return Mathf.IsEqualApprox(a, b);

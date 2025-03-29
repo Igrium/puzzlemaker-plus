@@ -179,15 +179,15 @@ public static class QuadMeshExtensions
                 if (1 - dot < config.MaxDeviation && !saturatedVerts.Contains(otherVert))
                 {
                     if (config.DrawDebug)
-                        DebugDrawEdge(edge, config.DebugColor, 2);
+                        DebugDrawEdge(edge, config.DebugColor, 5);
 
                     TraverseEdgeLine(ref config, otherVert, saturatedVerts);
                 }
-                //else
-                //{
-                //    if (config.DrawDebug)
-                //        DebugDrawEdge(edge, Colors.OrangeRed, .5f);
-                //}
+                else
+                {
+                    if (config.DrawDebug)
+                        DebugDrawEdge(edge, Colors.OrangeRed, .5f);
+                }
             }
         }
     }
