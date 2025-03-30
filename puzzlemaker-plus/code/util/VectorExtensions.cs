@@ -134,7 +134,7 @@ internal static class VectorExtensions
     /// <param name="vec">This vector.</param>
     /// <param name="other">The other vector.</param>
     /// <returns>If this vector shares any elements with the other vector.</returns>
-    public static bool IsInLine(this Vector3 vec, Vector3 other)
+    public static bool IsInPlane(this Vector3 vec, Vector3 other)
     {
         return vec.X.eqApprox(other.X) || vec.Y.eqApprox(other.Y) || vec.Z.eqApprox(other.Z);
     }
@@ -145,26 +145,26 @@ internal static class VectorExtensions
     /// <param name="vec">This vector.</param>
     /// <param name="other">The other vector.</param>
     /// <returns>If this vector shares any elements with the other vector.</returns>
-    public static bool IsInLine(this Vector3I vec, Vector3I other)
+    public static bool IsInPlane(this Vector3I vec, Vector3I other)
     {
         return vec.X == other.X || vec.Y == other.Y || vec.Z == other.Z;
     }
 
     public static bool GetSharedAxis(this Vector3I vec, Vector3I other, out int axis)
     {
-        if (vec.X == other.X)
+        if (vec.Y == other.Y && vec.Z == other.Z)
         {
-            axis = 0;
+            axis = 0; // X
             return true;
         }
-        else if (vec.Y == other.Y)
+        else if (vec.X == other.X && vec.Z == other.Z)
         {
-            axis = 1;
+            axis = 1; // Y
             return true;
         }
-        else if (vec.Z == other.Z)
+        else if (vec.X == other.X && vec.Y == other.Y)
         {
-            axis = 2;
+            axis = 2; // Z
             return true;
         }
         else
@@ -172,6 +172,26 @@ internal static class VectorExtensions
             axis = default;
             return false;
         }
+        //if (vec.X == other.X)
+        //{
+        //    axis = 0;
+        //    return true;
+        //}
+        //else if (vec.Y == other.Y)
+        //{
+        //    axis = 1;
+        //    return true;
+        //}
+        //else if (vec.Z == other.Z)
+        //{
+        //    axis = 2;
+        //    return true;
+        //}
+        //else
+        //{
+        //    axis = default;
+        //    return false;
+        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

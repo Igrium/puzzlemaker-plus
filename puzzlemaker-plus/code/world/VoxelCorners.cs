@@ -4,27 +4,26 @@ using Godot;
 
 namespace PuzzlemakerPlus;
 
+public enum VoxelCorner : byte
+{
+    None = 0,
+    NNN = 1,
+    NNP = 2,
+    PNN = 4,
+    PNP = 8,
+    NPN = 16,
+    NPP = 32,
+    PPN = 64,
+    PPP = 128,
+    All = 255
+}
+
 /// <summary>
 /// Can identify the normals for any given corner in the voxel mesh.
 /// </summary>
 public static class VoxelCorners
 {
-
-    private enum VoxelCorner : byte
-    {
-        None = 0,
-        NNN = 1,
-        NNP = 2,
-        PNN = 4,
-        PNP = 8,
-        NPN = 16,
-        NPP = 32,
-        PPN = 64,
-        PPP = 128,
-        All = 255
-    }
-
-    private static VoxelCorner GetCorner(IVoxelView<PuzzlemakerVoxel> view, Vector3I vertex)
+    public static VoxelCorner GetCorner(IVoxelView<PuzzlemakerVoxel> view, Vector3I vertex)
     {
         VoxelCorner corner = VoxelCorner.None;
         if (view.GetVoxel(vertex + new Vector3I(-1, -1, -1)).IsOpen)
@@ -46,7 +45,7 @@ public static class VoxelCorners
         return corner;
     }
 
-    private static bool HasVoxel(this VoxelCorner corner, Vector3I voxel)
+    public static bool HasVoxel(this VoxelCorner corner, Vector3I voxel)
     {
         if (voxel == new Vector3I(-1, -1, -1))
             return corner.HasFlag(VoxelCorner.NNN);
@@ -154,9 +153,19 @@ public static class VoxelCorners
         return (result.Normalized(), edgeDirections);
     }
 
+    public static Vector3 GetCornerNormal(this VoxelCorner corner)
+    {
+        return _normalLut[(byte)corner];
+    }
+
     public static Vector3 GetCornerNormal(IVoxelView<PuzzlemakerVoxel> world, Vector3I vertex)
     {
         return _normalLut[(byte)GetCorner(world, vertex)];
+    }
+
+    public static DirectionFlags GetVisibleEdges(this VoxelCorner corner)
+    {
+        return _visibleEdgesLut[(byte)corner];
     }
 
     /// <summary>

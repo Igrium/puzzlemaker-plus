@@ -13,16 +13,17 @@ public static class EdgeModelGenerator
         None, Corner, MeshEdge
     }
 
-    public static void FindCorners(SimpleQuadMesh mesh, IVoxelView<PuzzlemakerVoxel> world, IDictionary<Vector3I, Vector3> corners)
+    public static void FindCorners(SimpleQuadMesh mesh, IVoxelView<PuzzlemakerVoxel> world, IDictionary<Vector3I, VoxelCorner> corners)
     {
         foreach (var vertex in mesh.VertexRefCache.Keys)
         {
             Vector3I vertInt = vertex.RoundInt();
-            Vector3 normal = VoxelCorners.GetCornerNormal(world, vertInt);
+            VoxelCorner corner = VoxelCorners.GetCorner(world, vertInt);
+            Vector3 normal = corner.GetCornerNormal();
 
             if (!normal.IsCardinal())
             {
-                corners.Add(vertInt, normal);
+                corners.Add(vertInt, corner);
             }
         }
     }
@@ -30,124 +31,74 @@ public static class EdgeModelGenerator
     public static void IdentifyEdges(SimpleQuadMesh mesh, IVoxelView<PuzzlemakerVoxel> world, Action<Edge> edgeConsumer, bool drawDebug = false)
     {
 
-        Dictionary<Vector3I, Vector3> corners = new();
+        Dictionary<Vector3I, VoxelCorner> corners = new();
         FindCorners(mesh, world, corners);
 
         if (drawDebug)
         {
             foreach (var (vertex, normal) in corners)
             {
-                DrawDebugVector(vertex, vertex + normal, duration: 5);
+                DrawDebugVector(vertex, vertex + normal.GetCornerNormal(), duration: 5);
             }
         }
 
         Dictionary<Vector3I, HashSet<Vector3>> exaustedTangentsMap = new();
 
-
-        foreach (var (iVert, normal) in corners)
+        foreach (var (iVert, corner) in corners)
         {
             HashSet<Vector3> exaustedTangents = exaustedTangentsMap.GetOrAdd(iVert, k => new());
-
             Vector3 vertex = iVert;
-            DirectionFlags visibleEdges = VoxelCorners.GetVisibleEdges(world, iVert);
+            DirectionFlags visibleEdges = corner.GetVisibleEdges();
 
-            foreach (var edge in mesh.GetAdjoiningEdges(vertex).Distinct())
+            foreach (var direction in visibleEdges.GetDirections())
             {
-
-                //Vector3 otherVert = vertex == edge.Vert1 ? edge.Vert2 : edge.Vert1;
-                //Vector3 tangent = (otherVert - vertex).Normalized();
-                Vector3 tangent = edge.GetTangent(vertex);
-                Direction direction = Directions.GetClosestDirection(tangent);
-
-                if (!visibleEdges.HasDirection(direction))
-                    continue;
-
+                Vector3 tangent = direction.GetNormal();
                 if (exaustedTangents.Contains(tangent))
                     continue;
 
                 if (drawDebug)
                 {
-                    DrawDebugVector(vertex, vertex + tangent, Colors.Orange, 5);
+                    DrawDebugVector(vertex, vertex + tangent, Colors.Orange, 4);
                 }
 
-                // Find closest vertex in the desired direction.
-                // Shit complexity, but but it's a small(ish) sample at this point.
+                // Find closest vertex in desired direction.
+                // Shit complexity, but it's a small sample size at this point.
                 Vector3I iClosestOther = default;
-                float closestDistance = -1;
+                float closestDist = -1;
 
-                foreach (var iOtherVert in corners.Keys)
+                foreach (var (iOtherVert, otherCorner) in corners)
                 {
-                    if (iVert.GetSharedAxis(iOtherVert, out var axis) && axis == direction.GetAxis())
+                    if (iVert.GetSharedAxis(iOtherVert, out var axis) && axis == direction.GetAxis()) 
                     {
-                        // Ensure the vertex is in the correct direction (tangent is negative if it's supposed to be inverted)
+                        // Ensure vertex is in correct direction.
                         if ((iOtherVert[axis] - iVert[axis]) * tangent[axis] < 0)
                             continue;
 
-                        if (!VoxelCorners.GetVisibleEdges(world, iOtherVert).HasDirection(direction.Opposite()))
+                        if (!otherCorner.GetVisibleEdges().HasDirection(direction.Opposite()))
                             continue;
 
                         float dist = vertex.DistanceSquaredTo(iOtherVert);
-                        if (closestDistance < 0 || dist < closestDistance)
+                        if (closestDist < 0 || dist < closestDist)
                         {
+                            closestDist = dist;
                             iClosestOther = iOtherVert;
-                            closestDistance = dist;
                         }
                     }
                 }
 
-                if (closestDistance < 0)
-                    continue; // No other vertices were found on this axis.
+                // No other vertex was found.
+                if (closestDist < 0)
+                    continue;
 
                 HashSet<Vector3> otherExausted = exaustedTangentsMap.GetOrAdd(iClosestOther, k => new());
                 otherExausted.Add(-tangent);
 
-                Edge result = new Edge(vertex, iClosestOther);
+                Edge result = new Edge(iVert, iClosestOther);
                 if (drawDebug)
                 {
-                    QuadMeshExtensions.DebugDrawEdge(edge, duration: 4);
+                    QuadMeshExtensions.DebugDrawEdge(result, duration: 4);
                 }
                 edgeConsumer(result);
-
-                //Color color = Color.FromHsv(Random.Shared.NextSingle(), 1, 1);
-
-                //QuadMeshExtensions.EdgeTraversalConfig config = new()
-                //{
-                //    Mesh = mesh,
-                //    Tangent = tangent,
-                //    EndCondition = vec => corners.ContainsKey(vec.RoundInt()),
-                //    OnConditionMet = cornerCache.Add,
-                //};
-
-                //if (drawDebug)
-                //{
-                //    config.DrawDebug = true;
-                //    config.DebugColor = color;
-                //}
-
-                //QuadMeshExtensions.TraverseEdgeLine(ref config, vertex);
-
-                //if (cornerCache.Count == 0)
-                //    continue;
-
-                //// Get closest value
-                //Vector3 lineEnd = default;
-                //float minDist = float.MaxValue;
-                //foreach (Vector3 vec in cornerCache)
-                //{
-                //    float dist = vec.DistanceSquaredTo(vertex);
-                //    if (dist < minDist)
-                //    {
-                //        lineEnd = vec;
-                //        minDist = dist;
-                //    }
-                //}
-
-                //Edge result = new Edge(vertex, lineEnd);
-                //if (drawDebug)
-                //{
-                //    QuadMeshExtensions.DebugDrawEdge(edge, duration: 5);
-                //}
-                //edgeConsumer(result);
             }
         }
     }
@@ -155,8 +106,21 @@ public static class EdgeModelGenerator
     public static void CreateEdgeModel(SimpleQuadMesh mesh, IVoxelView<PuzzlemakerVoxel> world, Action<Quad> quadComsumer, float length = 1, bool drawDebug = false)
     {
         List<Edge> edges = new List<Edge>(mesh.Quads.Length);
-
         IdentifyEdges(mesh, world, edges.Add, drawDebug);
+
+        foreach (var edge in edges)
+        {
+            Vector3 normal1 = VoxelCorners.GetCornerNormal(world, edge.Vert1.RoundInt());
+            Vector3 normal2 = VoxelCorners.GetCornerNormal(world, edge.Vert2.RoundInt());
+
+            Quad quad = new Quad(edge.Vert1, edge.Vert2, edge.Vert2 + normal2 * length, edge.Vert1 + normal1 * length);
+            quad.Normal1 = normal1;
+            quad.Normal2 = normal2;
+            quad.Normal3 = normal2;
+            quad.Normal4 = normal1;
+
+            quadComsumer(quad);
+        }
     }
 
     private static void DrawDebugVector(Vector3 start, Vector3 end, Color? color = null, float duration = 0)

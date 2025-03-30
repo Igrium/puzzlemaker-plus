@@ -183,11 +183,6 @@ public static class QuadMeshExtensions
 
                     TraverseEdgeLine(ref config, otherVert, saturatedVerts);
                 }
-                else
-                {
-                    if (config.DrawDebug)
-                        DebugDrawEdge(edge, Colors.OrangeRed, .5f);
-                }
             }
         }
     }
