@@ -18,14 +18,14 @@ public struct Edge
         Vert2 = pos2;
     }
 
-    public override string ToString()
+    public readonly override string ToString()
     {
         return $"Edge[Pos1: {Vert1}, Pos2: {Vert2}]";
     }
 
-    public override bool Equals([NotNullWhen(true)] object? obj) => obj is Edge && this.Equals((Edge)obj);
+    public readonly override bool Equals([NotNullWhen(true)] object? obj) => obj is Edge && this.Equals((Edge)obj);
 
-    public bool Contains(Vector3 vertex)
+    public readonly bool Contains(Vector3 vertex)
     {
         return vertex == Vert1 || vertex == Vert2;
     }
@@ -36,7 +36,7 @@ public struct Edge
     /// <param name="vertex">The vertex in question.</param>
     /// <returns>The tangent.</returns>
     /// <exception cref="ArgumentException">If the supplied vertex is not in this edge.</exception>
-    public Vector3 GetTangent(Vector3 vertex)
+    public readonly Vector3 GetTangent(Vector3 vertex)
     {
         if (vertex == Vert1)
         {
@@ -52,12 +52,26 @@ public struct Edge
         }
     }
 
-    public bool Equals(Edge other)
+    public readonly bool Equals(Edge other)
     {
         return (this.Vert1 == other.Vert1 && this.Vert2 == other.Vert2) || (this.Vert1 == other.Vert2 && this.Vert2 == other.Vert1);
     }
 
-    public override int GetHashCode()
+    public readonly bool IsCollinear(Edge other)
+    {
+        return AreCollinear(this.Vert1, this.Vert2, other.Vert1) && AreCollinear(this.Vert1, this.Vert2, other.Vert2);
+    }
+
+    private static bool AreCollinear(Vector3 a, Vector3 b, Vector3 c)
+    {
+        Vector3 ab = b - a;
+        Vector3 ac = c - a;
+
+        Vector3 cross = ab.Cross(ac);
+        return cross.LengthSquared() < float.Epsilon;
+    }
+
+    public readonly override int GetHashCode()
     {
         return Vert1.GetHashCode() + Vert2.GetHashCode(); // Commutitive property
     }

@@ -177,7 +177,7 @@ public record struct Quad
     /// Construct an array with all these quad's edges.
     /// </summary>
     /// <returns>Array with all edges.</returns>
-    public Edge[] GetEdges()
+    public readonly Edge[] GetEdges()
     {
         Edge[] array = new Edge[4];
         array[0] = new Edge(Vert1, Vert2);
@@ -187,7 +187,7 @@ public record struct Quad
         return array;
     }
 
-    public void GetEdges(out Edge edge1, out Edge edge2, out Edge edge3, out Edge edge4)
+    public readonly void GetEdges(out Edge edge1, out Edge edge2, out Edge edge3, out Edge edge4)
     {
         edge1 = new Edge(Vert1, Vert2);
         edge2 = new Edge(Vert2, Vert3);
@@ -195,7 +195,7 @@ public record struct Quad
         edge4 = new Edge(Vert4, Vert1);
     }
 
-    public Edge GetEdge(int index)
+    public readonly Edge GetEdge(int index)
     {
         switch (index)
         {
@@ -203,17 +203,41 @@ public record struct Quad
             case 1: return new Edge(Vert2, Vert3);
             case 2: return new Edge(Vert3, Vert4);
             case 3: return new Edge(Vert4, Vert1);
-            default: throw new IndexOutOfRangeException("invalid edge " + index);
+            default: throw new IndexOutOfRangeException("invalid edge: " + index);
+        }
+    }
+
+    public readonly Vector3 GetEdgeTangent(int index)
+    {
+        switch (index)
+        {
+            case 0: return (Vert2 - Vert1).Normalized();
+            case 1: return (Vert3 - Vert2).Normalized();
+            case 2: return (Vert4 - Vert3).Normalized();
+            case 3: return (Vert1 - Vert4).Normalized();
+            default: throw new IndexOutOfRangeException("invalid edge: " + index);
+        }
+    }
+
+    public readonly (int, int) GetEdgeVertIndices(int index)
+    {
+        switch (index)
+        {
+            case 0: return (0, 1);
+            case 1: return (1, 2);
+            case 2: return (2, 3);
+            case 3: return (3, 0);
+            default: throw new IndexOutOfRangeException("invalid edge: " + index);
         }
     }
 
     public Vector3 this[int i]
     {
-        get => GetVertex(i);
+        readonly get => GetVertex(i);
         set => SetVertex(i, in value);
     }
 
-    public Vector3 GetVertex(int index)
+    public readonly Vector3 GetVertex(int index)
     {
         switch (index)
         {
@@ -237,7 +261,7 @@ public record struct Quad
         }
     }
 
-    public Vector3 GetNormal(int index)
+    public readonly Vector3 GetNormal(int index)
     {
         switch (index)
         {
@@ -261,7 +285,7 @@ public record struct Quad
         }
     }
 
-    public Vector2 GetUV(int index)
+    public readonly Vector2 GetUV(int index)
     {
         switch (index)
         {
@@ -283,6 +307,18 @@ public record struct Quad
             case 3: UV4 = value; break;
             default: throw new IndexOutOfRangeException("invalid vertex " + index);
         }
+    }
+
+    public readonly Vector3 GetUniformVertNormal(int index)
+    {
+        Vector3 vert = this[index];
+        Vector3 prev = this[(index + 4 - 1) % 4];
+        Vector3 next = this[(index + 4 + 1) % 4];
+
+        Vector3 tanPrev = (vert - prev).Normalized();
+        Vector3 tanNext = (vert - next).Normalized();
+
+        return (tanPrev + tanNext).Normalized();
     }
 
     public static Quad operator +(Quad quad, in Vector3 vec)

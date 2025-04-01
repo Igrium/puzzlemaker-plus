@@ -94,13 +94,29 @@ public static class VoxelCorners
 
         DirectionFlags edgeDirections = default;
 
+        Vector3I pos = Vector3I.Zero;
+        for (pos.Z = -1; pos.Z < 1; pos.Z++)
+        {
+            for (pos.Y = -1; pos.Y < 1; pos.Y++)
+            {
+                for (pos.X = -1; pos.X < 1; pos.X++)
+                {
+                    if (!corner.HasVoxel(pos))
+                    {
+                        Vector3 center = pos + new Vector3(.5f, .5f, .5f);
+                        result += center;
+                    }
+                }
+            }
+        }
+
         // Exteremly simplified meshing algorithm to approximate desired normal
         for (int axis = 0; axis < 3; axis++)
         {
             Array.Fill(mask, default);
             int uAxis = (axis + 1) % 3;
             int vAxis = (axis + 2) % 3;
-            Vector3I pos = Vector3I.Zero;
+            pos = Vector3I.Zero;
 
             Vector3I normal = Vector3I.Zero;
             normal[axis] = -1;
@@ -121,12 +137,12 @@ public static class VoxelCorners
 
                     if (current && !compare)
                     {
-                        result += normal;
+                        //result += normal;
                         mask[index] = 1;
                     }
                     else if (!current && compare)
                     {
-                        result -= normal;
+                        //result -= normal;
                         mask[index] = 1;
                     }
                     index++;

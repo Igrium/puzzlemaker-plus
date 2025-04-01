@@ -172,26 +172,6 @@ internal static class VectorExtensions
             axis = default;
             return false;
         }
-        //if (vec.X == other.X)
-        //{
-        //    axis = 0;
-        //    return true;
-        //}
-        //else if (vec.Y == other.Y)
-        //{
-        //    axis = 1;
-        //    return true;
-        //}
-        //else if (vec.Z == other.Z)
-        //{
-        //    axis = 2;
-        //    return true;
-        //}
-        //else
-        //{
-        //    axis = default;
-        //    return false;
-        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
