@@ -109,51 +109,54 @@ public static class EdgeModelGenerator
         IdentifyEdges(mesh, world, edges.Add, drawDebug);
 
         // Shit complexity, but the sample size is like 5
-        foreach (var quad in mesh.Quads)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                var (index1, index2) = quad.GetEdgeVertIndices(i);
-                Edge edge = new Edge(quad[index1], quad[index2]);
-
-                if (!edges.Any(e => e.IsCollinear(edge)))
-                    continue;
-
-                Vector3 faceNormal = -quad.ComputeFaceNormal();
-
-                Vector3 normal1 = (faceNormal + quad.GetUniformVertNormal(index1)).Normalized();
-                Vector3 normal2 = (faceNormal + quad.GetUniformVertNormal(index2)).Normalized();
-
-                Quad face = new Quad()
-                {
-                    Vert1 = edge.Vert1,
-                    Vert2 = edge.Vert2,
-                    Vert3 = edge.Vert2 + normal2 * length,
-                    Vert4 = edge.Vert1 + normal1 * length,
-
-                    Normal1 = normal1,
-                    Normal2 = normal2,
-                    Normal3 = normal2,
-                    Normal4 = normal1
-                };
-
-                quadConsumer(face);
-            }
-        }
-
-        //foreach (var edge in edges)
+        //foreach (var quad in mesh.Quads)
         //{
-        //    Vector3 normal1 = VoxelCorners.GetCornerNormal(world, edge.Vert1.RoundInt());
-        //    Vector3 normal2 = VoxelCorners.GetCornerNormal(world, edge.Vert2.RoundInt());
+        //    for (int i = 0; i < 4; i++)
+        //    {
+        //        var (index1, index2) = quad.GetEdgeVertIndices(i);
+        //        Edge edge = new Edge(quad[index1], quad[index2]);
 
-        //    Quad quad = new Quad(edge.Vert1, edge.Vert2, edge.Vert2 + normal2 * length, edge.Vert1 + normal1 * length);
-        //    quad.Normal1 = normal1;
-        //    quad.Normal2 = normal2;
-        //    quad.Normal3 = normal2;
-        //    quad.Normal4 = normal1;
+        //        if (!edges.Any(e => e.IsCollinear(edge)))
+        //            continue;
 
-        //    quadConsumer(quad);
+        //        Vector3 faceNormal = -quad.ComputeFaceNormal();
+
+        //        Vector3 normal1 = (faceNormal + quad.GetUniformVertNormal(index1)).Normalized();
+        //        Vector3 normal2 = (faceNormal + quad.GetUniformVertNormal(index2)).Normalized();
+
+        //        Quad face = new Quad()
+        //        {
+        //            Vert1 = edge.Vert1,
+        //            Vert2 = edge.Vert2,
+        //            Vert3 = edge.Vert2 + normal2 * length,
+        //            Vert4 = edge.Vert1 + normal1 * length,
+
+        //            Normal1 = normal1,
+        //            Normal2 = normal2,
+        //            Normal3 = normal2,
+        //            Normal4 = normal1
+        //        };
+
+        //        quadConsumer(face);
+        //    }
         //}
+
+        foreach (var edge in edges)
+        {
+            Vector3[] normals1 = VoxelCorners.GetExtrusionNormals(world, edge.Vert1.RoundInt());
+            Vector3[] normals2 = VoxelCorners.GetExtrusionNormals(world, edge.Vert2.RoundInt());
+
+            Vector3 normal1 = normals1.FirstOrDefault(Vector3.Zero);
+            Vector3 normal2 = normals2.FirstOrDefault(Vector3.Zero);
+
+            Quad quad = new Quad(edge.Vert1, edge.Vert2, edge.Vert2 + normal2 * length, edge.Vert1 + normal1 * length);
+            quad.Normal1 = normal1;
+            quad.Normal2 = normal2;
+            quad.Normal3 = normal2;
+            quad.Normal4 = normal1;
+
+            quadConsumer(quad);
+        }
     }
 
     private static void DrawDebugVector(Vector3 start, Vector3 end, Color? color = null, float duration = 0)

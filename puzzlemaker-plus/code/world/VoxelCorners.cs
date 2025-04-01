@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.Linq;
 using Godot;
 
 namespace PuzzlemakerPlus;
@@ -26,23 +28,43 @@ public static class VoxelCorners
     public static VoxelCorner GetCorner(IVoxelView<PuzzlemakerVoxel> view, Vector3I vertex)
     {
         VoxelCorner corner = VoxelCorner.None;
-        if (view.GetVoxel(vertex + new Vector3I(-1, -1, -1)).IsOpen)
-            corner |= VoxelCorner.NNN;
-        if (view.GetVoxel(vertex + new Vector3I(-1, -1, 0)).IsOpen)
-            corner |= VoxelCorner.NNP;
-        if (view.GetVoxel(vertex + new Vector3I(0, -1, -1)).IsOpen)
-            corner |= VoxelCorner.PNN;
-        if (view.GetVoxel(vertex + new Vector3I(0, -1, 0)).IsOpen)
-            corner |= VoxelCorner.PNP;
-        if (view.GetVoxel(vertex + new Vector3I(-1, 0, -1)).IsOpen)
-            corner |= VoxelCorner.NPN;
-        if (view.GetVoxel(vertex + new Vector3I(-1, 0, 0)).IsOpen)
-            corner |= VoxelCorner.NPP;
-        if (view.GetVoxel(vertex + new Vector3I(0, 0, -1)).IsOpen)
-            corner |= VoxelCorner.PPN;
-        if (view.GetVoxel(vertex + new Vector3I(0, 0, 0)).IsOpen)
-            corner |= VoxelCorner.PPP;
+        Vector3I pos = default;
+        
+        for (pos.X = -1; pos.X < 1; pos.X++)
+        {
+            for (pos.Y = -1; pos.Y < 1; pos.Y++)
+            {
+                for (pos.Z = -1; pos.Z < 1; pos.Z++)
+                {
+                    if (view.GetVoxel(vertex + pos).IsOpen)
+                        corner |= Single(pos);
+                }
+            }
+        }
+
         return corner;
+    }
+
+    public static VoxelCorner Single(Vector3I voxel)
+    {
+        if (voxel == new Vector3I(-1, -1, -1))
+            return VoxelCorner.NNN;
+        else if (voxel == new Vector3I(-1, -1, 0))
+            return VoxelCorner.NNP;
+        else if (voxel == new Vector3I(0, -1, -1))
+            return VoxelCorner.PNN;
+        else if (voxel == new Vector3I(0, -1, 0))
+            return VoxelCorner.PNP;
+        else if (voxel == new Vector3I(-1, 0, -1))
+            return VoxelCorner.NPN;
+        else if (voxel == new Vector3I(-1, 0, 0))
+            return VoxelCorner.NPP;
+        else if (voxel == new Vector3I(0, 0, -1))
+            return VoxelCorner.PPN;
+        else if (voxel == new Vector3I(0, 0, 0))
+            return VoxelCorner.PPP;
+        else
+            return VoxelCorner.None;
     }
 
     public static bool HasVoxel(this VoxelCorner corner, Vector3I voxel)
@@ -67,13 +89,31 @@ public static class VoxelCorners
             return false;
     }
 
+    public static IEnumerable<Vector3I> GetVoxels(this VoxelCorner corner)
+    {
+        Vector3I pos = default;
+        for (pos.X = -1; pos.X < 1; pos.X++)
+        {
+            for (pos.Y = -1; pos.Y < 1; pos.Y++)
+            {
+                for (pos.X = -1; pos.X < 1; pos.X++)
+                {
+                    if (HasVoxel(corner, pos))
+                        yield return pos;
+                }
+            }
+        }
+    }
+
     private static Vector3[] _normalLut;
     private static DirectionFlags[] _visibleEdgesLut;
+    private static Vector3[][] _extrusionNormalLut;
 
     static VoxelCorners()
     {
         _normalLut = new Vector3[byte.MaxValue];
         _visibleEdgesLut = new DirectionFlags[byte.MaxValue];
+        _extrusionNormalLut = new Vector3[byte.MaxValue][];
 
         List<Quad> quadCache = new List<Quad>(12);
         for (byte i = 0; i < byte.MaxValue; i++)
@@ -81,7 +121,9 @@ public static class VoxelCorners
             quadCache.Clear();
             VoxelCorner corner = (VoxelCorner)i;
             (_normalLut[i], _visibleEdgesLut[i]) = ComputeCornerData(corner);
+            _extrusionNormalLut[i] = ComputeExtrusionNormals(corner).ToArray();
         }
+
     }
 
     private static (Vector3, DirectionFlags) ComputeCornerData(VoxelCorner corner)
@@ -177,6 +219,98 @@ public static class VoxelCorners
     public static Vector3 GetCornerNormal(IVoxelView<PuzzlemakerVoxel> world, Vector3I vertex)
     {
         return _normalLut[(byte)GetCorner(world, vertex)];
+    }
+
+    private static void FloodFill(ref VoxelCorner filled, VoxelCorner corner, Vector3I pos)
+    {
+        filled |= Single(pos);
+        Vector3I opposite = new Vector3I(pos.X == -1 ? 0 : -1, pos.Y == -1 ? 0 : -1, pos.Z == -1 ? 0 : -1);
+
+        Vector3I compare = new Vector3I(opposite.X, pos.Y, pos.Z);
+        if (corner.HasVoxel(compare) && !filled.HasVoxel(compare))
+            FloodFill(ref filled, corner, compare);
+
+        compare = new Vector3I(pos.X, opposite.Y, pos.Z);
+        if (corner.HasVoxel(compare) && !filled.HasVoxel(compare))
+            FloodFill(ref filled, corner, compare);
+
+        compare = new Vector3I(pos.X, pos.Y, opposite.Z);
+        if (corner.HasVoxel(compare) && !filled.HasVoxel(compare))
+            FloodFill(ref filled, corner, compare);
+    }
+
+    private static IEnumerable<Vector3> ComputeExtrusionNormals(VoxelCorner corner)
+    {
+        VoxelCorner saturatedVoxels = VoxelCorner.None;
+
+        Vector3I pos = default;
+        for (pos.X = -1; pos.X < 1; pos.X++)
+        {
+            for (pos.Y = -1; pos.Y < 1; pos.Y++)
+            {
+                for (pos.Z = -1; pos.Z < 1; pos.Z++)
+                {
+                    if (corner.HasVoxel(pos) && !saturatedVoxels.HasVoxel(pos))
+                    {
+                        VoxelCorner filled = VoxelCorner.None;
+                        FloodFill(ref filled, corner, pos);
+
+                        if (filled == VoxelCorner.None)
+                            continue;
+
+                        saturatedVoxels |= filled;
+                        yield return GetCornerNormal(filled);
+                    }
+                }
+            }
+        }
+
+
+        //Vector3I pos = default;
+        //for (pos.X = -1; pos.X < 1; pos.X++)
+        //{
+        //    for (pos.Y = -1; pos.Y < 1; pos.Y++)
+        //    {
+        //        for (pos.Z = -1; pos.Z < 1; pos.Z++)
+        //        {
+        //            Vector3I opposite = new Vector3I(pos.X == -1 ? 0 : -1, pos.Y == -1 ? 0 : -1, pos.Z == -1 ? 0 : -1);
+
+        //            if (corner.HasVoxel(pos))
+        //            {
+        //                // If all connecting voxels match each other, we have a corner.
+        //                if (!corner.HasVoxel(new Vector3I(opposite.X, pos.Y, pos.Z))
+        //                    && !corner.HasVoxel(new Vector3I(pos.X, opposite.Y, pos.Z))
+        //                    && !corner.HasVoxel(new Vector3I(pos.X, pos.Y, opposite.Z)))
+        //                {
+        //                    Vector3 center = pos + new Vector3(0.5f, 0.5f, 0.5f);
+        //                    yield return -center.Normalized();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                // If all connecting voxels match each other, we have a corner.
+        //                if (corner.HasVoxel(new Vector3I(opposite.X, pos.Y, pos.Z))
+        //                    && !corner.HasVoxel(new Vector3I(pos.X, opposite.Y, pos.Z))
+        //                    && !corner.HasVoxel(new Vector3I(pos.X, pos.Y, opposite.Z)))
+        //                {
+        //                    Vector3 center = pos + new Vector3(0.5f, 0.5f, 0.5f);
+        //                    yield return center.Normalized();
+        //                }
+        //            }
+
+        //        }
+        //    }
+        //}
+    }
+
+    public static Vector3[] GetExtrusionNormals(this VoxelCorner corner)
+    {
+        return _extrusionNormalLut[(byte)corner];
+    }
+
+    public static Vector3[] GetExtrusionNormals(IVoxelView<PuzzlemakerVoxel> world, Vector3I vertex)
+    {
+        return _extrusionNormalLut[(byte)GetCorner(world, vertex)];
     }
 
     public static DirectionFlags GetVisibleEdges(this VoxelCorner corner)
