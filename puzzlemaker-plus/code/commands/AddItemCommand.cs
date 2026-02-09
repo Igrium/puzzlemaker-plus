@@ -24,7 +24,7 @@ public class AddItemCommand : ICommand
 
     public bool Execute()
     {
-        ItemType? type = PackageManager.Instance.GetItemType(_itemType);
+        ItemTypeOld? type = PackageManager.Instance.GetItemType(_itemType);
         if (type == null)
         {
             GD.PushError("Unknown item type: " + _itemType);

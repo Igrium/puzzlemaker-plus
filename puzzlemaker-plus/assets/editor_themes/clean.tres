@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EditorTheme" load_steps=7 format=3 uid="uid://c5jjtxrs7ubgs"]
+[gd_resource type="Resource" script_class="EditorTheme" format=3 uid="uid://c5jjtxrs7ubgs"]
 
 [ext_resource type="Script" uid="uid://cmwwy0evjnxl4" path="res://code/editor/EditorTheme.cs" id="1_bnrp4"]
 [ext_resource type="Material" uid="uid://cru0jqvvmp5ty" path="res://assets/materials/selection_highlight.tres" id="2_uu27t"]
@@ -16,5 +16,3 @@ albedo_texture = ExtResource("3_uu27t")
 [resource]
 script = ExtResource("1_bnrp4")
 WallTextures = Array[Material]([SubResource("StandardMaterial3D_y64lf"), SubResource("StandardMaterial3D_mlfhs")])
-FloorTextures = Array[Material]([])
-CeilingTextures = Array[Material]([])

@@ -21,9 +21,9 @@ public static class ItemClasses
         else return Type.GetType(name);
     }
 
-    public static Item CreateInstance(string typeName, ItemType itemType, PuzzlemakerProject project, string id)
+    public static Item CreateInstance(string typeName, ItemTypeOld itemTypeOld, PuzzlemakerProject project, string id)
     {
         Type type = GetItemType(typeName) ?? throw new KeyNotFoundException("Unknown item type: " + typeName);
-        return (Item?)Activator.CreateInstance(type, itemType, project, id) ?? throw new Exception("Unable to instansiate item");
+        return (Item?)Activator.CreateInstance(type, itemTypeOld, project, id) ?? throw new Exception("Unable to instansiate item");
     }
 }

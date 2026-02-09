@@ -115,7 +115,7 @@ public partial class PuzzlemakerProject : RefCounted
         JsonObject json = new JsonObject();
 
         item.WriteJson(json, options);
-        json["type"] = item.Type.ID;
+        json["type"] = item.TypeOld.ID;
         return json;
     }
 
@@ -171,10 +171,10 @@ public partial class PuzzlemakerProject : RefCounted
     /// <summary>
     /// Create an item and add it to this project.
     /// </summary>
-    /// <param name="type">Item type to instantiate.</param>
+    /// <param name="typeOld">Item type to instantiate.</param>
     /// <param name="id">ID to give it. Null for automatic ID.</param>
     /// <returns>The item, or null if there was an error stopping it from being created.</returns>
-    public Item? CreateItem(ItemType type, string? id = null)
+    public Item? CreateItem(ItemTypeOld typeOld, string? id = null)
     {
         if (id == null)
             id = GetEmptyItemID();
@@ -182,11 +182,11 @@ public partial class PuzzlemakerProject : RefCounted
         Item item;
         try
         {
-            item = type.CreateInstance(this, id);
+            item = typeOld.CreateInstance(this, id);
         }
         catch (Exception e)
         {
-            GD.PushError($"Error instantiating item {type.ID}: ", e);
+            GD.PushError($"Error instantiating item {typeOld.ID}: ", e);
             return null;
         }
 

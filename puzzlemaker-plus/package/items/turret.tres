@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ItemType" format=3 uid="uid://bxo85mqxj4w8t"]
+
+[ext_resource type="Script" uid="uid://df1p855yvk6a" path="res://code/item/ItemVariant.cs" id="1_1sm6f"]
+[ext_resource type="Script" uid="uid://t7gjfja0rmfv" path="res://code/item/ItemType.cs" id="1_b05g3"]
+[ext_resource type="Script" uid="uid://cul6k06id5e3n" path="res://code/item/ItemVariantThemeData.cs" id="2_xvmwt"]
+
+[sub_resource type="Resource" id="Resource_s2dyj"]
+script = ExtResource("2_xvmwt")
+Instance = "instances/pplus/turret.vmf"
+metadata/_custom_type_script = "uid://cul6k06id5e3n"
+
+[sub_resource type="Resource" id="Resource_8r2ry"]
+script = ExtResource("1_1sm6f")
+Themes = Array[ExtResource("2_xvmwt")]([SubResource("Resource_s2dyj")])
+EditorModel = "res://package/assets/models/turret.gltf"
+metadata/_custom_type_script = "uid://df1p855yvk6a"
+
+[resource]
+script = ExtResource("1_b05g3")
+ItemVariants = Dictionary[String, ExtResource("1_1sm6f")]({
+"standard": SubResource("Resource_8r2ry")
+})
+metadata/_custom_type_script = "uid://t7gjfja0rmfv"

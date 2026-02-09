@@ -33,7 +33,7 @@ public partial class Item : ItemPropHolder
     /// <summary>
     /// The ItemType this item is an instance of.
     /// </summary>
-    public ItemType Type { get; }
+    public ItemTypeOld TypeOld { get; }
     public PuzzlemakerProject Project { get; }
 
     /// <summary>
@@ -41,9 +41,9 @@ public partial class Item : ItemPropHolder
     /// </summary>
     public string ID { get; }
 
-    public Item(ItemType type, PuzzlemakerProject project, string id)
+    public Item(ItemTypeOld typeOld, PuzzlemakerProject project, string id)
     {
-        Type = type;
+        TypeOld = typeOld;
         Project = project;
         ID = id;
     }
@@ -111,7 +111,7 @@ public partial class Item : ItemPropHolder
     /// <summary>
     /// A shortcut getter to retrieve the current variant instance from the type.
     /// </summary>
-    public ItemVariant? ItemVariant => Type.Variants.GetValueOrDefault(_variant);
+    public ItemVariantOld? ItemVariant => TypeOld.Variants.GetValueOrDefault(_variant);
 
     /// <summary>
     /// Export this item into a VMF.
@@ -126,7 +126,7 @@ public partial class Item : ItemPropHolder
             return;
         }
 
-        ItemVariantTheme? itemTheme = variant.GetVariantTheme(theme.Name);
+        ItemVariantThemeOld? itemTheme = variant.GetVariantTheme(theme.Name);
         if (itemTheme == null)
         {
             GD.PushError($"Unable to compile item {ID}: variant does not have any theme instances.");
@@ -146,7 +146,7 @@ public partial class Item : ItemPropHolder
 
     public string[] GetVariants()
     {
-        return Type.Variants.Keys.ToArray();
+        return TypeOld.Variants.Keys.ToArray();
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public partial class Item : ItemPropHolder
     public virtual Godot.Collections.Dictionary<string, string> GetVariantDisplayNames()
     {
         Godot.Collections.Dictionary<string, string> dict = new();
-        foreach (var (id, var) in Type.Variants)
+        foreach (var (id, var) in TypeOld.Variants)
         {
             dict[id] = var.DisplayName ?? id;
         }
@@ -165,7 +165,7 @@ public partial class Item : ItemPropHolder
 
     public virtual string? GetEditorModel(string variant, string? editorTheme)
     {
-        return Type.GetEditorModel(variant, editorTheme);
+        return TypeOld.GetEditorModel(variant, editorTheme);
     }
 
     /// <summary> 
@@ -189,16 +189,16 @@ public partial class Item : ItemPropHolder
 
     public Direction GetMountDirection()
     {
-        return Type.MountDirection;
+        return TypeOld.MountDirection;
     }
 
     public Vector3 GetMountNormal()
     {
-        return Type.MountDirection.GetNormal();
+        return TypeOld.MountDirection.GetNormal();
     }
 
     public RotationMode GetRotationMode()
     {
-        return Type.RotationMode;
+        return TypeOld.RotationMode;
     }
 }

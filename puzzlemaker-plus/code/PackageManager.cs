@@ -40,14 +40,14 @@ public partial class PackageManager : Node
         _instance = this;
     }
 
-    public IDictionary<string, ItemType> ItemTypes { get; } = new ConcurrentDictionary<string, ItemType>();
+    public IDictionary<string, ItemTypeOld> ItemTypes { get; } = new ConcurrentDictionary<string, ItemTypeOld>();
 
     /// <summary>
     /// GetVoxel an item type from its ID.
     /// </summary>
     /// <param name="name">The type ID.</param>
     /// <returns>The type, or null if no type with that ID exists.</returns>
-    public ItemType? GetItemType(string name)
+    public ItemTypeOld? GetItemType(string name)
     {
         if (ItemTypes.TryGetValue(name, out var itemType))
             return itemType;
@@ -137,26 +137,26 @@ public partial class PackageManager : Node
         return Task.WhenAll(tasks);
     }
 
-    private ItemType? LoadItemType(string resourcePath)
+    private ItemTypeOld? LoadItemType(string resourcePath)
     {
         string name = Path.GetFileNameWithoutExtension(resourcePath);
         try
         {
-            ItemType itemType;
+            ItemTypeOld itemTypeOld;
             using (var stream = new FileAccessStream(resourcePath))
             {
-                itemType = JsonSerializer.Deserialize<ItemType>(stream, JsonUtils.JsonOptions) ?? throw new Exception("Item type didn't load.");
+                itemTypeOld = JsonSerializer.Deserialize<ItemTypeOld>(stream, JsonUtils.JsonOptions) ?? throw new Exception("Item type didn't load.");
             }
-            itemType.ID = name;
+            itemTypeOld.ID = name;
 
             if (ItemTypes.ContainsKey(name))
             {
                 GD.PushWarning("Duplicate item type: " + name);
             }
 
-            ItemTypes[name] = itemType;
+            ItemTypes[name] = itemTypeOld;
             GD.Print("Loaded " + resourcePath);
-            return itemType;
+            return itemTypeOld;
         }
         // Don't flood the console with stack trace if it's the package dev's fault.
         catch (JsonException e)
