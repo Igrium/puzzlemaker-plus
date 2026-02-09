@@ -1,10 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://bd3mbm0pemh78"]
+[gd_scene format=3 uid="uid://bd3mbm0pemh78"]
 
 [ext_resource type="Script" uid="uid://do1whabpgt0uc" path="res://ui/main_ui.gd" id="1_ubv51"]
 [ext_resource type="Script" uid="uid://drwyh52tujvls" path="res://ui/popup_menu_item.gd" id="2_hlo7n"]
 [ext_resource type="Script" uid="uid://0nvsysvmol76" path="res://ui/unsaved_confirmation_dialog.gd" id="4_x3h8h"]
 
-[node name="MainUi" type="Control"]
+[node name="MainUi" type="Control" unique_id=371903601]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,13 +13,13 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ubv51")
 
-[node name="FD_VMFExport" type="FileDialog" parent="."]
+[node name="FD_VMFExport" type="FileDialog" parent="." unique_id=434472357]
 title = "Export VMF File"
 access = 2
 filters = PackedStringArray("*.vmf;Valve Map Files;text/plain")
 use_native_dialog = true
 
-[node name="FD_OpenProject" type="FileDialog" parent="."]
+[node name="FD_OpenProject" type="FileDialog" parent="." unique_id=1860271770]
 title = "Open a File"
 ok_button_text = "Open"
 file_mode = 0
@@ -27,13 +27,13 @@ access = 2
 filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
 use_native_dialog = true
 
-[node name="FD_SaveProject" type="FileDialog" parent="."]
+[node name="FD_SaveProject" type="FileDialog" parent="." unique_id=1509772977]
 title = "Save Project As"
 access = 2
 filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
 use_native_dialog = true
 
-[node name="UnsavedConfirmationDialog" type="ConfirmationDialog" parent="."]
+[node name="UnsavedConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=2001318581]
 title = "Are you sure?"
 initial_position = 1
 size = Vector2i(229, 100)
@@ -41,7 +41,7 @@ force_native = true
 dialog_text = "You have unsaved changes."
 script = ExtResource("4_x3h8h")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=678942645]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -52,81 +52,81 @@ theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="MenuBar" type="MenuBar" parent="MarginContainer"]
+[node name="MenuBar" type="MenuBar" parent="MarginContainer" unique_id=1219074969]
 layout_mode = 2
 
-[node name="File" type="PopupMenu" parent="MarginContainer/MenuBar"]
+[node name="File" type="PopupMenu" parent="MarginContainer/MenuBar" unique_id=2117298100]
 
-[node name="NewProject" type="Node" parent="MarginContainer/MenuBar/File"]
+[node name="NewProject" type="Node" parent="MarginContainer/MenuBar/File" unique_id=1386516707]
 script = ExtResource("2_hlo7n")
 text = "New"
 accelerator = &"new_project"
 
-[node name="OpenProject" type="Node" parent="MarginContainer/MenuBar/File"]
+[node name="OpenProject" type="Node" parent="MarginContainer/MenuBar/File" unique_id=1975420809]
 script = ExtResource("2_hlo7n")
 text = "Open"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="Save" type="Node" parent="MarginContainer/MenuBar/File"]
+[node name="Save" type="Node" parent="MarginContainer/MenuBar/File" unique_id=991297339]
 script = ExtResource("2_hlo7n")
 text = "Save"
 accelerator = &"save"
 separator = true
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="SaveAs" type="Node" parent="MarginContainer/MenuBar/File"]
+[node name="SaveAs" type="Node" parent="MarginContainer/MenuBar/File" unique_id=1751386700]
 script = ExtResource("2_hlo7n")
 text = "Save As"
 accelerator = &"save_as"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="ExportVMF" type="Node" parent="MarginContainer/MenuBar/File"]
+[node name="ExportVMF" type="Node" parent="MarginContainer/MenuBar/File" unique_id=254354653]
 script = ExtResource("2_hlo7n")
 text = "Export VMF"
 separator = true
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="Edit" type="PopupMenu" parent="MarginContainer/MenuBar"]
+[node name="Edit" type="PopupMenu" parent="MarginContainer/MenuBar" unique_id=1483421154]
 
-[node name="Undo" type="Node" parent="MarginContainer/MenuBar/Edit"]
+[node name="Undo" type="Node" parent="MarginContainer/MenuBar/Edit" unique_id=1125561944]
 script = ExtResource("2_hlo7n")
 text = "Undo"
 accelerator = &"ui_undo"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="Redo" type="Node" parent="MarginContainer/MenuBar/Edit"]
+[node name="Redo" type="Node" parent="MarginContainer/MenuBar/Edit" unique_id=1909422376]
 script = ExtResource("2_hlo7n")
 text = "Redo"
 accelerator = &"ui_redo"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="Selection" type="PopupMenu" parent="MarginContainer/MenuBar"]
+[node name="Selection" type="PopupMenu" parent="MarginContainer/MenuBar" unique_id=692074859]
 
-[node name="SelectAll" type="Node" parent="MarginContainer/MenuBar/Selection"]
+[node name="SelectAll" type="Node" parent="MarginContainer/MenuBar/Selection" unique_id=1775320903]
 script = ExtResource("2_hlo7n")
 text = "Select All"
 accelerator = &"select_all"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="SelectAllItems" type="Node" parent="MarginContainer/MenuBar/Selection"]
+[node name="SelectAllItems" type="Node" parent="MarginContainer/MenuBar/Selection" unique_id=1245125316]
 script = ExtResource("2_hlo7n")
 text = "Select All Items"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="SelectNone" type="Node" parent="MarginContainer/MenuBar/Selection"]
+[node name="SelectNone" type="Node" parent="MarginContainer/MenuBar/Selection" unique_id=1801338834]
 script = ExtResource("2_hlo7n")
 text = "Deselect All"
 accelerator = &"select_none"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="Debug" type="PopupMenu" parent="MarginContainer/MenuBar"]
+[node name="Debug" type="PopupMenu" parent="MarginContainer/MenuBar" unique_id=1697692119]
 
-[node name="AddTestItem" type="Node" parent="MarginContainer/MenuBar/Debug"]
+[node name="AddTestItem" type="Node" parent="MarginContainer/MenuBar/Debug" unique_id=1039408573]
 script = ExtResource("2_hlo7n")
 text = "Add Test Item"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[node name="ExportGLTF" type="Node" parent="MarginContainer/MenuBar/Debug"]
+[node name="ExportGLTF" type="Node" parent="MarginContainer/MenuBar/Debug" unique_id=26447613]
 script = ExtResource("2_hlo7n")
 text = "Export Scene as glTF"
 metadata/_custom_type_script = "uid://drwyh52tujvls"

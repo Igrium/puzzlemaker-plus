@@ -36,7 +36,7 @@ public partial class WorldMeshGenerator : RefCounted
     public ArrayMesh? Mesh { get; set; }
     public ConcavePolygonShape3D? Collision { get; set; }
 
-    public bool GenerateEdgeModel = true;
+    public bool GenerateEdgeModel = false;
 
     public ArrayMesh? EdgeMesh;
 

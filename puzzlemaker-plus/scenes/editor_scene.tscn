@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c8opainusd88g"]
+[gd_scene format=3 uid="uid://c8opainusd88g"]
 
 [ext_resource type="Script" uid="uid://cfslk1m0s33iy" path="res://addons/orbit-controls/orbit-controls.gd" id="1_mrhsp"]
 [ext_resource type="Script" uid="uid://bo1578tbgptjc" path="res://scenes/editor_scene.gd" id="1_npaab"]
@@ -10,41 +10,41 @@
 [ext_resource type="Script" uid="uid://cv3rlgw4wpa47" path="res://code/editor/EditorOperations.cs" id="7_rvqb0"]
 [ext_resource type="Environment" uid="uid://bjoeovmqgcnnn" path="res://assets/default_env.tres" id="9_ew6pk"]
 
-[node name="EditorScene" type="Node3D"]
+[node name="EditorScene" type="Node3D" unique_id=2091643919]
 script = ExtResource("1_npaab")
 project_packed_scene = ExtResource("2_njtwn")
 
-[node name="OutlineOverlay" parent="." instance=ExtResource("3_mrhsp")]
+[node name="OutlineOverlay" parent="." unique_id=1814838037 instance=ExtResource("3_mrhsp")]
 
-[node name="MainCamera" type="Camera3D" parent="."]
+[node name="MainCamera" type="Camera3D" parent="." unique_id=2122514066]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.5971)
 fov = 20.0
 
-[node name="OrbitControls" type="Node3D" parent="."]
+[node name="OrbitControls" type="Node3D" parent="." unique_id=2106599313]
 script = ExtResource("1_mrhsp")
 _camera = NodePath("../MainCamera")
 max_distance = 500.0
 
-[node name="SelectionHighlight" type="MeshInstance3D" parent="."]
+[node name="SelectionHighlight" type="MeshInstance3D" parent="." unique_id=31671884]
 script = ExtResource("3_5atrf")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=474003230]
 
-[node name="MainUi" parent="CanvasLayer" instance=ExtResource("5_4nlwk")]
+[node name="MainUi" parent="CanvasLayer" unique_id=1071709418 instance=ExtResource("5_4nlwk")]
 anchors_preset = 10
 anchor_bottom = 0.0
 grow_vertical = 1
 
-[node name="KeyListener" type="Node" parent="."]
+[node name="KeyListener" type="Node" parent="." unique_id=447749325]
 script = ExtResource("6_2xfd1")
 
-[node name="Operations" type="Node" parent="KeyListener"]
+[node name="Operations" type="Node" parent="KeyListener" unique_id=1952305260]
 script = ExtResource("7_rvqb0")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=799883449]
 environment = ExtResource("9_ew6pk")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=91447480]
 transform = Transform3D(0.479191, 0.675153, -0.560842, -0.562295, 0.72678, 0.394481, 0.673944, 0.126327, 0.727902, 0, 0, 0)
 light_energy = 0.5
 light_indirect_energy = 0.0

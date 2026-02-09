@@ -7,6 +7,9 @@ func _export_scene_gltf() -> void:
 	
 	gltf_document_save.write_to_filesystem(gltf_state_save, "user://scene.gltf")
 	print("Wrote gltf to " + ProjectSettings.globalize_path("user://scene.gltf"))
+	
+	
+	
 
 
 func _on_new_project_pressed() -> void:
