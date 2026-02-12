@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using Godot;
 
 namespace PuzzlemakerPlus.Items;
 
@@ -50,7 +48,7 @@ public sealed class ItemType
     /// <param name="props">The item's current properties.</param>
     /// <param name="theme">The current level's theme.</param>
     /// <returns>An enumerable of all the legal instances in order.</returns>
-    public IEnumerable<InstanceType> GetLegalInstances(IReadOnlyDictionary<string, object> props, string theme)
+    public IEnumerable<InstanceType> GetLegalInstances(IReadOnlyDictionary<string, string> props, string theme)
     {
         List<InstanceType> themed = new(Instances.Count);
         List<InstanceType> conditioned = new(Instances.Count);
@@ -72,12 +70,12 @@ public sealed class ItemType
         return themed.Concat(conditioned).Concat(generic);
     }
     
-    public InstanceType? GetInstance(IReadOnlyDictionary<string, object> props, string theme)
+    public InstanceType? GetInstance(IReadOnlyDictionary<string, string> props, string theme)
     {
         return GetLegalInstances(props, theme).FirstOrDefault();
     }
 
-    public string? GetEditorModel(IReadOnlyDictionary<string, object> props, string theme)
+    public string? GetEditorModel(IReadOnlyDictionary<string, string> props, string theme)
     {
         return GetLegalInstances(props, theme)
             .FirstOrDefault(i => string.IsNullOrWhiteSpace(i.EditorModel))
@@ -92,7 +90,7 @@ public sealed class ItemType
         /// </summary>
         public string Editor { get; set; } = string.Empty;
 
-        public object? DefaultValue { get; set; }
+        public string? DefaultValue { get; set; }
         public string? DisplayName { get; set; }
         
         /// <summary>
@@ -133,7 +131,7 @@ public sealed class ItemType
         /// </summary>
         public string? EditorModel { get; set; }
 
-        public bool IsLegal(IReadOnlyDictionary<string, object> props, string theme)
+        public bool IsLegal(IReadOnlyDictionary<string, string> props, string theme)
         {
             if (Themes.Any() && !Themes.Contains(theme))
                 return false;
@@ -150,10 +148,10 @@ public sealed class ItemType
     public sealed class InstanceCondition
     {
         public string PropName { get; set; } = "";
-        public object? ExpectedValue { get; set; }
+        public string? ExpectedValue { get; set; }
         public bool Invert { get; set; } = false;
 
-        public bool Test(IReadOnlyDictionary<string, object> props)
+        public bool Test(IReadOnlyDictionary<string, string> props)
         {
             bool result = false;
             if (props.TryGetValue(PropName, out var prop) && prop == ExpectedValue)

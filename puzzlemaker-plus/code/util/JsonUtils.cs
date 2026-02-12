@@ -11,7 +11,7 @@ public static class JsonUtils
     /// <summary>
     /// Json serializer options with converters added for godot classes.
     /// </summary>
-    public static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions();
+    public static readonly JsonSerializerOptions JsonOptions = new();
 
     static JsonUtils()
     {

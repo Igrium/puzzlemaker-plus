@@ -102,7 +102,7 @@ public partial class PuzzlemakerProject : RefCounted
         if (PackageManager.Instance.ItemTypes.TryGetValue(typeStr, out var itemType))
         {
             Item item = itemType.CreateInstance(this, id);
-            item.ReadJson(json, options);
+            item.FromJson(json, options);
             AddItem(item);
             return item;
         }
@@ -114,7 +114,7 @@ public partial class PuzzlemakerProject : RefCounted
     {
         JsonObject json = new JsonObject();
 
-        item.WriteJson(json, options);
+        item.FromJson(json, options);
         json["type"] = item.Type.ID;
         return json;
     }
