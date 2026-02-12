@@ -130,9 +130,9 @@ public partial class PuzzlemakerProject : RefCounted
         if (item.Project != this)
             throw new ArgumentException("Item belongs to the wrong project.", nameof(item));
 
-        if (!_items.TryAdd(item.ID, item))
+        if (!_items.TryAdd(item.Id, item))
         {
-            GD.PushWarning($"An item already exists with ID {item.ID}. Ignoring.");
+            GD.PushWarning($"An item already exists with ID {item.Id}. Ignoring.");
             return false;
         }
         EmitSignal(SignalName.ItemAdded, item);
@@ -146,7 +146,7 @@ public partial class PuzzlemakerProject : RefCounted
     /// <returns>If the item was found.</returns>
     public virtual bool RemoveItem(Item item)
     {
-        if (_items.Remove(item.ID))
+        if (_items.Remove(item.Id))
         {
             EmitSignal(SignalName.ItemRemoved, item);
             return true;

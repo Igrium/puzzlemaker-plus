@@ -1,71 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using Godot;
 
 namespace PuzzlemakerPlus.Items;
 
-[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-public class ItemProp : Attribute
+public partial class ItemProp<[MustBeVariant] T> : RefCounted
 {
-    public string? DisplayName { get; }
-    public string? DisplayType { get; }
+    public T Value { get; set; } = default!;
 
-    public ItemProp(string? displayName = null, string? displayType = null)
+    /// <summary>
+    /// Get a UI editor that will edit this value. Value should be directly modified.
+    /// </summary>
+    /// <returns></returns>
+    public Control? GetEditor()
     {
-        DisplayName = displayName;
-        DisplayType = displayType;
+        return null;
     }
 
-    public string GetDisplayName(PropertyInfo propertyInfo)
+    /// <summary>
+    /// Called when this prop is being compiled.
+    /// </summary>
+    /// <param name="item">Item being compiled</param>
+    public void Compile(Item item)
     {
-        return DisplayName ?? propertyInfo.Name;
-    }
-
-    public string GetDisplayType(PropertyInfo propertyInfo)
-    {
-        if (DisplayType != null)
-            return DisplayType;
-
-        Type propType = propertyInfo.PropertyType;
-        if (IsIntegerType(propType))
-        {
-            return "Int";
-        }
-        else if (IsFloatType(propType))
-        {
-            return "Float";
-        }
-        else
-        {
-            return propType.Name;
-        }
-    }
-
-    public static string? GetPropertyDisplayName(PropertyInfo? propertyInfo)
-    {
-        return propertyInfo?.GetCustomAttribute<ItemProp>()?.GetDisplayName(propertyInfo);
-    }
-
-    public static string? GetPropertyDisplayType(PropertyInfo? propertyInfo)
-    {
-        return propertyInfo?.GetCustomAttribute<ItemProp>()?.GetDisplayType(propertyInfo);
-    }
-
-
-    private static bool IsIntegerType(Type type)
-    {
-        return type == typeof(sbyte) || type == typeof(byte) ||
-               type == typeof(short) || type == typeof(ushort) ||
-               type == typeof(int) || type == typeof(uint) ||
-               type == typeof(long) || type == typeof(ulong);
-    }
-
-    private static bool IsFloatType(Type type)
-    {
-        return type == typeof(float) || type == typeof(double) || type == typeof(decimal);
+        
     }
 }

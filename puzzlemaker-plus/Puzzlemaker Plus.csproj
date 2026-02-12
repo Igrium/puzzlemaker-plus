@@ -9,4 +9,7 @@
     <ProjectReference Include="../lib/VMFLib/VMFLib.csproj" />
 	<PackageReference Include="gdUnit4.api" Version="4.2.*" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="code\package\" />
+  </ItemGroup>
 </Project>

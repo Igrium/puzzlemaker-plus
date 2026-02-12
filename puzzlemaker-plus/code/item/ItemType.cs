@@ -1,7 +1,6 @@
-﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text.Json.Serialization;
 using Godot;
 
 namespace PuzzlemakerPlus.Items;
@@ -15,10 +14,12 @@ public enum RotationMode
     /// This item can't rotate.
     /// </summary>
     Fixed,
+
     /// <summary>
     /// This item can rotate in 90-degree increments.
     /// </summary>
     Quarter,
+
     /// <summary>
     /// This item can rotate any amount.
     /// </summary>
@@ -33,113 +34,133 @@ public sealed class ItemType
 {
     public string ItemClassName { get; set; } = "Item";
 
-    [JsonIgnore]
-    public string ID { get; internal set; } = "";
-
-    public Dictionary<string, ItemVariant> Variants { get; set; } = new Dictionary<string, ItemVariant>();
-
     /// <summary>
-    /// The direction from which the item mounts to the wall or floor. Defaults to Direction.Down
+    /// All the properties this item will have, along with their types
     /// </summary>
-    public Direction MountDirection { get; set; } = Direction.Down;
+    public Dictionary<string, PropDef> PropNames { get; } = new();
 
     public RotationMode RotationMode { get; set; } = RotationMode.Fixed;
+    
+    public List<InstanceType> Instances { get; } = new();
 
     /// <summary>
-    /// GetVoxel the editor model to use for a given variant and theme.
+    /// Find all the instances that this item may use for the given condition, in order of priority.
+    /// Priority is first determined by matching theme, then by matching condition, and finally by definition order.
     /// </summary>
-    /// <param name="variant">Variant ID to use.</param>
-    /// <param name="editorTheme">Editor theme to use. Null to use default theme.</param>
-    /// <returns>The model path; null if there is no variant by that name or no model was declared.</returns>
-    public string? GetEditorModel(string variant, string? editorTheme)
+    /// <param name="props">The item's current properties.</param>
+    /// <param name="theme">The current level's theme.</param>
+    /// <returns>An enumerable of all the legal instances in order.</returns>
+    public IEnumerable<InstanceType> GetLegalInstances(IReadOnlyDictionary<string, object> props, string theme)
     {
-        if (Variants.TryGetValue(variant, out var v))
-            return v.GetEditorModel(editorTheme);
-        else
-            return null;
+        List<InstanceType> themed = new(Instances.Count);
+        List<InstanceType> conditioned = new(Instances.Count);
+        List<InstanceType> generic = new(Instances.Count);
+
+        foreach (var instance in Instances)
+        {
+            if (!instance.IsLegal(props, theme))
+                continue;
+            
+            if (instance.Themes.Any())
+                themed.Add(instance);
+            else if (instance.Conditions.Any())
+                conditioned.Add(instance);
+            else
+                generic.Add(instance);
+        }
+        
+        return themed.Concat(conditioned).Concat(generic);
+    }
+    
+    public InstanceType? GetInstance(IReadOnlyDictionary<string, object> props, string theme)
+    {
+        return GetLegalInstances(props, theme).FirstOrDefault();
+    }
+
+    public string? GetEditorModel(IReadOnlyDictionary<string, object> props, string theme)
+    {
+        return GetLegalInstances(props, theme)
+            .FirstOrDefault(i => string.IsNullOrWhiteSpace(i.EditorModel))
+            ?.EditorModel;
+        
+    }
+    
+    public sealed class PropDef
+    {
+        /// <summary>
+        /// A reference to the PackedScene used for this instance's GUI editor.
+        /// </summary>
+        public string Editor { get; set; } = string.Empty;
+
+        public object? DefaultValue { get; set; }
+        public string? DisplayName { get; set; }
+        
+        /// <summary>
+        /// If set, apply this property as an instance param  
+        /// </summary>
+        public bool InstanceParam { get; set; } = false;
+        
+        /// <summary>
+        /// If this is an enum, the available options to choose from.
+        /// </summary>
+        public List<object> Options { get; } = new();
     }
 
     /// <summary>
-    /// Create an empty instance of this item type.
+    /// The required data to compile an instance into the level
     /// </summary>
-    /// <param name="project">Project to create the instance in. Does not actually add it to the project.</param>
-    /// <param name="id">Item ID to assign.</param>
-    /// <returns>The new item instance.</returns>
-    /// <remarks>This could throw all sorts of exceptions. Best to try and catch them.</remarks>
-    public Item CreateInstance(PuzzlemakerProject project, string id)
+    public sealed class InstanceType
     {
-        return ItemClasses.CreateInstance(ItemClassName, this, project, id);
+        /// <summary>
+        /// The VMF path to use.
+        /// </summary>
+        public string VMFPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// This instance can be used when these themes are active. If empty, valid for all themes.
+        /// </summary>
+        /// <remarks>Instance types with the current theme explicitly specified are prioritized over generic instances.</remarks>
+        public List<string> Themes { get; } = new();
+
+        /// <summary>
+        /// The conditions for this instance to be triggered.
+        /// </summary>
+        public List<InstanceCondition> Conditions { get; } = new();
+
+        /// <summary>
+        /// The model to use in the editor when this instance is used.
+        /// If unset, use a lower-priority instance.
+        /// </summary>
+        public string? EditorModel { get; set; }
+
+        public bool IsLegal(IReadOnlyDictionary<string, object> props, string theme)
+        {
+            if (Themes.Any() && !Themes.Contains(theme))
+                return false;
+            foreach (var cond in Conditions)
+            {
+                if (!cond.Test(props))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+    public sealed class InstanceCondition
+    {
+        public string PropName { get; set; } = "";
+        public object? ExpectedValue { get; set; }
+        public bool Invert { get; set; } = false;
+
+        public bool Test(IReadOnlyDictionary<string, object> props)
+        {
+            bool result = false;
+            if (props.TryGetValue(PropName, out var prop) && prop == ExpectedValue)
+                result = true;
+
+            return Invert ? !result : result;
+        }
     }
 }
 
-public sealed class ItemVariant
-{
-    /// <summary>
-    /// The display name of the variant. If unset, fallback to the variant ID.
-    /// </summary>
-    public string? DisplayName { get; set; }
-
-    public List<ItemVariantTheme> Themes { get; set; } = new();
-
-    [JsonConverter(typeof(DictOrValueJsonConverter<string>))]
-    public Dictionary<string, string> EditorModel { get; set; } = new();
-
-    /// <summary>
-    /// GetVoxel the editor model to use for a given theme.
-    /// </summary>
-    /// <param name="editorTheme">Editor theme to use. Null to use the default model.</param>
-    /// <returns>The model, or null if the package dev messed up and no model was found.</returns>
-    public string? GetEditorModel(string? editorTheme)
-    {
-        if (editorTheme == null) editorTheme = "default";
-
-        if (EditorModel.TryGetValue(editorTheme, out var model))
-            return model;
-        else if (EditorModel.TryGetValue("default", out model))
-            return model;
-        else return null;
-    }
-
-    /// <summary>
-    /// Return the variant theme that should be used for a given level theme.
-    /// First all the variant themes are checked for one with a matching name, in order of least names to most names.
-    /// If one isn't found, than the first theme in the list is selected.
-    /// </summary>
-    /// <param name="levelTheme">Level theme name.</param>
-    /// <returns>The variant theme, or null if the package dev messed up and didn't specify any theme entries.</returns>
-    public ItemVariantTheme? GetVariantTheme(string levelTheme)
-    {
-        var theme = Themes.Where(theme => theme.Names.Contains(levelTheme)).OrderBy(theme => theme.Names.Count()).FirstOrDefault();
-        return theme ?? Themes.FirstOrDefault();
-    }
-}
-
-public sealed class ItemVariantTheme
-{
-    /// <summary>
-    /// The theme name(s) that this variant will apply to. Leave empty to signify that this should be used for all level themes.
-    /// </summary>
-    public List<string> Names { get; } = new();
-
-    /// <summary>
-    /// The VMF instance that this theme variant will use.
-    /// </summary>
-    public string Instance { get; set; } = "";
-
-    /// <summary>
-    /// A list of voxels where antlines can spawn, relative to the object's root.
-    /// The face of the voxel in question corrisponds to the attachment direction of the item.
-    /// </summary>
-    public List<Vector3I> AntlineConnections { get; } = new();
-
-    /// <summary>
-    /// A list of custom assets that need to be packed for this item.
-    /// Will be searched in the editor's mounted resources, prepended with "res://package/game/"
-    /// </summary>
-    public List<string> Assets { get; } = new();
-
-    /// <summary>
-    /// A list of transitive instance dependencies that the instance relies on.
-    /// </summary>
-    public List<string> Dependencies { get; } = new();
-}
