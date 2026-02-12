@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Godot;
+using PuzzlemakerPlus.VMF;
+using VMFLib.VClass;
 
 namespace PuzzlemakerPlus.Items;
 
-public partial class Item(ItemType type) : RefCounted
+[GlobalClass]
+public partial class Item(ItemType type, PuzzlemakerProject project) : RefCounted
 {
 
     [Signal]
@@ -22,6 +25,14 @@ public partial class Item(ItemType type) : RefCounted
     public delegate void RefreshModelEventHandler();
 
     public ItemType Type { get; } = type;
+
+    /// <summary>
+    /// The project this item is part of.
+    /// </summary>
+    public PuzzlemakerProject Project { get; } = project;
+    
+    // TODO: Can we use a bidirectional dict for this instead?
+    public string Id { get; set; } = "";
     
     // public ItemType Type { get; set; } = new ItemType();
 
@@ -56,7 +67,15 @@ public partial class Item(ItemType type) : RefCounted
         get => Quaternion.FromEuler(Rotation);
         set => Rotation = value.GetEuler();
     }
-    
+
+    public RotationMode GetRotationMode() => Type.RotationMode;
+
+    public string? GetEditorModel()
+    {
+        // TODO: Theme
+        return Type.GetEditorModel(Properties);
+    }
+        
     private readonly Dictionary<string, string> _properties = new();
     
     public IReadOnlyDictionary<string, string> Properties => _properties;
@@ -106,7 +125,6 @@ public partial class Item(ItemType type) : RefCounted
     /// <param name="options">Json serialization options to use</param>
     public virtual void FromJson(JsonObject json, JsonSerializerOptions options)
     {
-        // TODO: Load type
         if (json.TryGetPropertyValue("pos", out var posNode))
             _position = posNode.Deserialize<Vector3>(options);
 
@@ -133,7 +151,7 @@ public partial class Item(ItemType type) : RefCounted
     /// <param name="options">Json serialization options to use</param>
     public virtual void ToJson(JsonObject json, JsonSerializerOptions options)
     {
-        // TODO: Save type
+        json["type"] = Type.Id;
         json["pos"] = JsonSerializer.Serialize(_position, options);
         json["rot"] = JsonSerializer.Serialize(_rotation, options);
 
@@ -156,4 +174,20 @@ public partial class Item(ItemType type) : RefCounted
         }
     }
     
+    public virtual void Export(VMFBuilder builder, LevelTheme theme)
+    {
+        var instance = type.GetInstance(Properties, theme.Name);
+        if (instance == null)
+        {
+            GD.PushError($"Unable to find a valid instance for item {Id} with theme {theme.Name}");
+            return;
+        }
+
+        FuncInstance ent = new FuncInstance();
+        ent.Origin = Position.ToSourceVector().AsVec3();
+        ent.Angles = Rotation.ToSourceEuler().ToDegrees().AsVec3();
+
+        ent.VMFFile = instance.VMFPath;
+        builder.Entities.Add(ent);
+    }
 }

@@ -1,13 +1,10 @@
 {
-	"variants": {
-		"standard": {
+	"rotation_mode": 2,
+	"instances": [
+		{
+			"vmf_path": "instances/pplus/turret.vmf",
 			"editor_model": "res://package/assets/models/turret.gltf",
-			"themes": [
-				{
-					"instance": "instances/pplus/turret.vmf"
-				}
-			]
+			"themes": []
 		}
-	},
-	"rotation_mode": 2
+	]
 }

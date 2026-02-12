@@ -147,7 +147,7 @@ public partial class PackageManager : Node
             {
                 itemType = JsonSerializer.Deserialize<ItemType>(stream, JsonUtils.JsonOptions) ?? throw new Exception("Item type didn't load.");
             }
-            itemType.ID = name;
+            itemType.Id = name;
 
             if (ItemTypes.ContainsKey(name))
             {

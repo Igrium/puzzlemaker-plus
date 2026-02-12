@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace PuzzlemakerPlus.Items;
 
@@ -31,6 +32,9 @@ public enum RotationMode
 public sealed class ItemType
 {
     public string ItemClassName { get; set; } = "Item";
+    
+    [JsonIgnore]
+    public string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// All the properties this item will have, along with their types
@@ -39,7 +43,7 @@ public sealed class ItemType
 
     public RotationMode RotationMode { get; set; } = RotationMode.Fixed;
     
-    public List<InstanceType> Instances { get; } = new();
+    public List<InstanceType> Instances { get; set; } = new();
 
     /// <summary>
     /// Find all the instances that this item may use for the given condition, in order of priority.
@@ -48,7 +52,7 @@ public sealed class ItemType
     /// <param name="props">The item's current properties.</param>
     /// <param name="theme">The current level's theme.</param>
     /// <returns>An enumerable of all the legal instances in order.</returns>
-    public IEnumerable<InstanceType> GetLegalInstances(IReadOnlyDictionary<string, string> props, string theme)
+    public IEnumerable<InstanceType> GetLegalInstances(IReadOnlyDictionary<string, string> props, string? theme = null)
     {
         List<InstanceType> themed = new(Instances.Count);
         List<InstanceType> conditioned = new(Instances.Count);
@@ -75,10 +79,10 @@ public sealed class ItemType
         return GetLegalInstances(props, theme).FirstOrDefault();
     }
 
-    public string? GetEditorModel(IReadOnlyDictionary<string, string> props, string theme)
+    public string? GetEditorModel(IReadOnlyDictionary<string, string> props, string? theme = null)
     {
         return GetLegalInstances(props, theme)
-            .FirstOrDefault(i => string.IsNullOrWhiteSpace(i.EditorModel))
+            .FirstOrDefault(i => !string.IsNullOrWhiteSpace(i.EditorModel))
             ?.EditorModel;
         
     }
@@ -101,7 +105,7 @@ public sealed class ItemType
         /// <summary>
         /// If this is an enum, the available options to choose from.
         /// </summary>
-        public List<object> Options { get; } = new();
+        public List<string> Options { get; set; } = new();
     }
 
     /// <summary>
@@ -118,7 +122,7 @@ public sealed class ItemType
         /// This instance can be used when these themes are active. If empty, valid for all themes.
         /// </summary>
         /// <remarks>Instance types with the current theme explicitly specified are prioritized over generic instances.</remarks>
-        public List<string> Themes { get; } = new();
+        public List<string> Themes { get; set; } = new();
 
         /// <summary>
         /// The conditions for this instance to be triggered.
@@ -131,9 +135,9 @@ public sealed class ItemType
         /// </summary>
         public string? EditorModel { get; set; }
 
-        public bool IsLegal(IReadOnlyDictionary<string, string> props, string theme)
+        public bool IsLegal(IReadOnlyDictionary<string, string> props, string? theme = null)
         {
-            if (Themes.Any() && !Themes.Contains(theme))
+            if (theme != null && Themes.Any() && !Themes.Contains(theme))
                 return false;
             foreach (var cond in Conditions)
             {

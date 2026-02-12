@@ -101,7 +101,8 @@ public partial class PuzzlemakerProject : RefCounted
 
         if (PackageManager.Instance.ItemTypes.TryGetValue(typeStr, out var itemType))
         {
-            Item item = itemType.CreateInstance(this, id);
+            // Item item = Items.
+            var item = itemType.CreateInstance(this, id);
             item.FromJson(json, options);
             AddItem(item);
             return item;
@@ -114,8 +115,8 @@ public partial class PuzzlemakerProject : RefCounted
     {
         JsonObject json = new JsonObject();
 
-        item.FromJson(json, options);
-        json["type"] = item.Type.ID;
+        item.ToJson(json, options);
+        json["type"] = item.Type.Id;
         return json;
     }
 
@@ -186,7 +187,7 @@ public partial class PuzzlemakerProject : RefCounted
         }
         catch (Exception e)
         {
-            GD.PushError($"Error instantiating item {type.ID}: ", e);
+            GD.PushError($"Error instantiating item {type.Id}: ", e);
             return null;
         }
 

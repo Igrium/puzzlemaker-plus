@@ -32,5 +32,5 @@ func _clear():
 func _create_item_renderer(item: Item) -> ItemRenderer:
 	var scene: ItemRenderer = item_renderer_scene.instantiate()
 	scene.set_item(item)
-	scene.name = item.ID
+	scene.name = item.Id
 	return scene

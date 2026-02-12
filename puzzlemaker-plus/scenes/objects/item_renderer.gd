@@ -60,6 +60,8 @@ func update_model():
 	if (model_name != null):
 		print("Loading model " + model_name)
 		model = PackageManager.LoadModel(model_name)
+	else:
+		push_error("No editor model found for item " + item.Id)
 	
 	if (model == null):
 		model = placeholder_mesh
