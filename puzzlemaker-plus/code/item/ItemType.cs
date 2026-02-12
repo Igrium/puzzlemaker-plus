@@ -35,6 +35,11 @@ public sealed class ItemType
     
     [JsonIgnore]
     public string Id { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// The thumbnail to render in the item selector. 
+    /// </summary>
+    public string Thumbnail { get; set; } = string.Empty;
 
     /// <summary>
     /// All the properties this item will have, along with their types
@@ -44,6 +49,13 @@ public sealed class ItemType
     public RotationMode RotationMode { get; set; } = RotationMode.Fixed;
     
     public List<InstanceType> Instances { get; set; } = new();
+
+    public ItemTypeProxy Proxy { get; init; }
+
+    public ItemType()
+    {
+        Proxy = new(this);
+    }
 
     /// <summary>
     /// Find all the instances that this item may use for the given condition, in order of priority.

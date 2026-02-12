@@ -22,7 +22,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Editor="*res://code/EditorState.cs"
-PackageManager="*res://code/PackageManager.cs"
+Packages="*res://code/PackageManager.cs"
 
 [display]
 

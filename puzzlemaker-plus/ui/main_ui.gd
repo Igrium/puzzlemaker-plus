@@ -9,9 +9,6 @@ func _export_scene_gltf() -> void:
 	print("Wrote gltf to " + ProjectSettings.globalize_path("user://scene.gltf"))
 	
 	
-	
-
-
 func _on_new_project_pressed() -> void:
 	$UnsavedConfirmationDialog.confirm_saved(Editor.NewProject)
 

@@ -3,10 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Resources;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 using PuzzlemakerPlus.Items;
@@ -54,6 +51,26 @@ public partial class PackageManager : Node
         else return null;
     }
 
+    public ItemTypeProxy? GetTypeProxy(string name)
+    {
+        return GetItemType(name)?.Proxy;
+    }
+    
+    /// <summary>
+    /// Get a godot dictionary of all the item types for use in GDScript
+    /// </summary>
+    /// <returns>Copy of item types dict</returns>
+    public Godot.Collections.Dictionary<string, ItemTypeProxy> GetItemTypes()
+    {
+        var dict = new Godot.Collections.Dictionary<string, ItemTypeProxy>();
+        foreach (var (name, type) in ItemTypes)
+        {
+            dict[name] = type.Proxy;
+        }
+
+        return dict;
+    }
+
     private bool _initialPackageLoad = true;
 
     public override void _Ready()
@@ -62,7 +79,7 @@ public partial class PackageManager : Node
         LoadPackages();
     }
 
-    public async void LoadPackages()
+    public async Task LoadPackages()
     {
         bool initial = _initialPackageLoad;
 
@@ -119,7 +136,7 @@ public partial class PackageManager : Node
         return dir.GetFiles()
             .Where(filename => filename.EndsWith(".zip") || filename.EndsWith(".pck"))
             .Concat(dir.GetDirectories())
-            .Select(filename => path.PathJoin(filename))
+            .Select(path.PathJoin)
             .ToArray();
     }
 
@@ -131,7 +148,7 @@ public partial class PackageManager : Node
         List<Task> tasks = new(resources.Length);
         foreach (string resource in resources)
         {
-            Task.Run(() => LoadItemType(ItemsPath.PathJoin(resource)));
+            tasks.Add(Task.Run(() => LoadItemType(ItemsPath.PathJoin(resource))));
         }
 
         return Task.WhenAll(tasks);
@@ -221,7 +238,8 @@ public partial class PackageManager : Node
         }
 
         // We need to dispose of the node manually because it's not being put in a scene.
-        using (Node node = gltfDocument.GenerateScene(gltfState))
+        using Node node = gltfDocument.GenerateScene(gltfState);
+        
         {
             PackedScene scene = new PackedScene();
             error = scene.Pack(node);
@@ -233,4 +251,5 @@ public partial class PackageManager : Node
             return scene;
         }
     }
+
 }

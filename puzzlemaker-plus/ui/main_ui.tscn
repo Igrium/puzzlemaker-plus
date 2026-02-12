@@ -2,51 +2,18 @@
 
 [ext_resource type="Script" uid="uid://do1whabpgt0uc" path="res://ui/main_ui.gd" id="1_ubv51"]
 [ext_resource type="Script" uid="uid://drwyh52tujvls" path="res://ui/popup_menu_item.gd" id="2_hlo7n"]
+[ext_resource type="PackedScene" uid="uid://dooe0tiiny35f" path="res://ui/item_browser.tscn" id="4_qry5k"]
 [ext_resource type="Script" uid="uid://0nvsysvmol76" path="res://ui/unsaved_confirmation_dialog.gd" id="4_x3h8h"]
 
-[node name="MainUi" type="Control" unique_id=371903601]
-layout_mode = 3
+[node name="VBoxContainer" type="VBoxContainer" unique_id=916244058]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_ubv51")
-
-[node name="FD_VMFExport" type="FileDialog" parent="." unique_id=434472357]
-title = "Export VMF File"
-access = 2
-filters = PackedStringArray("*.vmf;Valve Map Files;text/plain")
-use_native_dialog = true
-
-[node name="FD_OpenProject" type="FileDialog" parent="." unique_id=1860271770]
-title = "Open a File"
-ok_button_text = "Open"
-file_mode = 0
-access = 2
-filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
-use_native_dialog = true
-
-[node name="FD_SaveProject" type="FileDialog" parent="." unique_id=1509772977]
-title = "Save Project As"
-access = 2
-filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
-use_native_dialog = true
-
-[node name="UnsavedConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=2001318581]
-title = "Are you sure?"
-initial_position = 1
-size = Vector2i(229, 100)
-force_native = true
-dialog_text = "You have unsaved changes."
-script = ExtResource("4_x3h8h")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=678942645]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 31.0
-grow_horizontal = 2
+layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
@@ -131,20 +98,57 @@ script = ExtResource("2_hlo7n")
 text = "Export Scene as glTF"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
-[connection signal="file_selected" from="FD_VMFExport" to="." method="_on_fd_vmf_export_file_selected"]
-[connection signal="file_selected" from="FD_OpenProject" to="." method="_on_fd_open_project_file_selected"]
-[connection signal="file_selected" from="FD_SaveProject" to="." method="_on_fd_save_project_file_selected"]
-[connection signal="pressed" from="MarginContainer/MenuBar/File/NewProject" to="." method="_on_new_project_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/File/OpenProject" to="." method="_on_open_project_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/File/Save" to="." method="_on_save_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/File/SaveAs" to="." method="_on_save_as_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/File/ExportVMF" to="." method="_on_export_vmf_pressed"]
-[connection signal="index_pressed" from="MarginContainer/MenuBar/Edit" to="." method="_on_edit_index_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/Edit/Undo" to="." method="_on_undo_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/Edit/Redo" to="." method="_on_redo_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAll" to="." method="_on_select_all_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAllItems" to="." method="_on_select_all_items_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectNone" to="." method="_on_select_none_pressed"]
-[connection signal="index_pressed" from="MarginContainer/MenuBar/Debug" to="." method="_on_debug_index_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/Debug/AddTestItem" to="." method="_on_add_test_item_pressed"]
-[connection signal="pressed" from="MarginContainer/MenuBar/Debug/ExportGLTF" to="." method="_on_export_gltf_pressed"]
+[node name="ItemBrowser" parent="." unique_id=1090066385 instance=ExtResource("4_qry5k")]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+
+[node name="MainUi" type="Control" parent="." unique_id=371903601]
+layout_mode = 2
+script = ExtResource("1_ubv51")
+
+[node name="FD_VMFExport" type="FileDialog" parent="MainUi" unique_id=434472357]
+title = "Export VMF File"
+access = 2
+filters = PackedStringArray("*.vmf;Valve Map Files;text/plain")
+use_native_dialog = true
+
+[node name="FD_OpenProject" type="FileDialog" parent="MainUi" unique_id=1860271770]
+title = "Open a File"
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
+use_native_dialog = true
+
+[node name="FD_SaveProject" type="FileDialog" parent="MainUi" unique_id=1509772977]
+title = "Save Project As"
+access = 2
+filters = PackedStringArray("*.puzzle,*.json;Puzzle Files;application/json")
+use_native_dialog = true
+
+[node name="UnsavedConfirmationDialog" type="ConfirmationDialog" parent="MainUi" unique_id=2001318581]
+title = "Are you sure?"
+initial_position = 1
+size = Vector2i(229, 100)
+force_native = true
+dialog_text = "You have unsaved changes."
+script = ExtResource("4_x3h8h")
+
+[connection signal="pressed" from="MarginContainer/MenuBar/File/NewProject" to="MainUi" method="_on_new_project_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/OpenProject" to="MainUi" method="_on_open_project_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/Save" to="MainUi" method="_on_save_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/SaveAs" to="MainUi" method="_on_save_as_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/File/ExportVMF" to="MainUi" method="_on_export_vmf_pressed"]
+[connection signal="index_pressed" from="MarginContainer/MenuBar/Edit" to="MainUi" method="_on_edit_index_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Edit/Undo" to="MainUi" method="_on_undo_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Edit/Redo" to="MainUi" method="_on_redo_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAll" to="MainUi" method="_on_select_all_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAllItems" to="MainUi" method="_on_select_all_items_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectNone" to="MainUi" method="_on_select_none_pressed"]
+[connection signal="index_pressed" from="MarginContainer/MenuBar/Debug" to="MainUi" method="_on_debug_index_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Debug/AddTestItem" to="MainUi" method="_on_add_test_item_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Debug/ExportGLTF" to="MainUi" method="_on_export_gltf_pressed"]
+[connection signal="file_selected" from="MainUi/FD_VMFExport" to="MainUi" method="_on_fd_vmf_export_file_selected"]
+[connection signal="file_selected" from="MainUi/FD_OpenProject" to="MainUi" method="_on_fd_open_project_file_selected"]
+[connection signal="file_selected" from="MainUi/FD_SaveProject" to="MainUi" method="_on_fd_save_project_file_selected"]

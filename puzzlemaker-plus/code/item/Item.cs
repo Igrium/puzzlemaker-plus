@@ -26,6 +26,8 @@ public partial class Item(ItemType type, PuzzlemakerProject project) : RefCounte
 
     public ItemType Type { get; } = type;
 
+    public ItemTypeProxy TypeProxy => Type.Proxy;
+
     /// <summary>
     /// The project this item is part of.
     /// </summary>

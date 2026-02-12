@@ -1,0 +1,11 @@
+{
+	"rotation_mode": 0,
+	"thumbnail": "res://package/icons/portal_button.png",
+	"instances": [
+		{
+			"vmf_path": "instances/pplus/buttonweight.vmf",
+			"editor_model": "res://package/assets/models/buttonweight.gltf",
+			"themes": []
+		}
+	]
+}

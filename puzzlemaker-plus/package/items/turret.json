@@ -1,5 +1,6 @@
 {
 	"rotation_mode": 2,
+	"thumbnail": "res://package/icons/turret.png",
 	"instances": [
 		{
 			"vmf_path": "instances/pplus/turret.vmf",
