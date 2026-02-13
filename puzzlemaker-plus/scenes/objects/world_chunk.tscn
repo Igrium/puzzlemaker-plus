@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://1hw75nbgk46w"]
+[gd_scene format=3 uid="uid://1hw75nbgk46w"]
 
 [ext_resource type="Script" uid="uid://uyhs32ly8yyl" path="res://scenes/objects/world_chunk.gd" id="1_y567v"]
 [ext_resource type="Material" uid="uid://dyvgr7q35fcid" path="res://assets/materials/clean/grid_light.tres" id="2_fx1e0"]
@@ -9,22 +9,22 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ieh8h"]
 cull_mode = 2
 
-[node name="WorldChunk" type="MeshInstance3D" node_paths=PackedStringArray("edge_mesh_instace")]
+[node name="WorldChunk" type="MeshInstance3D" unique_id=1610742592 node_paths=PackedStringArray("edge_mesh_instace")]
 script = ExtResource("1_y567v")
 material = ExtResource("2_fx1e0")
 edge_mesh_instace = NodePath("EdgeModel")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Area3D" type="Area3D" parent="." unique_id=1264469267]
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=968334728]
 shape = SubResource("ConcavePolygonShape3D_ca28r")
 
-[node name="DebugVisualizer" type="Node" parent="."]
+[node name="DebugVisualizer" type="Node" parent="." unique_id=970144010]
 script = ExtResource("3_te8ta")
 
-[node name="EdgeModel" type="MeshInstance3D" parent="."]
+[node name="EdgeModel" type="MeshInstance3D" parent="." unique_id=943385664]
 material_override = SubResource("StandardMaterial3D_ieh8h")
 
 [connection signal="input_event" from="Area3D" to="." method="_on_input_event"]
