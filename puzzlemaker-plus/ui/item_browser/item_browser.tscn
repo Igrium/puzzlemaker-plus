@@ -18,23 +18,3 @@ horizontal_scroll_mode = 0
 [node name="GridContainer" type="GridContainer" parent="ScrollContainer" unique_id=2042600551]
 layout_mode = 2
 columns = 2
-
-[node name="Turret" type="TextureRect" parent="ScrollContainer/GridContainer" unique_id=843300582]
-custom_minimum_size = Vector2(96, 96)
-layout_mode = 2
-expand_mode = 1
-
-[node name="Turret2" type="TextureRect" parent="ScrollContainer/GridContainer" unique_id=51407433]
-custom_minimum_size = Vector2(96, 96)
-layout_mode = 2
-expand_mode = 1
-
-[node name="Turret3" type="TextureRect" parent="ScrollContainer/GridContainer" unique_id=1336580385]
-custom_minimum_size = Vector2(96, 96)
-layout_mode = 2
-expand_mode = 1
-
-[node name="Turret4" type="TextureRect" parent="ScrollContainer/GridContainer" unique_id=25451130]
-custom_minimum_size = Vector2(96, 96)
-layout_mode = 2
-expand_mode = 1

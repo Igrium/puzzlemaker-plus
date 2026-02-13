@@ -15,7 +15,8 @@ func _on_packages_reloaded(_initial: bool):
 		if !thumb:
 			continue
 		
-		var rect = TextureRect.new()
+		var rect = ItemIcon.new()
+		rect.item_type = item
 		rect.texture = thumb
 		rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		rect.custom_minimum_size = Vector2(96, 96)

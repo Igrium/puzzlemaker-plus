@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://b620it6yaouek"]
 
-[ext_resource type="PackedScene" uid="uid://ckh72tqdd5ga6" path="res://package/assets/models/turret.gltf" id="1_cr1pm"]
 [ext_resource type="Script" uid="uid://clh21xc7g67m" path="res://ui/item_browser/item_init.gd" id="1_hmm7b"]
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_udjbm"]
@@ -25,7 +24,7 @@ size = Vector2i(192, 192)
 transform = Transform3D(-0.09549835, -0.5810013, 0.8082808, -2.4990651e-08, 0.811992, 0.5836688, -0.9954298, 0.055739447, -0.077543855, 0, 0, 0)
 
 [node name="CameraRoot" type="Node3D" parent="SubViewport" unique_id=1079025296]
-transform = Transform3D(0.9486445, -0.1375238, 0.28488773, 1.21474075e-08, 0.9005615, 0.43472812, -0.31634453, -0.41240236, 0.8543128, 0, 1.1384395, 0)
+transform = Transform3D(0.9486445, -0.13752384, 0.28488773, 1.21474075e-08, 0.9005615, 0.43472812, -0.31634453, -0.41240233, 0.8543128, 0, 1.1384395, 0)
 
 [node name="Camera3D" type="Camera3D" parent="SubViewport/CameraRoot" unique_id=2123725279]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.9399607)
@@ -37,9 +36,7 @@ size = 3.524
 environment = SubResource("Environment_cr1pm")
 
 [node name="Subject" type="Node3D" parent="SubViewport" unique_id=862627481]
-
-[node name="sentry_qc" parent="SubViewport/Subject" unique_id=1816105276 instance=ExtResource("1_cr1pm")]
-transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
+transform = Transform3D(0.99989146, -0.010361557, 0.010471209, 0.010471209, 0.9998903, -0.010471784, -0.010361557, 0.010580293, 0.9998903, 0, 0, 0)
 
 [node name="Raycast" type="RayCast3D" parent="." unique_id=260027277]
 collision_mask = 255

@@ -1,3 +1,4 @@
+using System.Linq;
 using Godot;
 
 namespace PuzzlemakerPlus.Items;
@@ -22,5 +23,9 @@ public partial class ItemTypeProxy(ItemType type) : RefCounted
         get => type.RotationMode;
         set => type.RotationMode = value;
     }
-    
+
+    public string? GetPreviewModel()
+    {
+        return type.Instances.FirstOrDefault(i => !string.IsNullOrWhiteSpace(i.EditorModel))?.EditorModel;
+    }
 }

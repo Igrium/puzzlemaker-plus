@@ -2,9 +2,7 @@ extends Sprite2D
 
 class_name ItemInit
 
-signal completed(success: bool, pos: Vector3)
-
-var ItemType: ItemTypeProxy
+var item_type: ItemTypeProxy
 
 func _process(delta: float) -> void:
 	$SubViewport/Subject.rotate(Vector3(0, 1, 0), delta)
@@ -23,11 +21,18 @@ func _process(delta: float) -> void:
 	$Raycast.force_raycast_update()
 	
 	if $Raycast.is_colliding():
-		completed.emit(true, $Raycast.get_collision_point())
+		Editor.AddPlacementItem(item_type, $Raycast.get_collision_point())
+		queue_free()
 	pass
+
+func update_model():
+	var model_name := item_type.GetPreviewModel()
+	if model_name:
+		var model := Packages.LoadModel(model_name) as PackedScene
+		$SubViewport/Subject.add_child(model.instantiate())
 
 func _input(event: InputEvent) -> void:
 	var e := event as InputEventMouseButton
-	if e and e.button_index == 0 and !e.pressed:
-		completed.emit(false, Vector3(0,0,0))
+	if e and e.button_index == 1 and !e.pressed:
+		queue_free()
 	

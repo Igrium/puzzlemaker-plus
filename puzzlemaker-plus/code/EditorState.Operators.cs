@@ -74,12 +74,13 @@ public partial class EditorState
         return CommandStack.Execute(new AddItemCommand(itemType, position));
     }
 
-    public Item? AddPlacementItem(ItemTypeProxy itemType)
+    public Item? AddPlacementItem(ItemTypeProxy itemType, Vector3 position)
     {
         Item? item = Project.CreateItem(itemType.Type, addToLevel: false);
         if (item != null)
         {
             item.PlacementMode = true;
+            item.Position = position;
             Project.AddItem(item);
         }
         return item;
