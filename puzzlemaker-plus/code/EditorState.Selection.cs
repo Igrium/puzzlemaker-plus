@@ -262,6 +262,17 @@ public partial class EditorState
         EmitUpdatedSelectedItems();
     }
 
+    public void SelectItems(IEnumerable<Item> items, bool expand = false)
+    {
+        if (!expand)
+        {
+            _selectedItems.Clear();
+            SetSelection(default);
+        }
+        _selectedItems.UnionWith(items);
+        EmitUpdatedSelectedItems();
+    }
+
     public void SelectAllItems()
     {
         foreach (var item in Project.Items.Values)

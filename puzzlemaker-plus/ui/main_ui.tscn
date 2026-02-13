@@ -67,6 +67,13 @@ text = "Redo"
 accelerator = &"ui_redo"
 metadata/_custom_type_script = "uid://drwyh52tujvls"
 
+[node name="Delete" type="Node" parent="MarginContainer/MenuBar/Edit" unique_id=1607178029]
+script = ExtResource("2_hlo7n")
+text = "Delete"
+accelerator = &"delete"
+separator = true
+metadata/_custom_type_script = "uid://drwyh52tujvls"
+
 [node name="Selection" type="PopupMenu" parent="MarginContainer/MenuBar" unique_id=692074859]
 
 [node name="SelectAll" type="Node" parent="MarginContainer/MenuBar/Selection" unique_id=1775320903]
@@ -143,6 +150,7 @@ script = ExtResource("4_x3h8h")
 [connection signal="index_pressed" from="MarginContainer/MenuBar/Edit" to="MainUi" method="_on_edit_index_pressed"]
 [connection signal="pressed" from="MarginContainer/MenuBar/Edit/Undo" to="MainUi" method="_on_undo_pressed"]
 [connection signal="pressed" from="MarginContainer/MenuBar/Edit/Redo" to="MainUi" method="_on_redo_pressed"]
+[connection signal="pressed" from="MarginContainer/MenuBar/Edit/Delete" to="MainUi" method="_on_delete_pressed"]
 [connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAll" to="MainUi" method="_on_select_all_pressed"]
 [connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectAllItems" to="MainUi" method="_on_select_all_items_pressed"]
 [connection signal="pressed" from="MarginContainer/MenuBar/Selection/SelectNone" to="MainUi" method="_on_select_none_pressed"]

@@ -16,6 +16,8 @@ namespace PuzzlemakerPlus;
 [GlobalClass]
 public partial class PuzzlemakerProject : RefCounted
 {
+    public static PuzzlemakerProject Instance => EditorState.Instance.Project;
+    
     /// <summary>
     /// Called after an item has been added to the project.
     /// </summary>

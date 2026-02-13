@@ -93,4 +93,13 @@ public partial class EditorState
         else
             return CommandStack.Execute(new MoveItemCommand(item, position, rotation));
     }
+
+    public bool DeleteSelectedItems()
+    {
+        RemoveItemsCommand cmd = new(SelectedItems)
+        {
+            ReSelect = true
+        };
+        return CommandStack.Execute(cmd);
+    }
 }
