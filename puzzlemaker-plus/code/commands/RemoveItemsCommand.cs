@@ -23,7 +23,7 @@ public class RemoveItemsCommand(IEnumerable<Item> items) : ICommand
 
     public void Undo()
     {
-        foreach (var item in items)
+        foreach (var item in _items)
         {
             PuzzlemakerProject.Instance.AddItem(item);   
         }
@@ -36,7 +36,7 @@ public class RemoveItemsCommand(IEnumerable<Item> items) : ICommand
 
     public void Redo()
     {
-        foreach (var item in items)
+        foreach (var item in _items)
         {
             PuzzlemakerProject.Instance.RemoveItem(item);
         }
