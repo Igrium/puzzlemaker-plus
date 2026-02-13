@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://ck1uhkqs73kxa"]
+[gd_scene format=3 uid="uid://ck1uhkqs73kxa"]
 
 [ext_resource type="Script" uid="uid://c17h0y16qsy5d" path="res://scenes/objects/item_renderer.gd" id="1_3knih"]
 [ext_resource type="Script" uid="uid://b5q7d6mbfqo6k" path="res://scripts/collision_generator.gd" id="2_fqgpw"]
@@ -9,30 +9,30 @@
 [ext_resource type="PackedScene" uid="uid://dnbdhyqs06nck" path="res://scenes/objects/rotation_handle.tscn" id="7_opllf"]
 [ext_resource type="PackedScene" uid="uid://d2tfa8chuoqbe" path="res://scenes/objects/rotation_handle_4way.tscn" id="8_swxuq"]
 
-[node name="ItemRenderer" type="Node3D"]
+[node name="ItemRenderer" type="Node3D" unique_id=1458959483]
 script = ExtResource("1_3knih")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Area3D" type="Area3D" parent="." unique_id=1962565829]
 
-[node name="CollisionGenerator" type="Node" parent="." node_paths=PackedStringArray("base_node")]
+[node name="CollisionGenerator" type="Node" parent="." unique_id=1125675348 node_paths=PackedStringArray("base_node")]
 script = ExtResource("2_fqgpw")
 base_node = NodePath("../Area3D")
 allow_yoink = true
 metadata/_custom_type_script = "uid://b5q7d6mbfqo6k"
 
-[node name="OutlineRenderer" type="Node" parent="." node_paths=PackedStringArray("root_node")]
+[node name="OutlineRenderer" type="Node" parent="." unique_id=2080880949 node_paths=PackedStringArray("root_node")]
 script = ExtResource("7_erflv")
 root_node = NodePath("../Area3D")
 outline_material = ExtResource("4_34cp5")
 
-[node name="Draggable" type="Node" parent="."]
+[node name="Draggable" type="Node" parent="." unique_id=1131954978]
 script = ExtResource("5_13vp2")
 AutoDrop = true
 SnapIncrement = 1.0
 MountSnapOrientations = 63
 metadata/_custom_type_script = "uid://bweyhdxea83yj"
 
-[node name="RotationHandleContainer" type="Node3D" parent="."]
+[node name="RotationHandleContainer" type="Node3D" parent="." unique_id=910237923]
 visible = false
 script = ExtResource("6_kh24r")
 rotation_handle_scene = ExtResource("7_opllf")

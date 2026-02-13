@@ -184,8 +184,7 @@ public partial class Draggable : Node
             else return;
         }
 
-        RaycastResult traceResult;
-        Raycast(mousePos + _dragState.Value.Offset, out traceResult);
+        Raycast(mousePos + _dragState.Value.Offset, out var traceResult);
         if (!traceResult.Hit)
             return;
 

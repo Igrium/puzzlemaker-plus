@@ -74,8 +74,22 @@ public partial class EditorState
         return CommandStack.Execute(new AddItemCommand(itemType, position));
     }
 
+    public Item? AddPlacementItem(ItemTypeProxy itemType)
+    {
+        Item? item = Project.CreateItem(itemType.Type, addToLevel: false);
+        if (item != null)
+        {
+            item.PlacementMode = true;
+            Project.AddItem(item);
+        }
+        return item;
+    }
+
     public bool MoveItem(Item item, Vector3 position, Vector3 rotation)
     {
-        return CommandStack.Execute(new MoveItemCommand(item, position, rotation));
+        if (item.PlacementMode)
+            return CommandStack.Execute(new PlaceItemCommand(item, position));
+        else
+            return CommandStack.Execute(new MoveItemCommand(item, position, rotation));
     }
 }

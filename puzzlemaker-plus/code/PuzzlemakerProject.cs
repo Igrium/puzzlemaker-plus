@@ -174,8 +174,9 @@ public partial class PuzzlemakerProject : RefCounted
     /// </summary>
     /// <param name="type">Item type to instantiate.</param>
     /// <param name="id">ID to give it. Null for automatic ID.</param>
+    /// <param name="addToLevel">Automatically add this to the level</param>
     /// <returns>The item, or null if there was an error stopping it from being created.</returns>
-    public Item? CreateItem(ItemType type, string? id = null)
+    public Item? CreateItem(ItemType type, string? id = null, bool addToLevel=true)
     {
         if (id == null)
             id = GetEmptyItemID();
@@ -191,7 +192,10 @@ public partial class PuzzlemakerProject : RefCounted
             return null;
         }
 
-        return AddItem(item) ? item : null;
+        if (addToLevel)
+            AddItem(item);
+
+        return item;
     }
 
     /// <summary>

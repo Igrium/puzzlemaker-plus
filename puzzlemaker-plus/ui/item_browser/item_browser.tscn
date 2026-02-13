@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dooe0tiiny35f"]
 
-[ext_resource type="Script" uid="uid://cf4cllxwtktmf" path="res://ui/item_browser.gd" id="1_ap1au"]
+[ext_resource type="Script" uid="uid://cf4cllxwtktmf" path="res://ui/item_browser/item_browser.gd" id="1_ap1au"]
 
 [node name="ItemBrowser" type="PanelContainer" unique_id=200354303]
 anchors_preset = 15

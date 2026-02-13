@@ -37,6 +37,13 @@ public partial class Item(ItemType type, PuzzlemakerProject project) : RefCounte
     public string Id { get; set; } = "";
     
     // public ItemType Type { get; set; } = new ItemType();
+    
+    /// <summary>
+    /// If set, this item is in "placement mode".
+    /// It will automatically snap to the cursor position,
+    /// and EditorState.MoveItem will use PlaceItemCommand instead.
+    /// </summary>
+    public bool PlacementMode { get; set; }
 
     private Vector3 _position;
 

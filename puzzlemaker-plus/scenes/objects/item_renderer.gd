@@ -26,6 +26,9 @@ var selected: bool = false:
 func _ready() -> void:
 	Editor.connect("UpdatedSelectedItems", _on_updated_item_selection)
 
+func start_dragging():
+	$Draggable.StartDragging()
+
 @warning_ignore("shadowed_variable")
 func set_item(item: Item):
 	if (is_instance_valid(_item)):
