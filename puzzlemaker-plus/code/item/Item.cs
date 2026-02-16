@@ -18,6 +18,9 @@ public partial class Item(ItemType type, PuzzlemakerProject project) : RefCounte
     [Signal]
     public delegate void UpdateRotationEventHandler(Vector3 oldRot, Vector3 newRot);
 
+    [Signal]
+    public delegate void PropertyChangedEventHandler(string propName, string oldVal, string newVal);
+    
     /// <summary>
     /// Called when a state update triggers the editor model to be replaced.
     /// </summary>
@@ -89,24 +92,30 @@ public partial class Item(ItemType type, PuzzlemakerProject project) : RefCounte
     
     public IReadOnlyDictionary<string, string> Properties => _properties;
 
-    public string? GetProperty(string propName)
+    public string GetProperty(string propName)
     {
-        return Properties.GetValueOrDefault(propName);
+        return Properties.GetValueOrDefault(propName) ?? "";
     }
 
     public void SetProperty(string propName, string value)
     {
+        string oldVal = Properties.GetValueOrDefault(propName) ?? "";
         _properties[propName] = value;
+        EmitSignalPropertyChanged(propName, oldVal, value);
         EmitSignalRefreshModel();
     }
 
     public void ResetProperty(string propName)
     {
+        string oldVal = Properties.GetValueOrDefault(propName) ?? "";
         var val = DefaultPropValue(propName);
         if (val != null)
             _properties[propName] = val;
         else
             _properties.Remove(propName);
+        
+        EmitSignalPropertyChanged(propName, oldVal, val ?? "");
+        EmitSignalRefreshModel();
     }
 
     public void GetAllProperties(Godot.Collections.Dictionary<string, string> dest)

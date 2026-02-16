@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://dx8mkb48ibb0j"]
+
+[ext_resource type="Script" uid="uid://ci6nufedt7w51" path="res://code/editor/ItemContextMenu.cs" id="1_jsguq"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_1k3po"]
+font_size = 12
+
+[sub_resource type="Theme" id="Theme_1k3po"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jsguq"]
+bg_color = Color(0.012183833, 0.012183833, 0.012183833, 0.13333334)
+
+[node name="ContextMenu" type="PanelContainer" unique_id=145669739 node_paths=PackedStringArray("ItemContainer")]
+offset_right = 256.0
+offset_bottom = 44.0
+script = ExtResource("1_jsguq")
+ItemContainer = NodePath("VBoxContainer/PanelContainer/VBoxContainer")
+metadata/_custom_type_script = "uid://ci6nufedt7w51"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1712469605]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=940330514]
+layout_mode = 2
+text = "ITEM"
+label_settings = SubResource("LabelSettings_1k3po")
+horizontal_alignment = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer" unique_id=1764945992]
+layout_mode = 2
+theme = SubResource("Theme_1k3po")
+theme_override_styles/panel = SubResource("StyleBoxFlat_jsguq")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/PanelContainer" unique_id=1630374001]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/PanelContainer/VBoxContainer" unique_id=187008645]
+layout_mode = 2
+text = "TestLabel"

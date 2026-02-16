@@ -51,8 +51,10 @@ func _on_undo_pressed() -> void:
 func _on_redo_pressed() -> void:
 	Editor.Redo()
 
+
 func _on_delete_pressed() -> void:
 	Editor.DeleteSelectedItems()
+
 
 func _on_add_test_item_pressed() -> void:
 	#Editor.AddItem("turret", Vector3(0, 0, 0))

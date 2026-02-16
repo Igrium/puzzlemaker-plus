@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://duwldthrl5ows"]
+
+[ext_resource type="Script" uid="uid://drec0vgxp8nc5" path="res://ui/property_editors/generic_prop_editor.gd" id="1_6twjr"]
+[ext_resource type="Script" uid="uid://br1w7jwr63vgc" path="res://code/editor/PropEditorHandle.cs" id="1_nwktl"]
+
+[node name="GenericPropEditor" type="HBoxContainer" unique_id=185516412]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 31.0
+grow_horizontal = 2
+script = ExtResource("1_6twjr")
+
+[node name="Label" type="Label" parent="." unique_id=1279591492]
+layout_mode = 2
+text = "Generic Property"
+
+[node name="LineEdit" type="LineEdit" parent="." unique_id=1778118205]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Value"
+
+[node name="PropEditorHandle" type="Node" parent="." unique_id=1071035885]
+script = ExtResource("1_nwktl")
+metadata/_custom_type_script = "uid://br1w7jwr63vgc"
+
+[connection signal="text_submitted" from="LineEdit" to="." method="_on_line_edit_text_submitted"]
+[connection signal="PropertyChanged" from="PropEditorHandle" to="." method="_on_prop_editor_handle_property_changed"]

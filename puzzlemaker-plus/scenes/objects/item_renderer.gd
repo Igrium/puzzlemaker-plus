@@ -4,7 +4,8 @@ class_name ItemRenderer
 signal set_selected(selected: bool)
 
 const ITEM_RENDERER_SCENE := preload("res://scenes/objects/item_renderer.tscn")
-@export var placeholder_mesh := preload("res://assets/models/placeholder_cube.tscn")
+const PLACEHOLDER_MESH := preload("res://assets/models/placeholder_cube.tscn")
+const CONTEXT_MENU := preload("res://ui/item_context_menu.tscn")
 
 var _editor_model: Node
 var editor_model: Node:
@@ -67,7 +68,7 @@ func update_model():
 		push_error("No editor model found for item " + item.Id)
 	
 	if (model == null):
-		model = placeholder_mesh
+		model = PLACEHOLDER_MESH
 	
 	_editor_model = model.instantiate()
 	$Area3D.add_child(_editor_model)
@@ -87,10 +88,19 @@ func _on_set_selected(is_selected: bool):
 	
 func _on_area_3d_input_event(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouseButton:
-		if event.pressed and event.button_index == 1:
-			Editor.SelectItem(item, event.shift_pressed)
-			$Draggable.StartDragging()
+		if event.pressed:
+			if event.button_index == 1:
+				Editor.SelectItem(item, event.shift_pressed)
+				$Draggable.StartDragging()
+			elif event.button_index == 2:
+				_open_context_menu()
 
+func _open_context_menu():
+	var canvas = get_tree().current_scene.get_node("CanvasLayer")
+	var menu := CONTEXT_MENU.instantiate()
+	menu.SetItem(item)
+	canvas.add_child(menu)
+	
 
 func _on_draggable_drag_dropped(_node: Node3D, pos: Vector3, rot: Vector3) -> void:
 	Editor.MoveItem(item, pos, rot)
