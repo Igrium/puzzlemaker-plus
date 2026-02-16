@@ -78,14 +78,12 @@ public partial class PropEditorHandle : Node
         }
     }
 
-    protected override void Dispose(bool disposing)
+    public override void _ExitTree()
     {
         if (Item != null)
         {
             Item.PropertyChanged -= _onPropChanged;
         }
-        base.Dispose();
+        base._ExitTree();
     }
-    
-    
 }

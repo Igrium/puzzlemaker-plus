@@ -7,5 +7,12 @@
 			"editor_model": "res://package/assets/models/turret.gltf",
 			"themes": []
 		}
-	]
+	],
+	"prop_names": {
+		"TestProp": {
+			"editor": "generic",
+			"instance_param": true,
+			"default_value": "Hello World"
+		}
+	}
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 using PuzzlemakerPlus.Items;
 
@@ -17,14 +18,14 @@ public partial class ItemContextMenu : PanelContainer
     {
         _item = item;
 
-        foreach (var child in GetChildren())
+        foreach (var child in ItemContainer.GetChildren())
         {
             child.QueueFree();
         }
         
         foreach (var (name, def) in item.Type.PropNames)
         {
-            var scene = ResourceLoader.Load<PackedScene>(def.Editor);
+            var scene = ResourceLoader.Load<PackedScene>(GetEditorRef(def.Editor));
             if (scene == null)
             {
                 continue;
@@ -42,8 +43,13 @@ public partial class ItemContextMenu : PanelContainer
             handle.PropName = name;
             handle.Item = item;
             
-            ItemContainer.AddChild(handle);
+            ItemContainer.AddChild(editor);
         }
+    }
+
+    private static string GetEditorRef(string str)
+    {
+        return str.StartsWith("res://") ? str : PropEditorManifest.Instance.Editors.GetValueOrDefault(str, str);
     }
 
     private static T? FindChildByType<T>(Node parent) where T : Node

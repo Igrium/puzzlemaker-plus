@@ -44,7 +44,7 @@ public sealed class ItemType
     /// <summary>
     /// All the properties this item will have, along with their types
     /// </summary>
-    public Dictionary<string, PropDef> PropNames { get; } = new();
+    public Dictionary<string, PropDef> PropNames { get; set; } = new();
 
     public RotationMode RotationMode { get; set; } = RotationMode.Fixed;
     

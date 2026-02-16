@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PropEditorManifest" format=3 uid="uid://cwtd2w3kflmdb"]
+
+[ext_resource type="Script" uid="uid://cqc14rx3htj14" path="res://code/editor/PropEditorManifest.cs" id="1_7d2mo"]
+
+[resource]
+script = ExtResource("1_7d2mo")
+Editors = Dictionary[String, String]({
+"generic": "res://ui/property_editors/generic_prop_editor.tscn"
+})
+metadata/_custom_type_script = "uid://cqc14rx3htj14"
