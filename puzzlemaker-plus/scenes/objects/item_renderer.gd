@@ -97,8 +97,9 @@ func _on_area_3d_input_event(_camera: Node, event: InputEvent, _event_position: 
 
 func _open_context_menu():
 	var canvas = get_tree().current_scene.get_node("CanvasLayer")
-	var menu := CONTEXT_MENU.instantiate()
-	menu.SetItem(item)
+	var menu := CONTEXT_MENU.instantiate() as PopupPanel
+	menu.get_node("ItemContextMenu").SetItem(item)
+	menu.set_position(get_viewport().get_mouse_position())
 	canvas.add_child(menu)
 	
 

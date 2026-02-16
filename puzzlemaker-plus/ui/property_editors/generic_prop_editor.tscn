@@ -24,4 +24,5 @@ script = ExtResource("1_nwktl")
 metadata/_custom_type_script = "uid://br1w7jwr63vgc"
 
 [connection signal="text_submitted" from="LineEdit" to="." method="_on_line_edit_text_submitted"]
+[connection signal="tree_exiting" from="LineEdit" to="." method="_on_line_edit_tree_exiting"]
 [connection signal="PropertyChanged" from="PropEditorHandle" to="." method="_on_prop_editor_handle_property_changed"]

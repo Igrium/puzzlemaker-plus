@@ -5,7 +5,7 @@ using PuzzlemakerPlus.Items;
 namespace PuzzlemakerPlus.code.editor;
 
 [GlobalClass]
-public partial class ItemContextMenu : PanelContainer
+public partial class ItemContextMenu : Node
 {
     [Export] 
     public Container ItemContainer { get; set; } = null!;

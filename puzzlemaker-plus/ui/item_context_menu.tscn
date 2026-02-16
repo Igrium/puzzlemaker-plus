@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dx8mkb48ibb0j"]
 
 [ext_resource type="Script" uid="uid://ci6nufedt7w51" path="res://code/editor/ItemContextMenu.cs" id="1_jsguq"]
+[ext_resource type="Script" uid="uid://dngt2kk4ol2vo" path="res://ui/item_context_menu.gd" id="1_v1x65"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_1k3po"]
 font_size = 12
@@ -10,30 +11,40 @@ font_size = 12
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jsguq"]
 bg_color = Color(0.012183833, 0.012183833, 0.012183833, 0.13333334)
 
-[node name="ContextMenu" type="PanelContainer" unique_id=145669739 node_paths=PackedStringArray("ItemContainer")]
-offset_right = 256.0
-offset_bottom = 44.0
-script = ExtResource("1_jsguq")
-ItemContainer = NodePath("VBoxContainer/PanelContainer/VBoxContainer")
-metadata/_custom_type_script = "uid://ci6nufedt7w51"
+[node name="ContextMenu" type="PopupPanel" unique_id=135680177]
+oversampling_override = 1.0
+visible = true
+mouse_passthrough = true
+sharp_corners = true
+script = ExtResource("1_v1x65")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1712469605]
-layout_mode = 2
+[node name="ContextMenuBox" type="VBoxContainer" parent="." unique_id=1712469605]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 96.0
+offset_bottom = 96.0
 
-[node name="Label" type="Label" parent="VBoxContainer" unique_id=940330514]
+[node name="Label" type="Label" parent="ContextMenuBox" unique_id=940330514]
 layout_mode = 2
 text = "ITEM"
 label_settings = SubResource("LabelSettings_1k3po")
 horizontal_alignment = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer" unique_id=1764945992]
+[node name="PanelContainer" type="PanelContainer" parent="ContextMenuBox" unique_id=1764945992]
 layout_mode = 2
 theme = SubResource("Theme_1k3po")
 theme_override_styles/panel = SubResource("StyleBoxFlat_jsguq")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/PanelContainer" unique_id=1630374001]
+[node name="VBoxContainer" type="VBoxContainer" parent="ContextMenuBox/PanelContainer" unique_id=1630374001]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/PanelContainer/VBoxContainer" unique_id=187008645]
+[node name="Label" type="Label" parent="ContextMenuBox/PanelContainer/VBoxContainer" unique_id=187008645]
 layout_mode = 2
 text = "TestLabel"
+
+[node name="ItemContextMenu" type="Node" parent="." unique_id=991386358 node_paths=PackedStringArray("ItemContainer")]
+script = ExtResource("1_jsguq")
+ItemContainer = NodePath("../ContextMenuBox/PanelContainer/VBoxContainer")
+metadata/_custom_type_script = "uid://ci6nufedt7w51"
+
+[connection signal="popup_hide" from="." to="." method="_on_popup_hide"]
